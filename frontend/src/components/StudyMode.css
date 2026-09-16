@@ -1,0 +1,227 @@
+.study-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 100px 2rem 2rem 2rem;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.study-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-3px);
+}
+
+.progress-indicator {
+    color: #94a3b8;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* 3D Flip Card Container */
+.flashcard-3d-wrapper {
+    background-color: transparent;
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    perspective: 1000px; /* Gives the 3D depth */
+    cursor: pointer;
+    margin-bottom: 2rem;
+}
+
+.flashcard-3d-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d; /* Allows faces to exist in 3D space */
+}
+
+/* Toggle flip class */
+.flashcard-3d-inner.is-flipped {
+    transform: rotateX(180deg);
+}
+
+.flashcard-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden; /* Hides back of face */
+    
+    /* Glassmorphism styling matching the app */
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* Back face needs to be rotated initially */
+.flashcard-back {
+    transform: rotateX(180deg);
+    background: rgba(30, 41, 59, 0.85); /* Slightly darker back */
+    border-color: rgba(168, 85, 247, 0.3); /* Subtle purple border */
+}
+
+/* Front Face Content */
+.study-vocab {
+    font-size: 3.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+}
+
+.study-phonetic {
+    font-size: 1.5rem;
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+.flip-hint {
+    position: absolute;
+    bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+    animation: pulse 2s infinite;
+}
+
+/* Back Face Content */
+.study-meaning {
+    font-size: 2.5rem;
+    color: #f8fafc;
+    margin-bottom: 2rem;
+}
+
+.study-example-box {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #a855f7;
+    width: 90%;
+}
+
+.study-example {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* Review Actions */
+.review-actions {
+    width: 100%;
+    max-width: 600px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+}
+
+.review-actions.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.review-question {
+    text-align: center;
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.review-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.review-btn {
+    flex: 1;
+    padding: 1rem 0.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.review-btn span {
+    font-size: 0.8rem;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.review-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+.btn-again { background: #ef4444; }
+.btn-hard { background: #f59e0b; }
+.btn-good { background: #10b981; }
+.btn-easy { background: #3b82f6; }
+
+/* Finished State */
+.finished-state {
+    justify-content: center;
+}
+
+.finished-panel {
+    text-align: center;
+    padding: 4rem;
+}
+
+.finished-panel h2 {
+    font-size: 2.5rem;
+    color: #10b981;
+    margin-bottom: 1rem;
+}
+
+.finished-panel p {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}

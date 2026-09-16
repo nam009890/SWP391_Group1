@@ -25,4 +25,5 @@ public class UserFlashcardReview {
     private LocalDateTime nextReviewDate;
     private int repetitionCount;
     private double easeFactor; // For spaced repetition algorithms like SM-2
+    private int intervalDays; // Number of days before the next review
 }

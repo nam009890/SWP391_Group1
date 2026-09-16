@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import api from '../api/axiosConfig';
 import './CreateDeckModal.css';
 
@@ -44,7 +45,7 @@ const CreateDeckModal = ({ isOpen, onClose, onDeckCreated }) => {
     }
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div className="modal-overlay">
       <div className="modal-content glass-panel animate-fade-in">
         <h2>Create New Deck</h2>
@@ -88,7 +89,8 @@ const CreateDeckModal = ({ isOpen, onClose, onDeckCreated }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

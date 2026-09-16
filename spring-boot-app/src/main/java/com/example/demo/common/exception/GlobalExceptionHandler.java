@@ -1,13 +1,15 @@
 package com.example.demo.common.exception;
 
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(Exception.class)
-    public String handleException(Exception e) {
-        return "Error occurred: " + e.getMessage();
+    public ResponseEntity<String> handleException(Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.internalServerError().body("Error occurred: " + e.getMessage());
     }
 }

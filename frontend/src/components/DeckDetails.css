@@ -208,3 +208,10 @@
     margin: 10px 0;
   }
 }
+
+.header-actions { display: flex; gap: 12px; }
+.btn-ai { background: linear-gradient(135deg, #a855f7, #ec4899); color: white; border: none; font-weight: bold; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); }
+.btn-ai:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6); }
+.ai-form { border-left: 4px solid #ec4899; }
+.loading-dots { animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }

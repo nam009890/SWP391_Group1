@@ -23,9 +23,7 @@
 .modal-content h2 {
   font-size: 28px;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #f8fafc;
 }
 
 .modal-subtitle {
