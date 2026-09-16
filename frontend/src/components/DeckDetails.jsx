@@ -19,6 +19,12 @@ const DeckDetails = () => {
   const [example, setExample] = useState('');
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  
+  // AI Generation State
+  const [isAiMode, setIsAiMode] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   useEffect(() => {
     const fetchDeckData = async () => {
@@ -73,6 +79,33 @@ const DeckDetails = () => {
     }
   };
 
+  const handleGenerateAi = async (e) => {
+    e.preventDefault();
+    if (!aiPrompt.trim()) {
+      setAiError('Vui lòng nhập chủ đề bạn muốn tạo.');
+      return;
+    }
+
+    setIsAiGenerating(true);
+    setAiError('');
+
+    try {
+      const response = await api.post(`http://localhost:8080/api/decks/${id}/generate-ai`, {
+        prompt: aiPrompt
+      });
+      
+      // AI returns an array of newly created cards
+      setFlashcards([...flashcards, ...response.data]);
+      setAiPrompt('');
+      setIsAiMode(false);
+    } catch (err) {
+      console.error('Failed to generate cards with AI:', err);
+      setAiError('Có lỗi xảy ra khi gọi AI. Vui lòng kiểm tra lại cấu hình API Key.');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="details-container animate-fade-in" style={{ justifyContent: 'center' }}>
@@ -115,11 +148,59 @@ const DeckDetails = () => {
       <div className="cards-section">
         <div className="section-header">
           <h2>Terms in this set</h2>
-          <button className="btn btn-glass" onClick={() => setIsAdding(!isAdding)}>
-            {isAdding ? 'Cancel' : '+ Add Card'}
-          </button>
+          <div className="header-actions">
+            <button 
+              className={`btn ${isAiMode ? 'btn-glass' : 'btn-ai'}`} 
+              onClick={() => {
+                setIsAiMode(!isAiMode);
+                setIsAdding(false);
+              }}
+            >
+              {isAiMode ? 'Cancel' : 'Tạo bằng AI 🪄'}
+            </button>
+            <button 
+              className="btn btn-glass" 
+              onClick={() => {
+                setIsAdding(!isAdding);
+                setIsAiMode(false);
+              }}
+            >
+              {isAdding ? 'Cancel' : '+ Add Card'}
+            </button>
+          </div>
         </div>
         
+        {isAiMode && (
+          <form onSubmit={handleGenerateAi} className="add-card-form ai-form glass-panel animate-fade-in">
+            <h3 style={{ background: 'linear-gradient(90deg, #a855f7, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Tạo thẻ tự động bằng AI
+            </h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+              Nhập chủ đề bạn muốn học (VD: "Từ vựng tiếng Anh về các loài hoa", "10 từ chuyên ngành IT"). AI sẽ tự động sinh ra thẻ bài cho bạn!
+            </p>
+            {aiError && <div className="form-error">{aiError}</div>}
+            
+            <div className="form-row">
+              <div className="form-group flex-1">
+                <input 
+                  type="text" 
+                  value={aiPrompt} 
+                  onChange={(e) => setAiPrompt(e.target.value)} 
+                  className="glass-input" 
+                  placeholder="Nhập chủ đề bạn muốn học vào đây..."
+                  autoFocus
+                  disabled={isAiGenerating}
+                />
+              </div>
+              <button type="submit" className="btn btn-ai" disabled={isAiGenerating}>
+                {isAiGenerating ? (
+                  <span className="loading-dots">Đang suy nghĩ...</span>
+                ) : 'Tạo thẻ ngay'}
+              </button>
+            </div>
+          </form>
+        )}
+
         {isAdding && (
           <form onSubmit={handleAddCard} className="add-card-form glass-panel animate-fade-in">
             <h3>Add a New Card</h3>

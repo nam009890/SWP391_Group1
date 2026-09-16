@@ -14,6 +14,7 @@ public class User {
     private String email;
     private String name;
     private String avatarUrl;
+    private String password;
 
     // GOOGLE or LOCAL
     private String provider;

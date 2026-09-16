@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import DeckDetails from './components/DeckDetails';
-import FlashcardPlayer from './components/FlashcardPlayer';
+import Login from './components/Login';
+import Register from './components/Register';
+import StudyMode from './components/StudyMode';
 import api from './api/axiosConfig';
 
 function OAuth2RedirectHandler() {
@@ -24,9 +26,7 @@ function OAuth2RedirectHandler() {
 }
 
 function LandingPage() {
-  const handleLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-  };
+  const navigate = useNavigate();
 
   return (
     <div style={{ padding: '100px 20px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }} className="animate-fade-in">
@@ -37,10 +37,14 @@ function LandingPage() {
         The next-generation flashcard app. Ditch the boring flat design and learn vocabulary with futuristic 3D cards and spaced repetition.
       </p>
       
-      <button onClick={handleLogin} className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '18px', borderRadius: '30px' }}>
-        <span style={{ fontSize: '24px' }}>G</span> 
-        Continue with Google
-      </button>
+      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+        <button onClick={() => navigate('/login')} className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '18px', borderRadius: '30px' }}>
+          Đăng Nhập
+        </button>
+        <button onClick={() => navigate('/register')} className="btn btn-glass" style={{ padding: '16px 32px', fontSize: '18px', borderRadius: '30px' }}>
+          Đăng Ký
+        </button>
+      </div>
       
       <div style={{ marginTop: '80px', display: 'flex', gap: '20px', justifyContent: 'center' }}>
         <div className="glass-panel" style={{ padding: '24px', flex: 1 }}>
@@ -80,7 +84,7 @@ function MainApp() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    window.location.reload();
+    window.location.href = 'http://localhost:8080/logout'; // Invalidate backend session too
   };
 
   return (
@@ -89,8 +93,10 @@ function MainApp() {
       
       <Routes>
         <Route path="/" element={token ? <Dashboard user={user} /> : <LandingPage />} />
+        <Route path="/login" element={token ? <Dashboard user={user} /> : <Login />} />
+        <Route path="/register" element={token ? <Dashboard user={user} /> : <Register />} />
         <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
-        <Route path="/study/:id" element={token ? <FlashcardPlayer /> : <LandingPage />} />
+        <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>
     </>
