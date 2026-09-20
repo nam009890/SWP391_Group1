@@ -1,11 +1,11 @@
 package com.example.demo.study.service;
 
-import com.example.demo.flashcard.entity.Flashcard;
-import com.example.demo.study.entity.UserFlashcardReview;
+import com.example.demo.flashcard.dto.FlashcardResponse;
+import com.example.demo.study.dto.ReviewResponse;
 
 import java.util.List;
 
 public interface StudyService {
-    List<Flashcard> getFlashcardsToStudy(Long deckId, Long userId);
-    UserFlashcardReview processReview(Long userId, Long flashcardId, int quality);
+    List<FlashcardResponse> getFlashcardsToStudy(Long deckId, Long userId);
+    ReviewResponse processReview(Long userId, Long flashcardId, int quality);
 }

@@ -1,65 +1,57 @@
 package com.example.demo.study.service.impl;
 
+import com.example.demo.common.exception.ResourceNotFoundException;
+import com.example.demo.flashcard.dto.FlashcardResponse;
 import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.FlashcardRepository;
+import com.example.demo.study.dto.ReviewResponse;
 import com.example.demo.study.entity.UserFlashcardReview;
 import com.example.demo.study.repository.UserFlashcardReviewRepository;
 import com.example.demo.study.service.StudyService;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StudyServiceImpl implements StudyService {
 
-    @Autowired
-    private FlashcardRepository flashcardRepository;
-
-    @Autowired
-    private UserFlashcardReviewRepository reviewRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final FlashcardRepository flashcardRepository;
+    private final UserFlashcardReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<Flashcard> getFlashcardsToStudy(Long deckId, Long userId) {
-        return flashcardRepository.findFlashcardsToStudy(deckId, userId);
+    public List<FlashcardResponse> getFlashcardsToStudy(Long deckId, Long userId) {
+        return flashcardRepository.findFlashcardsToStudy(deckId, userId).stream()
+                .map(this::mapToFlashcardResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public UserFlashcardReview processReview(Long userId, Long flashcardId, int quality) {
+    public ReviewResponse processReview(Long userId, Long flashcardId, int quality) {
         // Find existing review or create a new one
         UserFlashcardReview review = reviewRepository.findByUserIdAndFlashcardId(userId, flashcardId)
                 .orElseGet(() -> {
-                    UserFlashcardReview newReview = new UserFlashcardReview();
-                    
-                    // Fetch user and flashcard references
                     User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found"));
+                            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
                     Flashcard flashcard = flashcardRepository.findById(flashcardId)
-                            .orElseThrow(() -> new RuntimeException("Flashcard not found"));
+                            .orElseThrow(() -> new ResourceNotFoundException("Flashcard not found"));
                             
-                    newReview.setUser(user);
-                    newReview.setFlashcard(flashcard);
-                    newReview.setEaseFactor(2.5); // Default SM-2 ease factor
-                    newReview.setRepetitionCount(0);
-                    newReview.setIntervalDays(0);
-                    return newReview;
+                    return UserFlashcardReview.builder()
+                            .user(user)
+                            .flashcard(flashcard)
+                            .easeFactor(2.5) // Default SM-2 ease factor
+                            .repetitionCount(0)
+                            .intervalDays(0)
+                            .build();
                 });
 
         // Apply Spaced Repetition logic (SuperMemo-2 simplified)
-        
-        // Quality: 
-        // 0-2: Incorrect or very hard (forgot)
-        // 3: Hard (remembered with serious difficulty)
-        // 4: Good (remembered after hesitation)
-        // 5: Easy (perfect response)
-        
         if (quality < 3) {
             // Failed
             review.setRepetitionCount(0);
@@ -88,6 +80,30 @@ public class StudyServiceImpl implements StudyService {
         // Set Next Review Date
         review.setNextReviewDate(LocalDateTime.now().plusDays(review.getIntervalDays()));
 
-        return reviewRepository.save(review);
+        UserFlashcardReview savedReview = reviewRepository.save(review);
+        return mapToReviewResponse(savedReview);
+    }
+
+    private FlashcardResponse mapToFlashcardResponse(Flashcard flashcard) {
+        return FlashcardResponse.builder()
+                .id(flashcard.getId())
+                .deckId(flashcard.getDeck() != null ? flashcard.getDeck().getId() : null)
+                .vocabulary(flashcard.getVocabulary())
+                .meaning(flashcard.getMeaning())
+                .phonetic(flashcard.getPhonetic())
+                .exampleSentence(flashcard.getExampleSentence())
+                .build();
+    }
+
+    private ReviewResponse mapToReviewResponse(UserFlashcardReview review) {
+        return ReviewResponse.builder()
+                .id(review.getId())
+                .userId(review.getUser() != null ? review.getUser().getId() : null)
+                .flashcardId(review.getFlashcard() != null ? review.getFlashcard().getId() : null)
+                .easeFactor((int)(review.getEaseFactor() * 100)) // Assuming we want an integer representation for DTO or keep it as is (Wait, ReviewResponse has Integer easeFactor, let's cast or map correctly)
+                .intervalDays(review.getIntervalDays())
+                .repetitions(review.getRepetitionCount())
+                .nextReviewDate(review.getNextReviewDate())
+                .build();
     }
 }

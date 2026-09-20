@@ -1,11 +1,12 @@
 package com.example.demo.flashcard.service;
 
-import com.example.demo.flashcard.entity.Flashcard;
+import com.example.demo.flashcard.dto.FlashcardRequest;
+import com.example.demo.flashcard.dto.FlashcardResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FlashcardService {
-    List<Flashcard> getFlashcardsByDeckId(Long deckId);
-    Optional<Flashcard> addFlashcardToDeck(Long deckId, Flashcard flashcard);
+    List<FlashcardResponse> getFlashcardsByDeckId(Long deckId);
+    FlashcardResponse addFlashcardToDeck(Long deckId, FlashcardRequest request);
+    List<FlashcardResponse> generateAiFlashcards(Long deckId, String prompt) throws Exception;
 }
