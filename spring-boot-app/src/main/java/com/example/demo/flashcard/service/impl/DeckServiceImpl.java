@@ -1,20 +1,22 @@
 package com.example.demo.flashcard.service.impl;
 
+import com.example.demo.common.exception.ResourceNotFoundException;
+import com.example.demo.flashcard.dto.DeckRequest;
 import com.example.demo.flashcard.dto.DeckDto;
+import com.example.demo.flashcard.dto.DeckResponse;
 import com.example.demo.flashcard.entity.Deck;
 import com.example.demo.flashcard.repository.DeckRepository;
 import com.example.demo.flashcard.service.DeckService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class DeckServiceImpl implements DeckService {
 
-    @Autowired
-    private DeckRepository deckRepository;
+    private final DeckRepository deckRepository;
 
     @Override
     public List<DeckDto> getAllDecksWithCount() {
@@ -22,12 +24,27 @@ public class DeckServiceImpl implements DeckService {
     }
 
     @Override
-    public Deck createDeck(Deck deck) {
-        return deckRepository.save(deck);
+    public DeckResponse createDeck(DeckRequest request) {
+        Deck deck = Deck.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
+        Deck savedDeck = deckRepository.save(deck);
+        return mapToResponse(savedDeck);
     }
 
     @Override
-    public Optional<Deck> getDeckById(Long id) {
-        return deckRepository.findById(id);
+    public DeckResponse getDeckById(Long id) {
+        Deck deck = deckRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Deck not found with id: " + id));
+        return mapToResponse(deck);
+    }
+
+    private DeckResponse mapToResponse(Deck deck) {
+        return DeckResponse.builder()
+                .id(deck.getId())
+                .name(deck.getName())
+                .description(deck.getDescription())
+                .build();
     }
 }

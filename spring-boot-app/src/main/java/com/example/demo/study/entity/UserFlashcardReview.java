@@ -3,11 +3,19 @@ package com.example.demo.study.entity;
 import com.example.demo.user.entity.User;
 import com.example.demo.flashcard.entity.Flashcard;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "user_flashcard_reviews")
 public class UserFlashcardReview {
     @Id

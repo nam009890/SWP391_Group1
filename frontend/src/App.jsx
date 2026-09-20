@@ -16,7 +16,7 @@ function OAuth2RedirectHandler() {
     const token = searchParams.get('token');
     if (token) {
       localStorage.setItem('token', token);
-      navigate('/');
+      window.location.href = '/'; // Force full reload so MainApp reads the new token
     } else {
       navigate('/login');
     }
@@ -74,9 +74,18 @@ function MainApp() {
       // In a real app, this should be validated by backend api call
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({ name: payload.name || payload.sub, email: payload.email });
+        
+        // Kiểm tra xem token đã hết hạn chưa (exp tính bằng giây)
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < currentTime) {
+          console.warn("Token expired on load");
+          handleLogout();
+        } else {
+          setUser({ name: payload.name || payload.sub, email: payload.email });
+        }
       } catch (e) {
         console.error("Invalid token");
+        handleLogout();
       }
     }
   }, [token]);
@@ -84,7 +93,7 @@ function MainApp() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    window.location.href = 'http://localhost:8080/logout'; // Invalidate backend session too
+    window.location.href = 'http://localhost:8080/api/auth/logout'; // Invalidate backend session too
   };
 
   return (
