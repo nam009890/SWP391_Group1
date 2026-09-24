@@ -6,6 +6,8 @@ import DeckDetails from './components/DeckDetails';
 import Login from './components/Login';
 import Register from './components/Register';
 import StudyMode from './components/StudyMode';
+import GrammarLearnerPage from './components/grammar/GrammarLearnerPage';
+import GrammarAdminCMSPage from './components/grammar/GrammarAdminCMSPage';
 import api from './api/axiosConfig';
 
 function OAuth2RedirectHandler() {
@@ -106,6 +108,8 @@ function MainApp() {
         <Route path="/register" element={token ? <Dashboard user={user} /> : <Register />} />
         <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
         <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
+        <Route path="/grammar" element={<GrammarLearnerPage user={user} />} />
+        <Route path="/grammar/admin" element={<GrammarAdminCMSPage user={user} />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>
     </>

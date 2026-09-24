@@ -3,12 +3,17 @@
   top: 0;
   left: 0;
   right: 0;
-  height: var(--nav-height);
-  z-index: 100;
+  height: var(--nav-height, 70px);
+  z-index: 1000;
   border-radius: 0;
   border-left: none;
   border-right: none;
   border-top: none;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .navbar-container {
@@ -18,15 +23,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 20px;
+  gap: 12px;
 }
 
 .navbar-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   transition: transform 0.2s;
+  flex-shrink: 0;
 }
 
 .navbar-logo:hover {
@@ -34,7 +41,7 @@
 }
 
 .logo-icon {
-  font-size: 24px;
+  font-size: 22px;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -42,19 +49,92 @@
 }
 
 .navbar-logo h2 {
-  font-size: 24px;
+  font-size: 22px;
   background: linear-gradient(to right, #fff, #94a3b8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+.navbar-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none; /* Hide scrollbar for clean look */
+  -ms-overflow-style: none;
+}
+
+.navbar-links::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-link-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-radius: 20px;
+}
+
+.creator-nav-btn {
+  border-color: rgba(244, 63, 94, 0.5) !important;
+  color: #fda4af !important;
+}
+
+.creator-nav-btn:hover {
+  background: rgba(244, 63, 94, 0.2) !important;
+}
+
+.navbar-menu {
+  flex-shrink: 0;
+}
+
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
 }
 
 .welcome-text {
   font-weight: 500;
+  font-size: 14px;
   color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .navbar-logo h2 {
+    font-size: 18px;
+  }
+
+  .nav-link-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .welcome-text {
+    display: none; /* Hide welcome text to save space on mobile */
+  }
+
+  .btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-logo h2 {
+    display: none; /* Only show icon on very small screens */
+  }
+
+  .nav-link-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
 }

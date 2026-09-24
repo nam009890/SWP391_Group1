@@ -45,6 +45,30 @@ const Dashboard = ({ user }) => {
         </button>
       </header>
 
+      {/* Quick Access to Grammar Module */}
+      <div className="grammar-quick-banner glass-panel">
+        <div className="grammar-quick-banner-content">
+          <div className="banner-icon-box">✏️</div>
+          <div>
+            <h3 style={{ fontSize: '18px', marginBottom: '4px', color: '#f8fafc' }}>
+              Mô-Đun Luyện Tập Ngữ Pháp Mới
+            </h3>
+            <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
+              Thử thách dạng bài Chỉ ra lỗi sai (Spot the Error) & Điền ô trống (Fill in the Blank)
+            </p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => navigate('/grammar')}
+            style={{ borderRadius: '20px', padding: '10px 20px' }}
+          >
+            Luyện Tập Ngay ➔
+          </button>
+        </div>
+      </div>
+
       <section className="decks-section">
         <h2>Your Flashcard Decks</h2>
         
