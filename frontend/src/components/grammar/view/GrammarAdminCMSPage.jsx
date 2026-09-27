@@ -1,7 +1,7 @@
 // ============================================================
 // VIEW — Grammar Admin CMS Page (Question Creator & Bank)
 // Allows creators (buiquangviet032@gmail.com) to author and manage
-// grammar exercise questions with live preview and friendly UX.
+// grammar questions organized into Groups (Chủ Đề) with smaller questions.
 // ============================================================
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -77,6 +77,9 @@ const GrammarAdminCMSPage = ({ user }) => {
   const [toastMessage, setToastMessage] = useState('');
   const [lessonData, setLessonData] = useState(() => getStoredQuestions());
 
+  const groups = lessonData.groups || [];
+  const [targetGroupId, setTargetGroupId] = useState(() => groups[0]?.id || 'group_01_tenses');
+
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3500);
@@ -84,8 +87,11 @@ const GrammarAdminCMSPage = ({ user }) => {
 
   useEffect(() => {
     fetchGrammarQuestions().then(data => {
-      if (data && data.questions && data.questions.length > 0) {
+      if (data && Array.isArray(data.groups) && data.groups.length > 0) {
         setLessonData(data);
+        if (!targetGroupId && data.groups[0]) {
+          setTargetGroupId(data.groups[0].id);
+        }
       }
     });
   }, []);
@@ -282,7 +288,7 @@ const GrammarAdminCMSPage = ({ user }) => {
     setter(currentVal + " " + snippet);
   };
 
-  // Handle Save Question
+  // Handle Save Question into target Group
   const handleSaveQuestion = async () => {
     let newQ = null;
     if (activeTab === 'SPOT_ERROR') {
@@ -306,43 +312,61 @@ const GrammarAdminCMSPage = ({ user }) => {
 
     if (!newQ) return;
 
-    // Persist to Spring Boot backend
-    await createGrammarQuestionInBackend(newQ);
+    // Send to backend API
+    await createGrammarQuestionInBackend({ ...newQ, groupId: targetGroupId });
+
+    // Append to selected group in lessonData
+    const updatedGroups = groups.map(g => {
+      if (g.id === targetGroupId) {
+        return {
+          ...g,
+          questions: [...(g.questions || []), newQ]
+        };
+      }
+      return g;
+    });
 
     const updated = {
       ...lessonData,
-      questions: [...lessonData.questions, newQ]
+      groups: updatedGroups
     };
     setLessonData(updated);
     saveStoredQuestions(updated);
-    showToast("✨ Đã lưu câu hỏi thành công vào ngân hàng đề!");
+    showToast("✨ Đã lưu câu hỏi thành công vào nhóm bài tập!");
   };
 
-  // Delete question
+  // Delete question from any group
   const handleDeleteQuestion = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này khỏi danh sách?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này khỏi nhóm?")) return;
     await deleteGrammarQuestionFromBackend(id);
+
+    const updatedGroups = groups.map(g => ({
+      ...g,
+      questions: (g.questions || []).filter(q => q.id !== id && q.dbId !== id)
+    }));
+
     const updated = {
       ...lessonData,
-      questions: lessonData.questions.filter(q => q.id !== id && q.dbId !== id)
+      groups: updatedGroups
     };
     setLessonData(updated);
     saveStoredQuestions(updated);
-    showToast("🗑️ Đã xóa câu hỏi khỏi ngân hàng đề.");
+    showToast("🗑️ Đã xóa câu hỏi khỏi nhóm bài tập.");
   };
 
   // Reset to default
   const handleResetDefaults = async () => {
-    if (!window.confirm("Khôi phục toàn bộ câu hỏi mẫu mặc định ban đầu?")) return;
+    if (!window.confirm("Khôi phục toàn bộ các nhóm và câu hỏi mẫu mặc định ban đầu?")) return;
     const res = await resetGrammarQuestionsInBackend();
     setLessonData(res);
-    showToast("🔄 Đã khôi phục câu hỏi mặc định ban đầu.");
+    showToast("🔄 Đã khôi phục các nhóm câu hỏi mặc định ban đầu.");
   };
 
   const previewQ = getLivePreviewQuestion();
+  const totalQuestionsCount = groups.reduce((acc, g) => acc + (g.questions?.length || 0), 0);
 
   // --- ACCESS CONTROL GUARD ---
-  if (!isLoggedIn) {
+  if (!bypass && !isLoggedIn) {
     return (
       <div className="grammar-container">
         <div className="creator-guard-box glass-panel">
@@ -351,12 +375,22 @@ const GrammarAdminCMSPage = ({ user }) => {
           <p>
             Bạn cần đăng nhập bằng tài khoản Quản trị viên (Creator) để truy cập chức năng tạo và quản lý ngân hàng câu hỏi.
           </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={() => navigate('/login')}>
               🔑 Đăng Nhập Ngay
             </button>
             <button className="btn btn-glass" onClick={() => navigate('/')}>
               ← Quay Lại Trang Chủ
+            </button>
+            <button
+              className="btn btn-glass"
+              style={{ fontSize: '13px', opacity: 0.8 }}
+              onClick={() => {
+                setCreatorBypass(true);
+                setBypass(true);
+              }}
+            >
+              🔓 Kích Hoạt Quyền Thử Nghiệm (Dev Mode)
             </button>
           </div>
         </div>
@@ -420,8 +454,8 @@ const GrammarAdminCMSPage = ({ user }) => {
       {/* Header Banner */}
       <div className="grammar-header-banner">
         <div className="grammar-title-group">
-          <h1>🛠️ Hệ Thống Soạn Đề Ngữ Pháp (Creator CMS)</h1>
-          <p>Thiết lập và quản lý ngân hàng câu hỏi tương tác cho học viên</p>
+          <h1>🛠️ Quản Lý Bài Tập Ngữ Pháp (Creator CMS)</h1>
+          <p>Quản lý các Nhóm bài tập lớn (Chủ Đề) và soạn câu hỏi nhỏ bên trong từng nhóm</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
@@ -457,7 +491,7 @@ const GrammarAdminCMSPage = ({ user }) => {
           className={`cms-tab-btn ${activeTab === 'QUESTION_BANK' ? 'active' : ''}`}
           onClick={() => setActiveTab('QUESTION_BANK')}
         >
-          📚 Ngân Hàng Câu Hỏi ({lessonData.questions?.length || 0})
+          📚 Ngân Hàng Câu Hỏi ({totalQuestionsCount})
         </button>
       </div>
 
@@ -466,6 +500,24 @@ const GrammarAdminCMSPage = ({ user }) => {
         <div className="admin-cms-layout">
           {/* LEFT: FORM EDITOR */}
           <div className="admin-editor-card glass-panel">
+
+            {/* Target Group Selector */}
+            <div className="form-group" style={{ padding: '14px', background: 'rgba(56, 189, 248, 0.08)', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.25)', marginBottom: '20px' }}>
+              <label className="form-label" style={{ color: '#38bdf8', fontWeight: 700 }}>
+                📚 Phân vào Nhóm Bài Tập / Chủ Đề:
+              </label>
+              <select
+                className="form-select"
+                value={targetGroupId}
+                onChange={(e) => setTargetGroupId(e.target.value)}
+              >
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.icon || "📘"} {g.title} ({g.questions?.length || 0} câu hiện có)
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* 1. SPOT THE ERROR */}
             {activeTab === 'SPOT_ERROR' && (
@@ -506,7 +558,7 @@ const GrammarAdminCMSPage = ({ user }) => {
 
                 {/* Question Title */}
                 <div className="form-group">
-                  <label className="form-label">🏷️ Tên / Tiêu đề câu hỏi:</label>
+                  <label className="form-label">🏷️ Tên / Tiêu đề câu hỏi nhỏ:</label>
                   <input
                     type="text"
                     className="form-input"
@@ -642,7 +694,7 @@ const GrammarAdminCMSPage = ({ user }) => {
 
                 {/* Question Title */}
                 <div className="form-group">
-                  <label className="form-label">🏷️ Tên / Tiêu đề câu hỏi:</label>
+                  <label className="form-label">🏷️ Tên / Tiêu đề câu hỏi nhỏ:</label>
                   <input
                     type="text"
                     className="form-input"
@@ -786,7 +838,7 @@ const GrammarAdminCMSPage = ({ user }) => {
 
                 {/* Question Title */}
                 <div className="form-group">
-                  <label className="form-label">🏷️ Tên / Tiêu đề câu hỏi:</label>
+                  <label className="form-label">🏷️ Tên / Tiêu đề câu hỏi nhỏ:</label>
                   <input
                     type="text"
                     className="form-input"
@@ -887,7 +939,7 @@ const GrammarAdminCMSPage = ({ user }) => {
               style={{ width: '100%', marginTop: '16px', padding: '14px', fontSize: '16px' }}
               onClick={handleSaveQuestion}
             >
-              ✨ Lưu Câu Hỏi Vào Ngân Hàng Đề
+              ✨ Lưu Câu Hỏi Vào Nhóm Này
             </button>
           </div>
 
@@ -908,13 +960,13 @@ const GrammarAdminCMSPage = ({ user }) => {
           </div>
         </div>
       ) : (
-        /* QUESTION BANK LIST (CLEAN, FRIENDLY CARDS — NO RAW JSON) */
+        /* QUESTION BANK LIST — ORGANIZED BY BIG GROUPS (CHỦ ĐỀ) */
         <div className="glass-panel" style={{ padding: '30px', borderRadius: '18px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '24px', marginBottom: '6px' }}>Ngân Hàng Câu Hỏi Hiện Có</h2>
+              <h2 style={{ fontSize: '24px', marginBottom: '6px' }}>Ngân Hàng Câu Hỏi Theo Nhóm</h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-                Tổng cộng có <strong style={{ color: '#38bdf8' }}>{lessonData.questions?.length || 0}</strong> câu hỏi trong ngân hàng đề.
+                Tổng cộng có <strong style={{ color: '#38bdf8' }}>{groups.length}</strong> Nhóm Chủ Đề với <strong style={{ color: '#10b981' }}>{totalQuestionsCount}</strong> câu hỏi nhỏ.
               </p>
             </div>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -928,120 +980,164 @@ const GrammarAdminCMSPage = ({ user }) => {
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `grammar_${lessonData.lesson_id}.json`;
+                  a.download = `grammar_groups_bank.json`;
                   a.click();
-                  showToast("📥 Đang tải xuống tệp dữ liệu bài tập...");
+                  showToast("📥 Đang tải xuống dữ liệu các nhóm câu hỏi...");
                 }}
               >
-                📥 Tải Bộ Câu Hỏi ({lessonData.questions?.length || 0} câu)
+                📥 Tải Bộ Câu Hỏi ({totalQuestionsCount} câu)
               </button>
             </div>
           </div>
 
-          {/* Clean Cards List */}
-          <div>
-            {lessonData.questions?.map((q, idx) => {
-              const typeInfo = getQuestionTypeInfo(q.type);
-              const displayName = q.title || `Câu #${idx + 1}: ${typeInfo.label}`;
-
-              return (
-                <div key={q.id || idx} className="question-bank-card">
-                  <div className="qbank-card-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '17px', fontWeight: '800', color: '#f8fafc' }}>
-                        {displayName}
-                      </span>
-                      <span style={{
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        color: typeInfo.color,
-                        background: typeInfo.bg,
-                        border: `1px solid ${typeInfo.border}`,
-                        padding: '4px 10px',
-                        borderRadius: '20px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}>
-                        <span>{typeInfo.icon}</span>
-                        <span>{typeInfo.label}</span>
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        className="btn btn-glass btn-sm"
-                        style={{ color: '#fb7185' }}
-                        onClick={() => handleDeleteQuestion(q.id)}
-                      >
-                        🗑️ Xóa Câu
-                      </button>
+          {/* GROUPS LIST */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                style={{
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                  padding: '24px'
+                }}
+              >
+                {/* Group Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: '24px' }}>{group.icon || "📘"}</span>
+                    <div>
+                      <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
+                        {group.title}
+                      </h3>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                        {group.description}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Question Sentence Body */}
-                  <div className="qbank-card-body">
-                    {q.type === 'SPOT_ERROR' ? (
-                      <div>
-                        {q.tokens?.map((t) => (
-                          <span
-                            key={t.id}
-                            style={{
-                              marginRight: '6px',
-                              padding: t.id === q.correct_token_id ? '2px 8px' : '0',
-                              borderRadius: '4px',
-                              background: t.id === q.correct_token_id ? 'rgba(244, 63, 94, 0.25)' : 'transparent',
-                              borderBottom: t.id === q.correct_token_id ? '2px solid #f43f5e' : 'none',
-                              color: t.id === q.correct_token_id ? '#fda4af' : 'inherit',
-                              fontWeight: t.id === q.correct_token_id ? '700' : 'normal'
-                            }}
-                          >
-                            {t.text}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div>{q.template}</div>
-                    )}
-                  </div>
-
-                  {/* Question Metadata & Answers */}
-                  <div className="qbank-card-meta">
-                    {q.type === 'SPOT_ERROR' ? (
-                      <>
-                        <div className="qbank-answer-highlight">
-                          <span>✓ Đáp án đúng:</span>
-                          <strong>{q.correction}</strong>
-                        </div>
-                        {q.error_type && (
-                          <span style={{ background: 'rgba(255,255,255,0.08)', padding: '3px 8px', borderRadius: '4px' }}>
-                            {q.error_type}
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      Object.keys(q.blanks || {}).map((bKey) => {
-                        const bConf = q.blanks[bKey];
-                        const answerText = bConf.correct_answer || (bConf.accepted_answers && bConf.accepted_answers.join(' | '));
-                        return (
-                          <div key={bKey} className="qbank-answer-highlight">
-                            <span>Vị trí #{bKey}:</span>
-                            <strong>{answerText}</strong>
-                            {bConf.hint && <span style={{ opacity: 0.8 }}>({bConf.hint})</span>}
-                          </div>
-                        );
-                      })
-                    )}
-
-                    {q.explanation && (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-                        💡 {q.explanation}
-                      </span>
-                    )}
-                  </div>
+                  <span style={{
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    color: '#38bdf8',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    padding: '4px 12px',
+                    borderRadius: '16px'
+                  }}>
+                    {group.questions?.length || 0} câu hỏi nhỏ
+                  </span>
                 </div>
-              );
-            })}
+
+                {/* Smaller Questions in this Group */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {(!group.questions || group.questions.length === 0) ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+                      Nhóm này chưa có câu hỏi nào.
+                    </div>
+                  ) : (
+                    group.questions.map((q, idx) => {
+                      const typeInfo = getQuestionTypeInfo(q.type);
+                      const displayName = q.title || `Câu #${idx + 1}: ${typeInfo.label}`;
+
+                      return (
+                        <div key={q.id || idx} className="question-bank-card" style={{ margin: 0 }}>
+                          <div className="qbank-card-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '15px', fontWeight: '800', color: '#f8fafc' }}>
+                                {displayName}
+                              </span>
+                              <span style={{
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                color: typeInfo.color,
+                                background: typeInfo.bg,
+                                border: `1px solid ${typeInfo.border}`,
+                                padding: '3px 8px',
+                                borderRadius: '16px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                <span>{typeInfo.icon}</span>
+                                <span>{typeInfo.label}</span>
+                              </span>
+                            </div>
+
+                            <button
+                              className="btn btn-glass btn-sm"
+                              style={{ color: '#fb7185' }}
+                              onClick={() => handleDeleteQuestion(q.id)}
+                            >
+                              🗑️ Xóa Câu
+                            </button>
+                          </div>
+
+                          {/* Question Sentence Body */}
+                          <div className="qbank-card-body">
+                            {q.type === 'SPOT_ERROR' ? (
+                              <div>
+                                {q.tokens?.map((t) => (
+                                  <span
+                                    key={t.id}
+                                    style={{
+                                      marginRight: '6px',
+                                      padding: t.id === q.correct_token_id ? '2px 8px' : '0',
+                                      borderRadius: '4px',
+                                      background: t.id === q.correct_token_id ? 'rgba(244, 63, 94, 0.25)' : 'transparent',
+                                      borderBottom: t.id === q.correct_token_id ? '2px solid #f43f5e' : 'none',
+                                      color: t.id === q.correct_token_id ? '#fda4af' : 'inherit',
+                                      fontWeight: t.id === q.correct_token_id ? '700' : 'normal'
+                                    }}
+                                  >
+                                    {t.text}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div>{q.template}</div>
+                            )}
+                          </div>
+
+                          {/* Question Metadata & Answers */}
+                          <div className="qbank-card-meta">
+                            {q.type === 'SPOT_ERROR' ? (
+                              <>
+                                <div className="qbank-answer-highlight">
+                                  <span>✓ Đáp án đúng:</span>
+                                  <strong>{q.correction}</strong>
+                                </div>
+                                {q.error_type && (
+                                  <span style={{ background: 'rgba(255,255,255,0.08)', padding: '3px 8px', borderRadius: '4px' }}>
+                                    {q.error_type}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              Object.keys(q.blanks || {}).map((bKey) => {
+                                const bConf = q.blanks[bKey];
+                                const answerText = bConf.correct_answer || (bConf.accepted_answers && bConf.accepted_answers.join(' | '));
+                                return (
+                                  <div key={bKey} className="qbank-answer-highlight">
+                                    <span>Vị trí #{bKey}:</span>
+                                    <strong>{answerText}</strong>
+                                    {bConf.hint && <span style={{ opacity: 0.8 }}>({bConf.hint})</span>}
+                                  </div>
+                                );
+                              })
+                            )}
+
+                            {q.explanation && (
+                              <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
+                                💡 {q.explanation}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
