@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { isCreatorUser } from './grammar/authHelper';
 import './Navbar.css';
 
 const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = (path) => location.pathname === path;
-  const hasCreatorAccess = isCreatorUser(user);
+  // Show grammar quick-access pill only on non-grammar pages
+  const isOnGrammarPage = location.pathname.startsWith('/grammar');
 
   return (
     <nav className="navbar glass-panel">
@@ -18,30 +17,17 @@ const Navbar = ({ user, onLogout }) => {
           <h2>StudyE</h2>
         </div>
 
-        <div className="navbar-links">
+        {/* Grammar quick-access pill — visible on flashcard pages only */}
+        {!isOnGrammarPage && (
           <button
-            className={`btn ${isActive('/') ? 'btn-primary' : 'btn-glass'} nav-link-btn`}
-            onClick={() => navigate('/')}
-          >
-            🗂️ Flashcards
-          </button>
-          <button
-            className={`btn ${isActive('/grammar') ? 'btn-primary' : 'btn-glass'} nav-link-btn`}
+            className="btn btn-glass grammar-pill-btn"
             onClick={() => navigate('/grammar')}
+            title="Luyện Tập Ngữ Pháp"
           >
-            ✏️ Luyện Ngữ Pháp
+            ✏️ <span className="grammar-pill-text">Bài Tập</span>
           </button>
-          {hasCreatorAccess && (
-            <button
-              className={`btn ${isActive('/grammar/admin') ? 'btn-primary' : 'btn-glass'} nav-link-btn creator-nav-btn`}
-              onClick={() => navigate('/grammar/admin')}
-              title="Chỉ dành cho Creator"
-            >
-              🛠️ Soạn Câu Hỏi
-            </button>
-          )}
-        </div>
-        
+        )}
+
         <div className="navbar-menu">
           {user ? (
             <div className="user-profile">
@@ -58,4 +44,3 @@ const Navbar = ({ user, onLogout }) => {
 };
 
 export default Navbar;
-

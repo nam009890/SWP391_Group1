@@ -9,11 +9,6 @@
   border-left: none;
   border-right: none;
   border-top: none;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .navbar-container {
@@ -23,14 +18,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  gap: 12px;
+  padding: 0 24px;
+  gap: 16px;
 }
 
 .navbar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   transition: transform 0.2s;
   flex-shrink: 0;
@@ -41,7 +36,7 @@
 }
 
 .logo-icon {
-  font-size: 22px;
+  font-size: 24px;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -49,92 +44,74 @@
 }
 
 .navbar-logo h2 {
-  font-size: 22px;
+  font-size: 24px;
   background: linear-gradient(to right, #fff, #94a3b8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.navbar-links {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  overflow-x: auto;
-  scrollbar-width: none; /* Hide scrollbar for clean look */
-  -ms-overflow-style: none;
-}
-
-.navbar-links::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-link-btn {
-  padding: 8px 14px;
+/* Grammar quick-access pill (sits between logo and user menu) */
+.grammar-pill-btn {
+  padding: 6px 16px;
   font-size: 13px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  font-weight: 600;
   border-radius: 20px;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  color: #c084fc !important;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.creator-nav-btn {
-  border-color: rgba(244, 63, 94, 0.5) !important;
-  color: #fda4af !important;
+.grammar-pill-btn:hover {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border-color: #a855f7 !important;
 }
 
-.creator-nav-btn:hover {
-  background: rgba(244, 63, 94, 0.2) !important;
+/* Push grammar pill to right side (right before user menu) */
+.grammar-pill-btn {
+  margin-left: auto;
 }
 
 .navbar-menu {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
 }
 
 .welcome-text {
   font-weight: 500;
-  font-size: 14px;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 768px) {
   .navbar-container {
-    padding: 0 12px;
-    gap: 8px;
+    padding: 0 16px;
+    gap: 10px;
   }
 
   .navbar-logo h2 {
-    font-size: 18px;
-  }
-
-  .nav-link-btn {
-    padding: 6px 10px;
-    font-size: 12px;
+    font-size: 20px;
   }
 
   .welcome-text {
-    display: none; /* Hide welcome text to save space on mobile */
+    display: none;
   }
 
-  .btn {
-    padding: 6px 12px;
-    font-size: 12px;
+  .grammar-pill-text {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
   .navbar-logo h2 {
-    display: none; /* Only show icon on very small screens */
-  }
-
-  .nav-link-btn {
-    padding: 6px 8px;
-    font-size: 11px;
+    display: none;
   }
 }

@@ -6,8 +6,8 @@ import DeckDetails from './components/DeckDetails';
 import Login from './components/Login';
 import Register from './components/Register';
 import StudyMode from './components/StudyMode';
-import GrammarLearnerPage from './components/grammar/GrammarLearnerPage';
-import GrammarAdminCMSPage from './components/grammar/GrammarAdminCMSPage';
+import GrammarLearnerPage from './components/grammar/view/GrammarLearnerPage';
+import GrammarAdminCMSPage from './components/grammar/view/GrammarAdminCMSPage';
 import api from './api/axiosConfig';
 
 function OAuth2RedirectHandler() {
