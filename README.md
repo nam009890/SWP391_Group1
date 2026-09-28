@@ -48,6 +48,18 @@ Environment variables:
 3. Configure the database credentials.
 4. Start Spring Boot; Flyway applies migrations automatically.
 
+## Frontend Environment
+
+`.env.example` is a template. Optionally copy it to `frontend/.env.local` and set
+`VITE_DEMO_USER_ID` to the ID of `demo@evms.local` in your local database. The
+development defaults still work without this file.
+
+To find the demo user ID after loading demo data:
+
+```sql
+SELECT id, email FROM users WHERE LOWER(email) = LOWER('demo@evms.local');
+```
+
 ## Run Backend
 
 Windows:

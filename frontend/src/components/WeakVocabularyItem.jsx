@@ -6,13 +6,19 @@ const reasons = {
 }
 
 export default function WeakVocabularyItem({ item }) {
-  return <article className="card">
-    <h2>{item.word} <small>{item.cefrLevel}</small></h2>
-    <p>{item.pronunciation} · {item.partOfSpeech}</p>
-    <p>{item.meaningVi || 'Chưa có nghĩa tiếng Việt.'}</p>
-    {item.example && <p><em>{item.example}</em></p>}
-    <p>Mastery: {item.masteryScore}% · Accuracy: {item.accuracy}%</p>
-    <p>Sai liên tiếp: {item.consecutiveWrong} · Đúng: {item.correctCount} · Sai: {item.wrongCount}</p>
-    <p>Lý do cần ôn: {reasons[item.weakReason]}</p>
-  </article>
+  const details = [item.pronunciation, item.partOfSpeech].filter(Boolean)
+  const mastery = item.masteryScore ?? 0
+  const accuracy = item.accuracy ?? 0
+
+  return (
+    <article className="card">
+      <h2>{item.word} {item.cefrLevel && <small>{item.cefrLevel}</small>}</h2>
+      {details.length > 0 && <p>{details.join(' · ')}</p>}
+      {item.meaningVi && <p>{item.meaningVi}</p>}
+      {item.example && <p><em>{item.example}</em></p>}
+      <p>Mastery: {mastery}% · Accuracy: {accuracy}%</p>
+      <p>Sai liên tiếp: {item.consecutiveWrong ?? 0} · Đúng: {item.correctCount ?? 0} · Sai: {item.wrongCount ?? 0}</p>
+      <p>Lý do cần ôn: {reasons[item.weakReason] || reasons.WEAK_STATUS}</p>
+    </article>
+  )
 }
