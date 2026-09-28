@@ -1,5 +1,5 @@
-function App() {
-  return <h1>EVMS</h1>
-}
+import AppRoutes from './routes/AppRoutes.jsx'
 
-export default App
+export default function App() {
+  return <AppRoutes />
+}
