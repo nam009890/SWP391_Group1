@@ -22,8 +22,14 @@ public class WeakVocabularyController {
 
     @GetMapping
     public WeakVocabularyPageResponse list(@RequestParam Long userId, @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String cefrLevel, @RequestParam(required = false) String partOfSpeech,
+            @RequestParam(required = false) Integer masteryMin, @RequestParam(required = false) Integer masteryMax,
+            @RequestParam(required = false) Integer accuracyMin, @RequestParam(required = false) Integer accuracyMax,
+            @RequestParam(required = false) Boolean manualWeak, @RequestParam(required = false) String sort,
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        return weakVocabularyService.getWeakVocabularyPage(userId, keyword, page, size);
+        return weakVocabularyService.getWeakVocabularyPage(userId,
+                new WeakVocabularyFilter(keyword, cefrLevel, partOfSpeech, masteryMin, masteryMax,
+                        accuracyMin, accuracyMax, manualWeak, sort), page, size);
     }
 
     @PatchMapping("/{userVocabularyId}")

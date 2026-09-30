@@ -20,7 +20,6 @@ export default function FillBlankQuestion({ question, index, total, onSubmit, su
     <section className="card">
       <p>Câu {index + 1} / {total}</p>
       <h2>{question.question}</h2>
-      {question.hint && <p>Gợi ý: {question.hint}</p>}
       <form onSubmit={submit}>
         <input value={answer} onChange={(event) => setAnswer(event.target.value)} disabled={submitting || Boolean(feedback)} aria-label="Câu trả lời" />
         {!feedback && <button disabled={submitting || !answer.trim()}>{submitting ? 'Đang kiểm tra…' : 'Kiểm tra'}</button>}

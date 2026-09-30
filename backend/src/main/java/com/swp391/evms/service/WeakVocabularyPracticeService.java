@@ -188,11 +188,8 @@ public class WeakVocabularyPracticeService {
     }
 
     private PracticeQuestionResponse question(ReviewSessionItem item) {
-        String hint = senseRepository
-                .findByVocabularyIdOrderBySenseOrderAsc(item.getUserVocabulary().getVocabulary().getId()).stream()
-                .findFirst().map(VocabularySense::getMeaningVi).orElse(null);
         return new PracticeQuestionResponse(item.getId(), item.getItemOrder(), item.getQuestionType().name(),
-                item.getQuestionContent(), hint, readOptions(item.getOptionsJson()));
+                item.getQuestionContent(), null, readOptions(item.getOptionsJson()));
     }
 
     private List<String> readOptions(String json) {
@@ -237,8 +234,12 @@ public class WeakVocabularyPracticeService {
             uv.setConsecutiveWrong(0);
             int score = Math.min(100, value(uv.getMasteryScore()) + 20);
             uv.setMasteryScore(score);
-            uv.setLearningStatus(score >= 80 ? LearningStatus.MASTERED
-                    : score >= 60 ? LearningStatus.LEARNING : LearningStatus.WEAK);
+            // The weak list is a user-managed watch list. Practising must not remove
+            // an item from it merely because its score improved.
+            if (uv.getLearningStatus() != LearningStatus.WEAK) {
+                uv.setLearningStatus(score >= 80 ? LearningStatus.MASTERED
+                        : score >= 60 ? LearningStatus.LEARNING : LearningStatus.WEAK);
+            }
         } else {
             uv.setWrongCount(value(uv.getWrongCount()) + 1);
             uv.setConsecutiveWrong(value(uv.getConsecutiveWrong()) + 1);

@@ -1,14 +1,9 @@
 package com.swp391.evms.repository;
 
 import com.swp391.evms.entity.UserVocabulary;
-import java.util.List;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface UserVocabularyRepository extends JpaRepository<UserVocabulary, Long> {
-    @Query("select uv from UserVocabulary uv join fetch uv.user join fetch uv.vocabulary where uv.user.id = :userId and coalesce(uv.weakDeleted, false) = false and (uv.learningStatus = com.swp391.evms.entity.LearningStatus.WEAK or uv.manualWeak = true)")
-    List<UserVocabulary> findWeakByUserId(@Param("userId") Long userId);
-
-    @Query("select uv from UserVocabulary uv join fetch uv.user join fetch uv.vocabulary where uv.user.id = :userId and coalesce(uv.weakDeleted, false) = false and (uv.learningStatus = com.swp391.evms.entity.LearningStatus.WEAK or uv.manualWeak = true) and (lower(uv.vocabulary.word) like concat('%', :keyword, '%') or exists (select s from VocabularySense s where s.vocabulary = uv.vocabulary and lower(coalesce(s.meaningVi, '')) like concat('%', :keyword, '%')))")
-    List<UserVocabulary> searchWeakByUserId(@Param("userId") Long userId, @Param("keyword") String keyword);
+public interface UserVocabularyRepository
+        extends JpaRepository<UserVocabulary, Long>, JpaSpecificationExecutor<UserVocabulary> {
 }

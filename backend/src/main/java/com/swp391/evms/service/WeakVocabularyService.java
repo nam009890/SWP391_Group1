@@ -1,13 +1,15 @@
 package com.swp391.evms.service;
 
-import com.swp391.evms.dto.response.WeakVocabularyResponse;
-import com.swp391.evms.dto.response.WeakVocabularyPageResponse;
 import com.swp391.evms.dto.request.UpdateWeakVocabularyRequest;
+import com.swp391.evms.dto.request.WeakVocabularyFilter;
+import com.swp391.evms.dto.response.WeakVocabularyPageResponse;
+import com.swp391.evms.dto.response.WeakVocabularyResponse;
 import com.swp391.evms.entity.*;
 import com.swp391.evms.exception.ResourceNotFoundException;
 import com.swp391.evms.repository.*;
 import java.util.*;
-import java.util.Locale;
+import jakarta.persistence.criteria.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,33 +36,115 @@ public class WeakVocabularyService {
 
     @Transactional(readOnly = true)
     public List<UserVocabulary> sortedWeak(Long userId) {
-        return sortedWeak(userId, null);
-    }
-
-    public List<UserVocabulary> sortedWeak(Long userId, String keyword) {
-        String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase(Locale.ROOT);
-        List<UserVocabulary> weakVocabularies = normalizedKeyword.isBlank()
-                ? userVocabularyRepository.findWeakByUserId(userId)
-                : userVocabularyRepository.searchWeakByUserId(userId, normalizedKeyword);
-        return weakVocabularies.stream()
-                .sorted(Comparator.comparing(UserVocabulary::getMasteryScore, Comparator.nullsLast(Integer::compareTo))
-                        .thenComparing(UserVocabulary::getConsecutiveWrong,
-                                Comparator.nullsLast(Comparator.reverseOrder()))
-                        .thenComparing(UserVocabulary::getUpdatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
-                .toList();
+        return findWeak(userId, new WeakVocabularyFilter(null, null, null, null, null, null, null, null, null));
     }
 
     @Transactional(readOnly = true)
-    public WeakVocabularyPageResponse getWeakVocabularyPage(Long userId, String keyword, int page, int size) {
+    public WeakVocabularyPageResponse getWeakVocabularyPage(Long userId, WeakVocabularyFilter filter, int page, int size) {
         requireUser(userId);
         int safePage = Math.max(0, page);
         int safeSize = Math.min(50, Math.max(1, size));
-        List<WeakVocabularyResponse> all = sortedWeak(userId, keyword).stream().map(this::map).toList();
+        List<WeakVocabularyResponse> all = findWeak(userId, filter).stream().map(this::map).toList();
         int from = Math.min(safePage * safeSize, all.size());
         int to = Math.min(from + safeSize, all.size());
         int pages = (int) Math.ceil(all.size() / (double) safeSize);
         return new WeakVocabularyPageResponse(all.subList(from, to), safePage, safeSize, all.size(), pages,
                 safePage == 0, pages == 0 || safePage >= pages - 1);
+    }
+
+    private List<UserVocabulary> findWeak(Long userId, WeakVocabularyFilter filter) {
+        WeakVocabularyFilter active = filter == null
+                ? new WeakVocabularyFilter(null, null, null, null, null, null, null, null, null)
+                : filter;
+        List<UserVocabulary> result = userVocabularyRepository.findAll(specification(userId, active));
+        return result.stream().sorted(comparator(active.sort())).toList();
+    }
+
+    private Specification<UserVocabulary> specification(Long userId, WeakVocabularyFilter filter) {
+        return (root, query, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(builder.equal(root.get("user").get("id"), userId));
+            predicates.add(builder.isFalse(builder.coalesce(root.get("weakDeleted"), false)));
+            predicates.add(builder.or(
+                    builder.equal(root.get("learningStatus"), LearningStatus.WEAK),
+                    builder.isTrue(builder.coalesce(root.get("manualWeak"), false))));
+
+            if (hasText(filter.keyword())) {
+                String pattern = "%" + filter.keyword().trim().toLowerCase(Locale.ROOT) + "%";
+                Subquery<Long> sense = query.subquery(Long.class);
+                Root<VocabularySense> senseRoot = sense.from(VocabularySense.class);
+                sense.select(senseRoot.get("id")).where(
+                        builder.equal(senseRoot.get("vocabulary"), root.get("vocabulary")),
+                        builder.like(builder.lower(senseRoot.get("meaningVi")), pattern));
+                predicates.add(builder.or(
+                        builder.like(builder.lower(root.get("vocabulary").get("word")), pattern),
+                        builder.exists(sense)));
+            }
+            if (hasText(filter.cefrLevel())) {
+                predicates.add(builder.equal(root.get("vocabulary").get("cefrLevel"), filter.cefrLevel().trim()));
+            }
+            if (hasText(filter.partOfSpeech())) {
+                Subquery<Long> sense = query.subquery(Long.class);
+                Root<VocabularySense> senseRoot = sense.from(VocabularySense.class);
+                sense.select(senseRoot.get("id")).where(
+                        builder.equal(senseRoot.get("vocabulary"), root.get("vocabulary")),
+                        builder.equal(builder.lower(senseRoot.get("partOfSpeech")),
+                                filter.partOfSpeech().trim().toLowerCase(Locale.ROOT)));
+                predicates.add(builder.exists(sense));
+            }
+            addRange(predicates, builder, root.get("masteryScore"), filter.masteryMin(), filter.masteryMax());
+            if (filter.manualWeak() != null) {
+                predicates.add(builder.equal(builder.coalesce(root.get("manualWeak"), false), filter.manualWeak()));
+            }
+            if (filter.accuracyMin() != null || filter.accuracyMax() != null) {
+                Expression<Integer> total = root.get("totalAttempts");
+                Expression<Integer> correct = root.get("correctCount");
+                Expression<Number> accuracy = builder.quot(builder.prod(builder.toDouble(correct), 100D),
+                        builder.toDouble(builder.nullif(total, 0)));
+                predicates.add(builder.greaterThan(total, 0));
+                if (filter.accuracyMin() != null) predicates.add(builder.ge(accuracy, filter.accuracyMin().doubleValue()));
+                if (filter.accuracyMax() != null) predicates.add(builder.le(accuracy, filter.accuracyMax().doubleValue()));
+            }
+            return builder.and(predicates.toArray(Predicate[]::new));
+        };
+    }
+
+    private static void addRange(List<Predicate> predicates, CriteriaBuilder builder, Path<Integer> path,
+            Integer min, Integer max) {
+        if (min != null) predicates.add(builder.ge(path, Math.max(0, min)));
+        if (max != null) predicates.add(builder.le(path, Math.min(100, max)));
+    }
+
+    private static Comparator<UserVocabulary> comparator(String sort) {
+        Comparator<UserVocabulary> weakest = Comparator
+                .comparing(UserVocabulary::getMasteryScore, Comparator.nullsLast(Integer::compareTo))
+                .thenComparing(UserVocabulary::getConsecutiveWrong, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(UserVocabulary::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
+        String value = sort == null ? "WEAKEST_FIRST" : sort;
+        return switch (value) {
+            case "MASTERY_DESC" -> Comparator.comparing(UserVocabulary::getMasteryScore,
+                    Comparator.nullsLast(Comparator.reverseOrder()));
+            case "ACCURACY_ASC" -> Comparator.comparingDouble(WeakVocabularyService::accuracy);
+            case "ACCURACY_DESC" -> Comparator.comparingDouble(WeakVocabularyService::accuracy).reversed();
+            case "UPDATED_DESC" -> Comparator.comparing(UserVocabulary::getUpdatedAt,
+                    Comparator.nullsLast(Comparator.reverseOrder()));
+            case "WORD_ASC" -> Comparator.comparing(uv -> uv.getVocabulary().getWord(),
+                    Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
+            case "WORD_DESC" -> Comparator.comparing((UserVocabulary uv) -> uv.getVocabulary().getWord(),
+                    Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)).reversed();
+            case "MASTERY_ASC" -> Comparator.comparing(UserVocabulary::getMasteryScore,
+                    Comparator.nullsLast(Integer::compareTo));
+            default -> weakest;
+        };
+    }
+
+    private static double accuracy(UserVocabulary uv) {
+        int attempts = value(uv.getTotalAttempts());
+        return attempts == 0 ? 0D : value(uv.getCorrectCount()) * 100D / attempts;
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     @Transactional
