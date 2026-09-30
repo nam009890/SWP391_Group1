@@ -7,6 +7,7 @@ import com.swp391.evms.entity.*;
 import com.swp391.evms.exception.ResourceNotFoundException;
 import com.swp391.evms.repository.*;
 import java.util.*;
+import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +38,11 @@ public class WeakVocabularyService {
     }
 
     public List<UserVocabulary> sortedWeak(Long userId, String keyword) {
-        return userVocabularyRepository
-                .findVisibleWeakByUserId(userId, keyword == null || keyword.isBlank() ? null : keyword.trim()).stream()
+        String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase(Locale.ROOT);
+        List<UserVocabulary> weakVocabularies = normalizedKeyword.isBlank()
+                ? userVocabularyRepository.findWeakByUserId(userId)
+                : userVocabularyRepository.searchWeakByUserId(userId, normalizedKeyword);
+        return weakVocabularies.stream()
                 .sorted(Comparator.comparing(UserVocabulary::getMasteryScore, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(UserVocabulary::getConsecutiveWrong,
                                 Comparator.nullsLast(Comparator.reverseOrder()))
