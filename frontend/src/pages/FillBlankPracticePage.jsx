@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import FillBlankQuestion from '../components/FillBlankQuestion.jsx'
 import PracticeSummary from '../components/PracticeSummary.jsx'
+import OptionQuestion from '../components/OptionQuestion.jsx'
 import { APP_CONFIG } from '../config/appConfig.js'
 import { getPracticeSession, getPracticeSummary, submitFillBlankAnswer } from '../services/weakVocabularyService.js'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage.js'
@@ -84,9 +85,11 @@ export default function FillBlankPracticePage() {
   const question = session.pendingQuestions[index]
   if (!question) return <p>Không còn câu hỏi đang chờ.</p>
 
+  const isOptionQuestion = question.questionType === 'MULTIPLE_CHOICE' || question.questionType === 'WORD_TO_MEANING'
   return (
     <main>
-      <FillBlankQuestion key={question.itemId} question={question} index={index} total={session.totalQuestions} onSubmit={submit} submitting={submitting} />
+      <h1>Ôn luyện từ yếu</h1><p>Câu {index + 1} / {session.totalQuestions}</p><progress value={index + 1} max={session.totalQuestions} />
+      {isOptionQuestion ? <OptionQuestion key={question.itemId} question={question} onSubmit={submit} submitting={submitting} /> : <FillBlankQuestion key={question.itemId} question={question} index={index} total={session.totalQuestions} onSubmit={submit} submitting={submitting} />}
       {answered && <button onClick={nextQuestion}>Câu tiếp theo</button>}
     </main>
   )
