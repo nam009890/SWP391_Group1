@@ -6,6 +6,9 @@ import DeckDetails from './components/DeckDetails';
 import Login from './components/Login';
 import Register from './components/Register';
 import StudyMode from './components/StudyMode';
+import WeakVocabulary from './components/WeakVocabulary';
+import WeakPracticeSetup from './components/WeakPracticeSetup';
+import WeakPracticeSession from './components/WeakPracticeSession';
 import api from './api/axiosConfig';
 
 function OAuth2RedirectHandler() {
@@ -106,6 +109,9 @@ function MainApp() {
         <Route path="/register" element={token ? <Dashboard user={user} /> : <Register />} />
         <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
         <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
+        <Route path="/weak-vocabulary" element={token ? <WeakVocabulary /> : <LandingPage />} />
+        <Route path="/weak-vocabulary/practice" element={token ? <WeakPracticeSetup /> : <LandingPage />} />
+        <Route path="/weak-vocabulary/practice/:id" element={token ? <WeakPracticeSession /> : <LandingPage />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>
     </>

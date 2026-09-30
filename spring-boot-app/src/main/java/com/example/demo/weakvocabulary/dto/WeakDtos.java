@@ -1,0 +1,10 @@
+package com.example.demo.weakvocabulary.dto;
+import com.example.demo.weakvocabulary.entity.*; import lombok.*; import java.time.LocalDateTime; import java.util.*;
+public final class WeakDtos { private WeakDtos(){} @Getter @Setter public static class PatchRequest { private String weakNote; private Boolean manualMarked; } @Getter @Setter public static class PracticeStartRequest { private WeakQuestionType questionType; private List<Long> weakVocabularyIds; } @Getter @Setter public static class AnswerRequest { private String answer; }
+ @Builder @Getter public static class WeakResponse { private Long weakVocabularyId,flashcardId,deckId; private String deckName,vocabulary,meaning,phonetic,exampleSentence,weakReason,weakNote; private boolean manualMarked,autoDetected; private int masteryScore,totalAttempts,correctCount,wrongCount,consecutiveWrong; private double accuracy; private Integer lastStudyQuality; private LocalDateTime lastPracticedAt,createdAt,updatedAt; }
+ @Builder @Getter public static class PageResponse { private List<WeakResponse> items; private int page,size,totalPages; private long totalElements; private boolean first,last; }
+ @Builder @Getter public static class QuestionResponse { private Long itemId; private int itemOrder; private WeakQuestionType questionType; private String question; private List<String> options; }
+ @Builder @Getter public static class SessionResponse { private Long sessionId; private WeakQuestionType questionType; private WeakPracticeStatus status; private int totalQuestions,correctAnswers,wrongAnswers; private List<QuestionResponse> questions; }
+ @Builder @Getter public static class AnswerResponse { private boolean correct; private String correctAnswer; private int correctAnswers,wrongAnswers; private boolean completed; }
+ @Builder @Getter public static class SummaryResponse { private Long sessionId; private WeakPracticeStatus status; private int totalQuestions,correctAnswers,wrongAnswers; private double accuracy; private LocalDateTime startedAt,completedAt; }
+}
