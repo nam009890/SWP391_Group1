@@ -1,2 +1,37 @@
-import { useEffect, useState } from 'react'; import { useNavigate } from 'react-router-dom'; import { deleteWeakVocabulary, getWeakVocabularies, updateWeakVocabulary } from '../api/weakVocabularyApi'; import './WeakVocabulary.css';
-export default function WeakVocabulary(){const nav=useNavigate(),[data,setData]=useState(null),[input,setInput]=useState(''),[keyword,setKeyword]=useState(''),[filters,setFilters]=useState({source:'ALL',sort:'WEAKEST_FIRST'}),[applied,setApplied]=useState(filters),[error,setError]=useState('');const load=async(page=0)=>{try{setError('');const r=await getWeakVocabularies({...applied,keyword,page,size:10});setData(r.data)}catch{setError('Không thể tải danh sách từ yếu.')}};useEffect(()=>{load()},[keyword,applied]);const search=e=>{e.preventDefault();setKeyword(input)};const note=async w=>{const v=window.prompt('Ghi chú',w.weakNote||'');if(v!==null){await updateWeakVocabulary(w.weakVocabularyId,{weakNote:v});load(data.page)}};return <main className="weak-page animate-fade-in"><section className="weak-head"><div><h1>Từ cần ôn luyện</h1><p>Củng cố những từ bạn còn chưa tự tin.</p></div><button className="btn btn-primary" onClick={()=>nav('/weak-vocabulary/practice')}>Ôn luyện</button></section><form className="weak-filters glass-panel" onSubmit={search}><input className="glass-input" value={input} onChange={e=>setInput(e.target.value)} placeholder="Tìm từ hoặc nghĩa..."/><select value={filters.source} onChange={e=>setFilters({...filters,source:e.target.value})}><option value="ALL">Tất cả nguồn</option><option value="AUTO">Tự động</option><option value="MANUAL">Thủ công</option><option value="BOTH">Cả hai</option></select><select value={filters.sort} onChange={e=>setFilters({...filters,sort:e.target.value})}><option value="WEAKEST_FIRST">Yếu nhất</option><option value="MASTERY_DESC">Thành thạo giảm dần</option><option value="WORD_ASC">Từ A–Z</option><option value="UPDATED_DESC">Cập nhật mới</option></select><button className="btn btn-primary">Tìm kiếm</button><button type="button" className="btn btn-glass" onClick={()=>{const x={source:'ALL',sort:'WEAKEST_FIRST'};setFilters(x);setApplied(x);setInput('');setKeyword('')}}>Đặt lại</button><button type="button" className="btn btn-glass" onClick={()=>setApplied(filters)}>Áp dụng</button></form>{error&&<div className="weak-error">{error} <button onClick={()=>load()}>Thử lại</button></div>}{!data?<p>Đang tải...</p>:<><div className="weak-grid">{data.items.map(w=><article className="weak-card glass-panel" key={w.weakVocabularyId}><div className="word-row"><h2>{w.vocabulary}</h2><span>{w.manualMarked&&w.autoDetected?'BOTH':w.manualMarked?'MANUAL':'AUTO'}</span></div><em>{w.phonetic}</em><p>{w.meaning}</p><small>{w.exampleSentence}</small><div className="stats"><b>{w.masteryScore}% mastery</b><span>Đúng {w.correctCount} · Sai {w.wrongCount} · {w.accuracy}%</span></div><p className="reason">{w.weakReason}</p>{w.weakNote&&<p className="note">{w.weakNote}</p>}<div className="card-actions"><button className="btn btn-glass" onClick={()=>note(w)}>Sửa ghi chú</button><button className="btn btn-glass" onClick={()=>nav('/weak-vocabulary/practice')}>Ôn luyện</button><button className="btn danger" onClick={async()=>{if(window.confirm('Xóa từ này khỏi danh sách?')){await deleteWeakVocabulary(w.weakVocabularyId);load(data.page)}}}>Xóa</button></div></article>)}</div>{data.items.length===0&&<div className="glass-panel empty">Chưa có từ yếu phù hợp.</div>}<div className="pager"><button disabled={data.first} onClick={()=>load(data.page-1)}>← Trước</button><span>Trang {data.page+1} / {Math.max(data.totalPages,1)} · {data.totalElements} từ</span><button disabled={data.last} onClick={()=>load(data.page+1)}>Sau →</button></div></>}</main>}
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { deleteWeakVocabulary, getWeakVocabularies, updateWeakVocabulary } from '../api/weakVocabularyApi';
+import WeakVocabularyFilters, { defaultWeakFilters } from './WeakVocabularyFilters';
+import './WeakVocabulary.css';
+
+export default function WeakVocabulary() {
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [input, setInput] = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [pendingFilters, setPendingFilters] = useState(defaultWeakFilters);
+  const [appliedFilters, setAppliedFilters] = useState(defaultWeakFilters);
+  const [page, setPage] = useState(0);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const load = async (nextPage = page) => {
+    setLoading(true);
+    try {
+      setError('');
+      const response = await getWeakVocabularies({ ...appliedFilters, keyword, page: nextPage, size: 10 });
+      setData(response.data);
+      setPage(nextPage);
+    } catch { setError('Không thể tải danh sách từ yếu.'); }
+    finally { setLoading(false); }
+  };
+  useEffect(() => { load(0); }, [keyword, appliedFilters]);
+  const reset = () => { setInput(''); setKeyword(''); setPendingFilters(defaultWeakFilters); setAppliedFilters(defaultWeakFilters); setPage(0); };
+  const editNote = async (word) => { const weakNote = window.prompt('Ghi chú', word.weakNote || ''); if (weakNote !== null) { await updateWeakVocabulary(word.weakVocabularyId, { weakNote }); load(); } };
+  const filtered = keyword || JSON.stringify(appliedFilters) !== JSON.stringify(defaultWeakFilters);
+  return <main className="weak-page animate-fade-in">
+    <section className="weak-head"><div><h1>Từ cần ôn luyện</h1><p>Củng cố những từ bạn còn chưa tự tin.</p></div><button className="btn btn-primary" onClick={() => navigate('/weak-vocabulary/practice')}>Ôn luyện</button></section>
+    <WeakVocabularyFilters input={input} onInputChange={setInput} onSearch={() => setKeyword(input)} pending={pendingFilters} onPendingChange={setPendingFilters} onApply={() => { setAppliedFilters({ ...pendingFilters }); setPage(0); }} onReset={reset} />
+    {error && <div className="weak-error">{error} <button onClick={() => load()}>Thử lại</button></div>}
+    {!data ? <p>Đang tải...</p> : <>{loading && <p className="weak-loading">Đang cập nhật...</p>}<div className="weak-grid">{data.items.map((word) => <article className="weak-card glass-panel" key={word.weakVocabularyId}><div className="word-row"><h2>{word.vocabulary}</h2><span>{word.manualMarked && word.autoDetected ? 'BOTH' : word.manualMarked ? 'MANUAL' : 'AUTO'}</span></div><em>{word.phonetic}</em><p>{word.meaning}</p><small>{word.exampleSentence}</small><div className="stats"><b>{word.masteryScore}% mastery</b><span>Đúng {word.correctCount} · Sai {word.wrongCount} · {word.accuracy}%</span></div><p className="reason">{word.weakReason}</p>{word.weakNote && <p className="note">{word.weakNote}</p>}<div className="card-actions"><button className="btn btn-glass" onClick={() => editNote(word)}>Sửa ghi chú</button><button className="btn btn-glass" onClick={() => navigate('/weak-vocabulary/practice')}>Ôn luyện</button><button className="btn danger" onClick={async () => { if (window.confirm('Xóa từ này khỏi danh sách?')) { await deleteWeakVocabulary(word.weakVocabularyId); load(); } }}>Xóa</button></div></article>)}</div>{!data.items.length && <div className="glass-panel empty">{filtered ? <>Không tìm thấy từ phù hợp với bộ lọc hiện tại. <button onClick={reset}>Đặt lại bộ lọc</button></> : 'Bạn chưa có từ nào cần ôn luyện.'}</div>}<div className="pager"><button disabled={data.first} onClick={() => load(page - 1)}>← Trước</button><span>Trang {data.page + 1} / {Math.max(data.totalPages, 1)} · {data.totalElements} từ</span><button disabled={data.last} onClick={() => load(page + 1)}>Sau →</button></div></>}
+  </main>;
+}

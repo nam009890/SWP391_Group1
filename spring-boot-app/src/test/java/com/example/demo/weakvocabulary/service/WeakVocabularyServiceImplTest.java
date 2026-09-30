@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -65,5 +68,76 @@ class WeakVocabularyServiceImplTest {
 
         assertTrue(item.isWeakDeleted());
         verify(weakRepository, never()).save(any());
+    }
+
+    @Test
+    void qualityOneMarksAutoDetected() {
+        UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).build();
+        when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
+        service.recordStudyDifficulty(1L, 2L, 1);
+        assertTrue(item.isAutoDetected());
+        assertTrue(item.getLastStudyQuality() == 1);
+    }
+
+    @Test
+    void qualityThreeMarksAutoDetected() {
+        UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).build();
+        when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
+        service.recordStudyDifficulty(1L, 2L, 3);
+        assertTrue(item.isAutoDetected());
+    }
+
+    @Test
+    void qualityFourDoesNotCreateWeakVocabulary() {
+        service.recordStudyDifficulty(1L, 2L, 4);
+        verify(weakRepository, never()).findByUserIdAndFlashcardId(any(), any());
+    }
+
+    @Test
+    void qualityFiveDoesNotRemoveExistingWeakVocabulary() {
+        UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).build();
+        when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
+        service.recordStudyDifficulty(1L, 2L, 5);
+        assertFalse(item.isWeakDeleted());
+        verify(weakRepository, never()).save(any());
+    }
+
+    @Test
+    void manualAddShouldBeIdempotent() {
+        UserWeakVocabulary existing = UserWeakVocabulary.builder().user(user).flashcard(flashcard).totalAttempts(4).build();
+        when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.empty(), Optional.of(existing));
+        service.addManual(1L, 2L);
+        service.addManual(1L, 2L);
+        verify(weakRepository, times(2)).save(any(UserWeakVocabulary.class));
+        assertEquals(4, existing.getTotalAttempts());
+        assertTrue(existing.isManualMarked());
+    }
+
+    @Test
+    void deleteShouldSoftDeleteWithoutHardDelete() {
+        UserWeakVocabulary item = UserWeakVocabulary.builder().id(3L).user(user).flashcard(flashcard).build();
+        when(weakRepository.findById(3L)).thenReturn(Optional.of(item));
+        service.softDelete(1L, 3L);
+        assertTrue(item.isWeakDeleted());
+        assertNotNull(item.getWeakDeletedAt());
+        verify(weakRepository, never()).delete(any(UserWeakVocabulary.class));
+    }
+
+    @Test
+    void patchShouldRejectDifferentOwner() {
+        User other = User.builder().id(9L).build();
+        UserWeakVocabulary item = UserWeakVocabulary.builder().id(3L).user(user).flashcard(flashcard).weakNote("original").build();
+        when(weakRepository.findById(3L)).thenReturn(Optional.of(item));
+        var request = new com.example.demo.weakvocabulary.dto.WeakDtos.PatchRequest(); request.setWeakNote("changed");
+        assertThrows(com.example.demo.common.exception.ResourceNotFoundException.class, () -> service.patch(other.getId(), 3L, request));
+        assertEquals("original", item.getWeakNote());
+    }
+
+    @Test
+    void deleteShouldRejectDifferentOwner() {
+        UserWeakVocabulary item = UserWeakVocabulary.builder().id(3L).user(user).flashcard(flashcard).build();
+        when(weakRepository.findById(3L)).thenReturn(Optional.of(item));
+        assertThrows(com.example.demo.common.exception.ResourceNotFoundException.class, () -> service.softDelete(9L, 3L));
+        assertFalse(item.isWeakDeleted());
     }
 }

@@ -83,7 +83,7 @@ GO
 -- 6. BASE SEED DATA
 -- =====================================================
 INSERT dbo.users(email,name,password,provider,role) VALUES
- (N'demo@studye.local',N'Demo StudyE',N'$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',N'LOCAL',N'ROLE_USER');
+ (N'demo@studye.local',N'Demo StudyE',N'$2a$10$5jJSpWMyRZqmeEn9exHWCOtupH0dBCPoOPqqTK/RyvZFqCA2RRhuy',N'LOCAL',N'ROLE_USER');
 INSERT dbo.decks(name,description) VALUES
  (N'Everyday English',N'Basic vocabulary'),(N'Academic English',N'Academic vocabulary'),(N'Travel',N'Useful travel vocabulary'),(N'Weak Vocabulary Demo',N'Development data for weak vocabulary and practice');
 INSERT dbo.flashcards(deck_id,vocabulary,meaning,phonetic,example_sentence) VALUES
