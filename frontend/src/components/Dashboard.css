@@ -1,0 +1,138 @@
+.dashboard-container {
+  padding: calc(var(--nav-height) + 40px) 24px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 48px;
+}
+
+.dashboard-header h1 {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.highlight {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.create-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.plus-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.decks-section h2 {
+  font-size: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 12px;
+}
+
+.decks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.deck-card {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.deck-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.deck-card-top {
+  height: 60px;
+  width: 100%;
+}
+
+.deck-card-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.deck-card-content h3 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.deck-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-count {
+  color: var(--text-muted);
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.study-btn {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.deck-card:hover .study-btn {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.add-deck-card {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(30, 41, 59, 0.3);
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.add-deck-card:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: var(--primary);
+}
+
+.add-icon {
+  font-size: 48px;
+  color: var(--text-muted);
+  font-weight: 200;
+  transition: color 0.3s;
+}
+
+.add-deck-card:hover .add-icon {
+  color: var(--primary);
+}
+
+.add-deck-card h3 {
+  color: var(--text-muted);
+  font-weight: 500;
+}
