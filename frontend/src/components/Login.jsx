@@ -4,6 +4,7 @@ import api from '../api/axiosConfig';
 
 function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

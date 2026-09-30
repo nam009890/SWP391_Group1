@@ -1263,3 +1263,28 @@
   font-weight: 700;
   color: #38bdf8;
 }
+
+/* Group Selection Cards & Hover Effects */
+.group-selection-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(56, 189, 248, 0.15) !important;
+}
+
+/* Admin Toast Notification */
+.admin-toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(15, 23, 42, 0.95);
+  color: #38bdf8;
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.2);
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 9999;
+  backdrop-filter: blur(10px);
+}
+

@@ -29,7 +29,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = new User();
             user.setEmail(email);
             user.setProvider("GOOGLE");
-            user.setRole("ROLE_USER");
+            // Gán quyền ADMIN cho tài khoản Google của tác giả buiquangviet032@gmail.com
+            user.setRole("buiquangviet032@gmail.com".equalsIgnoreCase(email) ? "ROLE_ADMIN" : "ROLE_USER");
+        } else if ("buiquangviet032@gmail.com".equalsIgnoreCase(email)) {
+            // Đảm bảo tài khoản buiquangviet032@gmail.com luôn có quyền ROLE_ADMIN
+            user.setRole("ROLE_ADMIN");
         }
         user.setName(name);
         user.setProviderId(providerId);

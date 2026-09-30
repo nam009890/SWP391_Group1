@@ -132,8 +132,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
 
             // Text Input mode
             const currentVal = answers[blankKey] || '';
-            const hint = blankConfig.hint;
-            const inputWidth = Math.max((currentVal.length || 0), (hint ? hint.length : 0), 5) + 3;
+            const inputWidth = Math.max((currentVal.length || 0), 6) + 3;
             let inputClass = '';
             if (submitted && result) inputClass = result.isCorrect ? 'correct' : 'incorrect';
 
@@ -144,16 +143,13 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
                   className={`inline-blank-input ${inputClass}`}
                   style={{ width: `${inputWidth}ch` }}
                   value={currentVal}
-                  placeholder={hint ? `(${hint})` : `...`}
+                  placeholder="..."
                   onChange={(e) => handleInputChange(blankKey, e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleCheckAnswer(); }}
                   disabled={submitted && result?.isCorrect}
                   autoComplete="off"
                   spellCheck="false"
                 />
-                {hint && !submitted && (
-                  <span className="blank-hint-text">({hint})</span>
-                )}
                 {submitted && result && !result.isCorrect && (
                   <span className="blank-correct-contrast">Đúng: {result.expected}</span>
                 )}

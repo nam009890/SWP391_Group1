@@ -17,14 +17,16 @@ const Navbar = ({ user, onLogout }) => {
           <h2>StudyE</h2>
         </div>
 
-        {/* Grammar quick-access pill — visible on flashcard pages only */}
+        {/* Nút truy cập nhanh Module Bài Tập Ngữ Pháp */}
         {!isOnGrammarPage && (
           <button
             className="btn btn-glass grammar-pill-btn"
             onClick={() => navigate('/grammar')}
-            title="Luyện Tập Ngữ Pháp"
+            title={user?.isAdmin || (user?.email && user.email.toLowerCase() === 'buiquangviet032@gmail.com') ? "Soạn & Quản Trị Câu Hỏi Ngữ Pháp" : "Luyện Tập Ngữ Pháp"}
           >
-            ✏️ <span className="grammar-pill-text">Bài Tập</span>
+            ✏️ <span className="grammar-pill-text">
+              {user?.isAdmin || (user?.email && user.email.toLowerCase() === 'buiquangviet032@gmail.com') ? "Soạn Bài Tập" : "Bài Tập"}
+            </span>
           </button>
         )}
 

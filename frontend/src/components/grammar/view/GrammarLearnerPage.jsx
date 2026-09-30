@@ -1,23 +1,48 @@
-// ============================================================
-// VIEW — Grammar Learner Page
-// Supports hierarchical structure: Big Groups (Chủ Đề)
-// with smaller questions in each group, clean alignment and navigation.
-// ============================================================
+// =========================================================================================
+// VIEW LAYER — GRAMMAR LEARNER PAGE (GIAO DIỆN HỌC VIÊN LÀM BÀI TẬP)
+// =========================================================================================
+// Cập nhật theo yêu cầu người dùng:
+// 1. Khắc phục lỗi Header bị che/clip dưới thanh Navbar cố định (paddingTop chuẩn).
+// 2. Đơn giản hóa màn hình danh sách bài: Chỉ hiển thị "Các bài tập hiện tại" và Tên bài
+//    (ví dụ: Test 1, Test 2...), không cần phần lời chào hay chi tiết dài dòng.
+// 3. Loại bỏ hoàn toàn phần Gợi ý (Hint).
+// 4. Câu từ ngắn gọn, thân thiện, dễ hiểu cho người học.
+// =========================================================================================
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SpotTheErrorQuestion from './components/SpotTheErrorQuestion';
 import FillBlankQuestion from './components/FillBlankQuestion';
 import { getStoredQuestions, fetchGrammarQuestions } from '../model/grammarQuestionsData';
+import { getQuestionTypeInfo } from '../model/questionTypesRegistry';
+import { isCreatorUser } from '../model/authHelper';
 import '../Grammar.css';
 
 const GrammarLearnerPage = ({ user }) => {
   const navigate = useNavigate();
+
+  // Danh sách các bài tập
   const [data, setData] = useState(() => getStoredQuestions());
+
+  // Chế độ xem: 'GROUPS_LIST' (Xem danh sách bài) hoặc 'TEST_SESSION' (Làm bài)
+  const [viewMode, setViewMode] = useState('GROUPS_LIST');
+
+  // Bài tập đang được chọn
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
+
+  // Câu hỏi hiện tại
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [scoreMap, setScoreMap] = useState({}); // { [groupId]: number }
-  const [answeredMap, setAnsweredMap] = useState({}); // { [`${groupId}_${idx}`]: 'correct' | 'incorrect' }
+
+  // Điểm số của từng bài: { [groupId]: number }
+  const [scoreMap, setScoreMap] = useState({});
+
+  // Trạng thái từng câu: { [`${groupId}_${idx}`]: 'correct' | 'incorrect' }
+  const [answeredMap, setAnsweredMap] = useState({});
+
+  // Modal kết quả khi làm xong bài
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  const isCreator = isCreatorUser(user);
 
   useEffect(() => {
     fetchGrammarQuestions().then(res => {
@@ -35,11 +60,21 @@ const GrammarLearnerPage = ({ user }) => {
   const currentScore = scoreMap[currentGroup?.id] || 0;
   const progressPercent = questions.length > 0 ? Math.round(((currentIndex + 1) / questions.length) * 100) : 0;
 
-  const handleSelectGroup = (idx) => {
-    setSelectedGroupIndex(idx);
+  // Bắt đầu làm bài
+  const handleStartTest = (index) => {
+    setSelectedGroupIndex(index);
     setCurrentIndex(0);
+    setViewMode('TEST_SESSION');
+    setShowCompletionModal(false);
   };
 
+  // Quay lại danh sách bài tập
+  const handleBackToGroupsList = () => {
+    setViewMode('GROUPS_LIST');
+    setShowCompletionModal(false);
+  };
+
+  // Xử lý khi trả lời
   const handleAnswerResult = (isCorrect) => {
     const key = `${currentGroup.id}_${currentIndex}`;
     if (!answeredMap[key]) {
@@ -53,6 +88,7 @@ const GrammarLearnerPage = ({ user }) => {
     }
   };
 
+  // Câu tiếp
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -61,14 +97,17 @@ const GrammarLearnerPage = ({ user }) => {
     }
   };
 
+  // Câu trước
   const handlePrev = () => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
   };
 
+  // Làm lại bài này
   const handleRestartGroup = () => {
     setCurrentIndex(0);
     setScoreMap(prev => ({ ...prev, [currentGroup.id]: 0 }));
-    // Clear answers for this group
     setAnsweredMap(prev => {
       const next = { ...prev };
       questions.forEach((_, idx) => delete next[`${currentGroup.id}_${idx}`]);
@@ -77,96 +116,166 @@ const GrammarLearnerPage = ({ user }) => {
     setShowCompletionModal(false);
   };
 
-  const handleNextGroup = () => {
-    if (selectedGroupIndex < groups.length - 1) {
-      setSelectedGroupIndex(selectedGroupIndex + 1);
-      setCurrentIndex(0);
-      setShowCompletionModal(false);
-    } else {
-      setShowCompletionModal(false);
-    }
-  };
-
-  if (!currentGroup || questions.length === 0) {
+  // =========================================================================================
+  // MÀN HÌNH 1: CÁC BÀI TẬP HIỆN TẠI (ĐƠN GIẢN HÓA THEO YÊU CẦU 3)
+  // =========================================================================================
+  if (viewMode === 'GROUPS_LIST') {
     return (
-      <div className="grammar-container">
-        <div className="glass-panel grammar-empty-state">
-          <div className="empty-state-icon">📝</div>
-          <h2>Chưa có câu hỏi ngữ pháp nào</h2>
-          <p>Hãy truy cập màn hình Quản trị để tạo nhóm bài tập và câu hỏi mới.</p>
-          <button className="btn btn-primary" onClick={() => navigate('/')}>
-            ← Về Trang Chủ
-          </button>
+      <div
+        className="grammar-container animate-fade-in"
+        style={{
+          maxWidth: '900px',
+          margin: '0 auto',
+          paddingTop: 'calc(var(--nav-height, 70px) + 30px)',
+          paddingBottom: '60px',
+          paddingLeft: '20px',
+          paddingRight: '20px'
+        }}
+      >
+        {/* Thanh tiêu đề trên cùng */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 6px 0' }}>
+              Các bài tập hiện tại
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>
+              Chọn bài tập để bắt đầu luyện tập:
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {isCreator && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => navigate('/grammar/admin')}
+                style={{ fontWeight: 600 }}
+              >
+                ⚙️ Tạo Câu Hỏi
+              </button>
+            )}
+            <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
+              ← Trang Chủ
+            </button>
+          </div>
+        </div>
+
+        {/* Lưới danh sách bài tập gọn gàng (chỉ có tên bài và số câu, không chi tiết thừa) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
+          {groups.map((group, idx) => {
+            const count = group.questions?.length || 0;
+            const score = scoreMap[group.id];
+
+            return (
+              <div
+                key={group.id || idx}
+                className="glass-panel group-selection-card animate-fade-in"
+                style={{
+                  padding: '22px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+                onClick={() => handleStartTest(idx)}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <h3 style={{ margin: 0, fontSize: '19px', color: 'var(--primary)' }}>
+                      {group.title}
+                    </h3>
+                    {score !== undefined && (
+                      <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 600 }}>
+                        Đạt: {score}/{count}
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ margin: '0 0 18px 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                    {count} câu hỏi
+                  </p>
+                </div>
+
+                <button
+                  className="btn btn-primary"
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', fontSize: '14px', fontWeight: 600 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStartTest(idx);
+                  }}
+                >
+                  Bắt đầu làm bài →
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
   }
 
+  // =========================================================================================
+  // MÀN HÌNH 2: LÀM BÀI TẬP TRONG NHÓM ĐÃ CHỌN
+  // =========================================================================================
   return (
-    <div className="grammar-container animate-fade-in">
-
-      {/* Page Title Bar */}
-      <div className="grammar-page-titlebar">
-        <div className="grammar-title-left">
-          <span className="grammar-lesson-badge">✏️ Luyện Tập Ngữ Pháp</span>
-          <span className="grammar-lesson-subtitle">{data.lesson_title || "Ngữ Pháp Tiếng Anh"}</span>
-        </div>
-        <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
-          ← Quay Về
+    <div
+      className="grammar-container animate-fade-in"
+      style={{
+        maxWidth: '850px',
+        margin: '0 auto',
+        paddingTop: 'calc(var(--nav-height, 70px) + 30px)',
+        paddingBottom: '60px',
+        paddingLeft: '20px',
+        paddingRight: '20px'
+      }}
+    >
+      {/* Thanh điều hướng */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+        <button
+          className="btn btn-glass btn-sm"
+          onClick={handleBackToGroupsList}
+          style={{ fontSize: '13px', fontWeight: 600 }}
+        >
+          ← Quay lại danh sách bài
         </button>
-      </div>
 
-      {/* BIG GROUPS / CHỦ ĐỀ SELECTOR (1 Nhóm Lớn Chứa Các Câu Nhỏ) */}
-      <div className="grammar-groups-nav">
-        <div className="grammar-groups-header">
-          <span className="grammar-groups-title">
-            📚 Chọn Nhóm Bài Tập / Chủ Đề ({groups.length} Nhóm Lớn)
+        <div style={{ textAlign: 'center' }}>
+          <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--primary)' }}>
+            {currentGroup.title}
+          </h3>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Câu {currentIndex + 1} / {questions.length}
           </span>
         </div>
-        <div className="grammar-groups-grid">
-          {groups.map((group, idx) => (
-            <div
-              key={group.id || idx}
-              className={`group-tab-card ${selectedGroupIndex === idx ? 'active' : ''}`}
-              onClick={() => handleSelectGroup(idx)}
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {isCreator && (
+            <button
+              className="btn btn-glass btn-sm"
+              onClick={() => navigate('/grammar/admin')}
+              title="Chuyển sang trang tạo câu hỏi"
             >
-              <div className="group-card-icon">{group.icon || "📘"}</div>
-              <div className="group-card-info">
-                <h4>{group.title}</h4>
-                <p>{group.description}</p>
-                <span className="group-card-badge">
-                  {group.questions?.length || 0} câu hỏi
-                </span>
-              </div>
-            </div>
-          ))}
+              ⚙️ Tạo câu hỏi
+            </button>
+          )}
+          <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
+            Trang chủ
+          </button>
         </div>
       </div>
 
-      {/* Active Group Banner & Progress */}
-      <div className="active-group-banner glass-panel">
-        <div className="active-group-label">
-          <span>{currentGroup.icon || "📘"}</span>
-          <span>{currentGroup.title}</span>
-        </div>
-        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          Tiến độ nhóm: <strong>{currentIndex + 1}</strong> / {questions.length} câu
-        </span>
-      </div>
-
-      {/* Progress & Score Bar */}
-      <div className="grammar-progress-box glass-panel">
+      {/* Tiến độ và điểm số */}
+      <div className="grammar-progress-box glass-panel" style={{ marginBottom: '20px' }}>
         <div className="progress-info">
           <span>
-            Câu hỏi <strong>{currentIndex + 1}</strong> / {questions.length}
+            Câu hỏi: <strong>{currentIndex + 1}</strong> / {questions.length}
             {currentQuestion?.title && (
-              <span style={{ marginLeft: '10px', color: '#38bdf8', fontWeight: 600 }}>
+              <span style={{ marginLeft: '8px', color: '#38bdf8' }}>
                 • {currentQuestion.title}
               </span>
             )}
           </span>
           <span>
-            Điểm số nhóm: <strong style={{ color: '#10b981' }}>{currentScore}</strong> / {questions.length}
+            Đúng: <strong style={{ color: '#10b981' }}>{currentScore}</strong> / {questions.length}
           </span>
         </div>
         <div className="progress-bar-bg">
@@ -174,8 +283,8 @@ const GrammarLearnerPage = ({ user }) => {
         </div>
       </div>
 
-      {/* Active Question Widget */}
-      {currentQuestion && (
+      {/* Hiển thị câu hỏi tương tác (Hoàn toàn không có phần Gợi ý) */}
+      {currentQuestion ? (
         currentQuestion.type === 'SPOT_ERROR' ? (
           <SpotTheErrorQuestion
             key={currentQuestion.id || currentIndex}
@@ -189,17 +298,24 @@ const GrammarLearnerPage = ({ user }) => {
             onAnswerResult={handleAnswerResult}
           />
         )
+      ) : (
+        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
+          <p>Bài tập này hiện chưa có câu hỏi.</p>
+          <button className="btn btn-glass" onClick={handleBackToGroupsList}>
+            ← Quay lại danh sách bài
+          </button>
+        </div>
       )}
 
-      {/* Step Navigation Controls (Correctly Aligned) */}
-      <div className="step-controls-bar">
+      {/* Thanh chọn số câu (Căn giữa, đẹp mắt) */}
+      <div className="step-controls-bar" style={{ marginTop: '24px' }}>
         <button
           className="btn btn-glass"
           onClick={handlePrev}
           disabled={currentIndex === 0}
           style={{ opacity: currentIndex === 0 ? 0.4 : 1, cursor: currentIndex === 0 ? 'not-allowed' : 'pointer' }}
         >
-          ← Câu Trước
+          ← Câu trước
         </button>
 
         <div className="step-numbers-box">
@@ -211,7 +327,7 @@ const GrammarLearnerPage = ({ user }) => {
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`step-num-btn ${currentIndex === idx ? 'active' : ''} ${state === 'correct' ? 'done-correct' : state === 'incorrect' ? 'done-incorrect' : ''}`}
-                title={`Chuyển đến câu ${idx + 1}`}
+                title={`Câu ${idx + 1}`}
               >
                 {idx + 1}
               </button>
@@ -220,43 +336,33 @@ const GrammarLearnerPage = ({ user }) => {
         </div>
 
         <button className="btn btn-primary" onClick={handleNext}>
-          {currentIndex === questions.length - 1 ? 'Hoàn Thành Nhóm ➔' : 'Câu Tiếp ➔'}
+          {currentIndex === questions.length - 1 ? "Hoàn thành 🎉" : "Câu tiếp →"}
         </button>
       </div>
 
-      {/* Completion Modal */}
+      {/* Modal hoàn thành */}
       {showCompletionModal && (
-        <div className="grammar-modal-overlay">
-          <div className="grammar-modal-box">
-            <div className="modal-emoji">🎉</div>
-            <h2>Hoàn Thành Nhóm Bài Tập!</h2>
-            <p className="modal-subtitle">{currentGroup.title}</p>
-            
-            <div className="modal-score-box">
-              <span>Điểm số đạt được:</span>
-              <div className="modal-score-value">
-                {currentScore} / {questions.length}
-              </div>
+        <div className="completion-modal-overlay">
+          <div className="glass-panel completion-modal-card animate-pop">
+            <div className="completion-trophy-icon">🏆</div>
+            <h2>Hoàn thành {currentGroup.title}!</h2>
+            <p>Bạn đã trả lời xong tất cả các câu hỏi trong bài này.</p>
+
+            <div className="completion-score-badge">
+              {currentScore} / {questions.length} câu đúng
             </div>
 
-            <div className="modal-actions">
+            <div className="completion-actions-row">
               <button className="btn btn-glass" onClick={handleRestartGroup}>
-                🔄 Làm Lại Nhóm Này
+                🔄 Làm lại bài này
               </button>
-              {selectedGroupIndex < groups.length - 1 ? (
-                <button className="btn btn-primary" onClick={handleNextGroup}>
-                  Sang Nhóm Tiếp Theo ➔
-                </button>
-              ) : (
-                <button className="btn btn-primary" onClick={() => navigate('/')}>
-                  ✓ Hoàn Tất Về Trang Chủ
-                </button>
-              )}
+              <button className="btn btn-primary" onClick={handleBackToGroupsList}>
+                ← Quay lại danh sách bài
+              </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 };

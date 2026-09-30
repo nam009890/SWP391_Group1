@@ -8,7 +8,6 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
   const [selectedTokenId, setSelectedTokenId] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
-  const [showHint, setShowHint] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
 
   const handleSelectToken = (tokenId) => {
@@ -36,7 +35,6 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
     setSelectedTokenId(null);
     setSubmitted(false);
     setIsCorrect(false);
-    setShowHint(false);
     setShowExplanation(false);
   };
 
@@ -106,15 +104,6 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
             </button>
           )}
 
-          {question.hint && !isCorrect && (
-            <button
-              className="btn btn-glass"
-              onClick={() => setShowHint(!showHint)}
-            >
-              💡 {showHint ? 'Ẩn Gợi Ý' : 'Xem Gợi Ý'}
-            </button>
-          )}
-
           {submitted && (
             <button className="btn btn-glass" onClick={handleReset}>
               🔄 Thử Lại
@@ -127,19 +116,11 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
             {isCorrect ? (
               <span style={{ color: '#34d399' }}>✓ Chính xác! Bạn đã tìm đúng lỗi sai.</span>
             ) : (
-              <span style={{ color: '#fb7185' }}>✗ Chưa chính xác. Hãy chọn lại hoặc xem gợi ý.</span>
+              <span style={{ color: '#fb7185' }}>✗ Chưa chính xác. Vui lòng chọn lại.</span>
             )}
           </div>
         )}
       </div>
-
-      {/* Hint Box */}
-      {showHint && question.hint && (
-        <div className="feedback-box hint-box">
-          <div className="feedback-title"><span>💡 Gợi ý tư duy:</span></div>
-          <div className="feedback-content">{question.hint}</div>
-        </div>
-      )}
 
       {/* Explanation Box */}
       {showExplanation && (
