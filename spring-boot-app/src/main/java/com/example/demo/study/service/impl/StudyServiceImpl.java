@@ -10,6 +10,7 @@ import com.example.demo.study.repository.UserFlashcardReviewRepository;
 import com.example.demo.study.service.StudyService;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
+import com.example.demo.weakvocabulary.service.WeakVocabularyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class StudyServiceImpl implements StudyService {
     private final FlashcardRepository flashcardRepository;
     private final UserFlashcardReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final WeakVocabularyService weakVocabularyService;
 
     @Override
     public List<FlashcardResponse> getFlashcardsToStudy(Long deckId, Long userId) {
@@ -81,6 +83,10 @@ public class StudyServiceImpl implements StudyService {
         review.setNextReviewDate(LocalDateTime.now().plusDays(review.getIntervalDays()));
 
         UserFlashcardReview savedReview = reviewRepository.save(review);
+        // A study difficulty records weakness, but a user's soft deletion is respected by the feature.
+        if (quality <= 3) {
+            weakVocabularyService.recordStudyDifficulty(userId, flashcardId, quality);
+        }
         return mapToReviewResponse(savedReview);
     }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import { addWeakVocabulary } from '../api/weakVocabularyApi';
 import './DeckDetails.css';
 
 const DeckDetails = () => {
@@ -25,6 +26,7 @@ const DeckDetails = () => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
+  const [weakAdded, setWeakAdded] = useState({});
 
   useEffect(() => {
     const fetchDeckData = async () => {
@@ -280,6 +282,12 @@ const DeckDetails = () => {
                   <p>{card.meaning}</p>
                   {card.exampleSentence && <p className="example">"{card.exampleSentence}"</p>}
                 </div>
+                <button className="btn btn-glass" onClick={async () => {
+                  await addWeakVocabulary(card.id);
+                  setWeakAdded({ ...weakAdded, [card.id]: true });
+                }}>
+                  {weakAdded[card.id] ? 'Đã thêm vào từ yếu' : 'Thêm vào từ yếu'}
+                </button>
               </div>
             ))
           )}
