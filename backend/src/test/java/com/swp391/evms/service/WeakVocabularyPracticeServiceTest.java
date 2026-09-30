@@ -25,7 +25,8 @@ class WeakVocabularyPracticeServiceTest {
         final WeakVocabularyService weak=mock(WeakVocabularyService.class); final UserVocabularyRepository uvRepository=mock(UserVocabularyRepository.class);
         final VocabularySenseRepository senseRepository=mock(VocabularySenseRepository.class); final VocabularyExampleRepository exampleRepository=mock(VocabularyExampleRepository.class);
         final ReviewSessionRepository sessionRepository=mock(ReviewSessionRepository.class); final ReviewSessionItemRepository itemRepository=mock(ReviewSessionItemRepository.class); final ReviewAttemptRepository attemptRepository=mock(ReviewAttemptRepository.class);
-        final WeakVocabularyPracticeService service=new WeakVocabularyPracticeService(weak, uvRepository, senseRepository, exampleRepository, sessionRepository, itemRepository, attemptRepository);
+        final VocabularyRepository vocabularyRepository=mock(VocabularyRepository.class);
+        final WeakVocabularyPracticeService service=new WeakVocabularyPracticeService(weak, uvRepository, senseRepository, exampleRepository, sessionRepository, itemRepository, attemptRepository, vocabularyRepository);
         final ReviewSession session=new ReviewSession(); final ReviewSessionItem item=new ReviewSessionItem();
         Fixture() { session.setCorrectAnswers(0); session.setWrongAnswers(0); session.setStatus(ReviewSessionStatus.IN_PROGRESS); UserVocabulary uv=new UserVocabulary(); uv.setMasteryScore(0); uv.setTotalAttempts(0); uv.setCorrectCount(0); uv.setWrongCount(0); uv.setConsecutiveWrong(0); uv.setLearningStatus(LearningStatus.WEAK); item.setSession(session); item.setUserVocabulary(uv); item.setCorrectAnswer("answer"); item.setQuestionContent("_____ test"); item.setStatus(ReviewItemStatus.PENDING); }
     }

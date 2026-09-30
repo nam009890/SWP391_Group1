@@ -23,4 +23,7 @@ public class UserVocabulary {
     @Column(name = "next_review_at") private OffsetDateTime nextReviewAt;
     @Column(name = "created_at") private OffsetDateTime createdAt;
     @Column(name = "updated_at") private OffsetDateTime updatedAt;
+    @Column(name = "weak_deleted") private Boolean weakDeleted;
+    @Column(name = "weak_deleted_at") private OffsetDateTime weakDeletedAt;
+    @Column(name = "weak_note") private String weakNote;
 }

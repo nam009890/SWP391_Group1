@@ -7,14 +7,25 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "review_sessions")
-@Getter @Setter
+@Getter
+@Setter
 public class ReviewSession {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "user_id") private User user;
-    @Enumerated(EnumType.STRING) private ReviewSessionStatus status;
-    @Column(name = "started_at") private OffsetDateTime startedAt;
-    @Column(name = "completed_at") private OffsetDateTime completedAt;
-    @Column(name = "total_questions") private Integer totalQuestions;
-    @Column(name = "correct_answers") private Integer correctAnswers;
-    @Column(name = "wrong_answers") private Integer wrongAnswers;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
+    @Enumerated(EnumType.STRING)
+    private ReviewSessionStatus status;
+    @Column(name = "started_at")
+    private OffsetDateTime startedAt;
+    @Column(name = "completed_at")
+    private OffsetDateTime completedAt;
+    @Column(name = "total_questions")
+    private Integer totalQuestions;
+    @Column(name = "correct_answers")
+    private Integer correctAnswers;
+    @Column(name = "wrong_answers")
+    private Integer wrongAnswers;
 }

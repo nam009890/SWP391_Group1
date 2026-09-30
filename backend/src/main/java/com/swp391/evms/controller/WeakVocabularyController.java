@@ -18,7 +18,11 @@ public class WeakVocabularyController {
         this.weakVocabularyService=weakVocabularyService; this.practiceService=practiceService;
     }
     @GetMapping
-    public List<WeakVocabularyResponse> list(@RequestParam Long userId) { return weakVocabularyService.getWeakVocabularies(userId); }
+    public WeakVocabularyPageResponse list(@RequestParam Long userId, @RequestParam(required=false) String keyword, @RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="10") int size) { return weakVocabularyService.getWeakVocabularyPage(userId, keyword, page, size); }
+    @PatchMapping("/{userVocabularyId}")
+    public WeakVocabularyResponse update(@RequestParam Long userId, @PathVariable Long userVocabularyId, @RequestBody UpdateWeakVocabularyRequest request) { return weakVocabularyService.update(userId,userVocabularyId,request); }
+    @DeleteMapping("/{userVocabularyId}")
+    public ResponseEntity<Void> delete(@RequestParam Long userId, @PathVariable Long userVocabularyId) { weakVocabularyService.softDelete(userId,userVocabularyId); return ResponseEntity.noContent().build(); }
     @PostMapping("/practice-sessions")
     public ResponseEntity<StartPracticeResponse> start(@RequestParam Long userId, @Valid @RequestBody(required = false) StartPracticeRequest request) {
         StartPracticeResponse response=practiceService.startPractice(userId, request);

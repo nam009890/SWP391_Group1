@@ -1,6 +1,8 @@
 package com.swp391.evms.service;
 
 import com.swp391.evms.dto.response.WeakVocabularyResponse;
+import com.swp391.evms.dto.response.WeakVocabularyPageResponse;
+import com.swp391.evms.dto.request.UpdateWeakVocabularyRequest;
 import com.swp391.evms.entity.*;
 import com.swp391.evms.exception.ResourceNotFoundException;
 import com.swp391.evms.repository.*;
@@ -28,13 +30,27 @@ public class WeakVocabularyService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserVocabulary> sortedWeak(Long userId) {
-        return userVocabularyRepository.findWeakByUserId(userId).stream()
+    public List<UserVocabulary> sortedWeak(Long userId) { return sortedWeak(userId, null); }
+    public List<UserVocabulary> sortedWeak(Long userId, String keyword) {
+        return userVocabularyRepository.findVisibleWeakByUserId(userId, keyword == null || keyword.isBlank() ? null : keyword.trim()).stream()
             .sorted(Comparator.comparing(UserVocabulary::getMasteryScore, Comparator.nullsLast(Integer::compareTo))
                 .thenComparing(UserVocabulary::getConsecutiveWrong, Comparator.nullsLast(Comparator.reverseOrder()))
                 .thenComparing(UserVocabulary::getUpdatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
     }
+
+    @Transactional(readOnly = true)
+    public WeakVocabularyPageResponse getWeakVocabularyPage(Long userId, String keyword, int page, int size) {
+        requireUser(userId); int safePage=Math.max(0,page); int safeSize=Math.min(50, Math.max(1,size)); List<WeakVocabularyResponse> all=sortedWeak(userId,keyword).stream().map(this::map).toList();
+        int from=Math.min(safePage*safeSize,all.size()); int to=Math.min(from+safeSize,all.size()); int pages=(int)Math.ceil(all.size()/(double)safeSize);
+        return new WeakVocabularyPageResponse(all.subList(from,to),safePage,safeSize,all.size(),pages,safePage==0,pages==0||safePage>=pages-1);
+    }
+
+    @Transactional
+    public WeakVocabularyResponse update(Long userId, Long id, UpdateWeakVocabularyRequest request) { UserVocabulary uv=owned(userId,id); if(request.manualWeak()!=null) uv.setManualWeak(request.manualWeak()); uv.setWeakNote(request.weakNote()); uv.setUpdatedAt(java.time.OffsetDateTime.now()); return map(uv); }
+    @Transactional
+    public void softDelete(Long userId, Long id) { UserVocabulary uv=owned(userId,id); uv.setWeakDeleted(true); uv.setWeakDeletedAt(java.time.OffsetDateTime.now()); uv.setUpdatedAt(java.time.OffsetDateTime.now()); }
+    private UserVocabulary owned(Long userId, Long id) { requireUser(userId); return userVocabularyRepository.findById(id).filter(v -> v.getUser().getId().equals(userId)).orElseThrow(() -> new ResourceNotFoundException("Weak vocabulary not found: "+id)); }
 
     public void requireUser(Long userId) {
         if (!userRepository.existsById(userId)) throw new ResourceNotFoundException("User not found: " + userId);
@@ -52,7 +68,7 @@ public class WeakVocabularyService {
             sense == null ? null : sense.getPartOfSpeech(), sense == null ? null : sense.getMeaningVi(),
             example == null ? null : example.getExampleText(), value(uv.getMasteryScore()), total,
             value(uv.getCorrectCount()), value(uv.getWrongCount()), value(uv.getConsecutiveWrong()), accuracy,
-            Boolean.TRUE.equals(uv.getManualWeak()), weakReason(uv), uv.getLastReviewedAt(), uv.getNextReviewAt());
+            Boolean.TRUE.equals(uv.getManualWeak()), weakReason(uv), uv.getWeakNote(), uv.getLastReviewedAt(), uv.getNextReviewAt());
     }
 
     public static String weakReason(UserVocabulary uv) {

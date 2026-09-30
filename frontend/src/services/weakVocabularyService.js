@@ -7,18 +7,21 @@ function ensureObject(data, message) {
   return data
 }
 
-export async function getWeakVocabularies(userId) {
-  const { data } = await axiosClient.get('/weak-vocabularies', { params: { userId } })
-  if (!Array.isArray(data)) {
-    throw new Error('Phản hồi từ server không đúng định dạng: danh sách từ cần ôn phải là mảng JSON.')
+export async function getWeakVocabularies(userId, keyword = '', page = 0, size = 10) {
+  const { data } = await axiosClient.get('/weak-vocabularies', { params: { userId, keyword, page, size } })
+  if (!data || !Array.isArray(data.items)) {
+    throw new Error('Phản hồi từ server không đúng định dạng: items phải là mảng JSON.')
   }
   return data
 }
 
-export async function startFillBlankPractice(userId, limit = 10) {
-  const { data } = await axiosClient.post('/weak-vocabularies/practice-sessions', { limit }, { params: { userId } })
+export async function startFillBlankPractice(userId, questionType, userVocabularyIds) {
+  const { data } = await axiosClient.post('/weak-vocabularies/practice-sessions', { questionType, userVocabularyIds }, { params: { userId } })
   return ensureObject(data, 'Phản hồi tạo phiên luyện tập không đúng định dạng.')
 }
+
+export async function updateWeakVocabulary(userId, id, payload) { const { data } = await axiosClient.patch(`/weak-vocabularies/${id}`, payload, { params: { userId } }); return ensureObject(data, 'Phản hồi cập nhật không đúng định dạng.') }
+export async function deleteWeakVocabulary(userId, id) { await axiosClient.delete(`/weak-vocabularies/${id}`, { params: { userId } }) }
 
 export async function getPracticeSession(userId, sessionId) {
   const { data } = await axiosClient.get(`/weak-vocabularies/practice-sessions/${sessionId}`, { params: { userId } })

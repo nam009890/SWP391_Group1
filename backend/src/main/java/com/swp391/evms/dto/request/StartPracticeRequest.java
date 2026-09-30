@@ -1,6 +1,8 @@
 package com.swp391.evms.dto.request;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import com.swp391.evms.entity.QuestionType;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
 
-public record StartPracticeRequest(@Min(1) @Max(50) Integer limit) {}
+public record StartPracticeRequest(@NotNull QuestionType questionType, @NotEmpty List<Long> userVocabularyIds) {}

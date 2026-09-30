@@ -19,4 +19,5 @@ public class ReviewSessionItem {
     @Enumerated(EnumType.STRING) private ReviewItemStatus status;
     @Column(name = "created_at") private OffsetDateTime createdAt;
     @Column(name = "answered_at") private OffsetDateTime answeredAt;
+    @Column(name = "options_json") private String optionsJson;
 }

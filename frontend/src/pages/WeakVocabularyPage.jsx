@@ -21,7 +21,7 @@ export default function WeakVocabularyPage() {
         setLoading(true)
         setError('')
         const data = await getWeakVocabularies(userId)
-        if (active) setItems(data)
+        if (active) setItems(data.items)
       } catch (requestError) {
         console.error('Failed to load weak vocabularies.', requestError)
         if (active) {
@@ -41,7 +41,7 @@ export default function WeakVocabularyPage() {
     try {
       setStarting(true)
       setError('')
-      const session = await startFillBlankPractice(userId, 10)
+      const session = await startFillBlankPractice(userId, 'FILL_BLANK', items.map((item) => item.userVocabularyId))
       navigate(`/weak-vocabulary/practice/${session.sessionId}`)
     } catch (requestError) {
       console.error('Failed to start fill-blank practice.', requestError)
