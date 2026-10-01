@@ -1,0 +1,255 @@
+.weak-page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 96px 20px 40px;
+}
+.weak-head,
+.word-row,
+.card-actions,
+.pager,
+.choice-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.weak-head p,
+.weak-card small,
+.stats,
+.weak-loading {
+  color: var(--text-muted);
+}
+.weak-filters {
+  display: grid;
+  grid-template-columns: minmax(190px, 2fr) repeat(
+      5,
+      minmax(120px, 1fr)
+    ) auto auto auto;
+  gap: 10px;
+  padding: 16px;
+  margin: 24px 0;
+}
+.glass-input,
+.weak-filters select {
+  min-width: 0;
+  width: 100%;
+  padding: 10px;
+  color: var(--text-main);
+  background: #172033;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+}
+.weak-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.weak-card {
+  padding: 20px;
+  min-width: 0;
+}
+.word-row span,
+.reason,
+.selected-count {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.weak-card > p {
+  margin: 10px 0;
+}
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+.note {
+  padding: 8px;
+  background: rgba(139, 92, 246, 0.16);
+  border-radius: 8px;
+}
+.danger {
+  color: white;
+  background: #7f1d1d;
+}
+.pager {
+  margin: 24px 0;
+}
+.pager button {
+  padding: 6px;
+  color: var(--primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.pager button:disabled {
+  opacity: 0.35;
+}
+.weak-error {
+  margin: 12px 0;
+  color: #fda4af;
+}
+.weak-error button,
+.empty button {
+  margin-left: 6px;
+  color: var(--primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.empty {
+  padding: 30px;
+  text-align: center;
+}
+.setup {
+  margin: 24px 0;
+}
+.method {
+  min-height: 100px;
+  padding: 28px;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+}
+.method:hover {
+  transform: translateY(-2px);
+}
+.method.selected,
+.options button.selected {
+  outline: 2px solid var(--primary);
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+.choices,
+.practice {
+  padding: 20px;
+}
+.choice-head {
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.choice-head > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.choice-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--glass-border);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.start-practice {
+  margin-top: 20px;
+  min-height: 44px;
+}
+.practice {
+  max-width: 720px;
+  margin: auto;
+}
+.practice h1 {
+  margin: 24px 0;
+  overflow-wrap: anywhere;
+}
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.options button {
+  padding: 14px;
+  color: white;
+  text-align: left;
+  background: #172033;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.practice > .btn {
+  margin-top: 20px;
+}
+.feedback {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+}
+.feedback.ok {
+  background: #14532d;
+}
+.feedback.bad {
+  background: #7f1d1d;
+}
+.progress {
+  height: 6px;
+  background: #334155;
+  border-radius: 6px;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 6px;
+}
+@media (max-width: 1024px) {
+  .weak-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .weak-filters input {
+    grid-column: span 3;
+  }
+}
+@media (max-width: 640px) {
+  .weak-page {
+    padding: 88px 14px 28px;
+  }
+  .weak-head,
+  .card-actions {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .weak-head h1 {
+    font-size: 28px;
+  }
+  .weak-filters {
+    grid-template-columns: 1fr;
+  }
+  .weak-filters input {
+    grid-column: auto;
+  }
+  .weak-grid,
+  .options {
+    grid-template-columns: 1fr;
+  }
+  .stats {
+    display: block;
+  }
+  .stats span {
+    display: block;
+    margin-top: 6px;
+  }
+  .card-actions .btn {
+    flex: 1 1 130px;
+  }
+  .pager {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .choice-head {
+    align-items: flex-start;
+  }
+  .choices,
+  .practice {
+    padding: 16px;
+  }
+  .method {
+    min-height: 78px;
+  }
+  .start-practice {
+    width: 100%;
+  }
+}

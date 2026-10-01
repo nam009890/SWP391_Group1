@@ -33,6 +33,9 @@ const Navbar = ({ user, onLogout }) => {
         <div className="navbar-menu">
           {user ? (
             <div className="user-profile">
+              <button className="btn btn-glass" onClick={() => navigate('/')}>Dashboard</button>
+              <button className="btn btn-glass" onClick={() => navigate('/weak-vocabulary')}>Từ yếu</button>
+              <button className="btn btn-glass" onClick={() => navigate('/weak-vocabulary/practice')}>Ôn luyện</button>
               <span className="welcome-text">Hi, {user.name}</span>
               <button className="btn btn-glass" onClick={onLogout}>Logout</button>
             </div>

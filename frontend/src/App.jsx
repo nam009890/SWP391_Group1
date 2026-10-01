@@ -21,6 +21,9 @@ import StudyMode from './components/StudyMode';
 import GrammarLearnerPage from './components/grammar/view/GrammarLearnerPage';
 import GrammarAdminCMSPage from './components/grammar/view/GrammarAdminCMSPage';
 import { isCreatorUser } from './components/grammar/model/authHelper';
+import WeakVocabulary from './components/WeakVocabulary';
+import WeakPracticeSetup from './components/WeakPracticeSetup';
+import WeakPracticeSession from './components/WeakPracticeSession';
 import api from './api/axiosConfig';
 
 /**
@@ -163,7 +166,6 @@ function MainApp() {
         <Route path="/register" element={token ? <Dashboard user={user} /> : <Register />} />
         <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
         <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
-        
         {/* Module Bài Tập Ngữ Pháp — Điều phối thông minh theo trạng thái đăng nhập và email */}
         <Route path="/grammar" element={<GrammarModuleDispatcher user={user} token={token} />} />
         
@@ -179,6 +181,9 @@ function MainApp() {
           element={token ? <GrammarAdminCMSPage user={user} /> : <Navigate to="/login" replace />}
         />
 
+        <Route path="/weak-vocabulary" element={token ? <WeakVocabulary /> : <LandingPage />} />
+        <Route path="/weak-vocabulary/practice" element={token ? <WeakPracticeSetup /> : <LandingPage />} />
+        <Route path="/weak-vocabulary/practice/:id" element={token ? <WeakPracticeSession /> : <LandingPage />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>
     </>
