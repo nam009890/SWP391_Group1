@@ -60,7 +60,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**", "/", "/login**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
+                .requestMatchers("/api/auth/**", "/api/grammar/**", "/", "/login**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
