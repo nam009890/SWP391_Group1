@@ -18,6 +18,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SpotTheErrorQuestion from './components/SpotTheErrorQuestion';
 import FillBlankQuestion from './components/FillBlankQuestion';
+import ImageQuestion from './components/ImageQuestion';
+import PassageClozeQuestion from './components/PassageClozeQuestion';
+import ReadingComprehensionQuestion from './components/ReadingComprehensionQuestion';
+import AudioListeningQuestion from './components/AudioListeningQuestion';
+import PrintTestModal from './components/PrintTestModal';
 import {
   getStoredQuestions,
   saveStoredQuestions,
@@ -46,6 +51,9 @@ const GrammarAdminCMSPage = ({ user }) => {
 
   // Thông báo Toast phản hồi người dùng
   const [toastMessage, setToastMessage] = useState('');
+
+  // Modal in đề thi / xuất PDF
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   // =========================================================================================
   // BƯỚC 1 STATE: GROUP NAME (CHỌN HOẶC TẠO NHÓM BÀI TẬP: Test 1, Test 2,...)
@@ -96,6 +104,48 @@ const GrammarAdminCMSPage = ({ user }) => {
   const [cardOptions, setCardOptions] = useState("");
   const [cardCorrect, setCardCorrect] = useState("");
   const [cardExplanation, setCardExplanation] = useState("");
+
+  // --- 3.5: Dạng IMAGE_QUESTION (Câu hỏi hình ảnh) ---
+  const [imgTitle, setImgTitle] = useState("");
+  const [imgUrl, setImgUrl] = useState("");
+  const [imgCaption, setImgCaption] = useState("");
+  const [imgQuestion, setImgQuestion] = useState("");
+  const [imgOptions, setImgOptions] = useState("");
+  const [imgCorrect, setImgCorrect] = useState("");
+  const [imgExplanation, setImgExplanation] = useState("");
+
+  // --- 3.6: Dạng PASSAGE_CLOZE (Đoạn văn điền từ) ---
+  const [clozeTitle, setClozeTitle] = useState("");
+  const [clozePassageTitle, setClozePassageTitle] = useState("");
+  const [clozePassageText, setClozePassageText] = useState("");
+  const [clozeBlank1Opts, setClozeBlank1Opts] = useState("");
+  const [clozeBlank1Correct, setClozeBlank1Correct] = useState("");
+  const [clozeBlank2Opts, setClozeBlank2Opts] = useState("");
+  const [clozeBlank2Correct, setClozeBlank2Correct] = useState("");
+  const [clozeBlank3Opts, setClozeBlank3Opts] = useState("");
+  const [clozeBlank3Correct, setClozeBlank3Correct] = useState("");
+  const [clozeExplanation, setClozeExplanation] = useState("");
+
+  // --- 3.7: Dạng READING_COMPREHENSION (Đọc hiểu văn bản) ---
+  const [readTitle, setReadTitle] = useState("");
+  const [readPassageTitle, setReadPassageTitle] = useState("");
+  const [readPassageText, setReadPassageText] = useState("");
+  const [readSub1Q, setReadSub1Q] = useState("");
+  const [readSub1Opts, setReadSub1Opts] = useState("");
+  const [readSub1Correct, setReadSub1Correct] = useState("");
+  const [readSub2Q, setReadSub2Q] = useState("");
+  const [readSub2Opts, setReadSub2Opts] = useState("");
+  const [readSub2Correct, setReadSub2Correct] = useState("");
+  const [readExplanation, setReadExplanation] = useState("");
+
+  // --- 3.8: Dạng AUDIO_LISTENING (Nghe audio trả lời câu hỏi) ---
+  const [audioTitle, setAudioTitle] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
+  const [audioTranscript, setAudioTranscript] = useState("");
+  const [audioQuestion, setAudioQuestion] = useState("");
+  const [audioOptions, setAudioOptions] = useState("");
+  const [audioCorrect, setAudioCorrect] = useState("");
+  const [audioExplanation, setAudioExplanation] = useState("");
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -323,6 +373,129 @@ const GrammarAdminCMSPage = ({ user }) => {
         },
         explanation: cardExplanation.trim()
       };
+    } else if (selectedQuestionType === 'IMAGE_QUESTION') {
+      if (!imgUrl.trim()) {
+        showToast("Vui lòng nhập đường dẫn hình ảnh!");
+        return;
+      }
+      if (!imgQuestion.trim()) {
+        showToast("Vui lòng nhập nội dung câu hỏi!");
+        return;
+      }
+      if (!imgOptions.trim()) {
+        showToast("Vui lòng nhập các lựa chọn đáp án!");
+        return;
+      }
+      if (!imgCorrect.trim()) {
+        showToast("Vui lòng nhập đáp án đúng!");
+        return;
+      }
+      const opts = imgOptions.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+      newQuestion = {
+        id: uniqueId,
+        title: imgTitle.trim() || "Quan sát hình ảnh và trả lời",
+        type: 'IMAGE_QUESTION',
+        instruction: "Quan sát bức ảnh bên dưới và chọn câu trả lời chính xác nhất:",
+        image_url: imgUrl.trim(),
+        image_caption: imgCaption.trim(),
+        question_text: imgQuestion.trim(),
+        options: opts,
+        correct_answer: imgCorrect.trim(),
+        explanation: imgExplanation.trim()
+      };
+    } else if (selectedQuestionType === 'PASSAGE_CLOZE') {
+      if (!clozePassageText.trim()) {
+        showToast("Vui lòng nhập đoạn văn có chứa {1}!");
+        return;
+      }
+      if (!clozeBlank1Opts.trim() || !clozeBlank1Correct.trim()) {
+        showToast("Vui lòng nhập các lựa chọn và đáp án đúng cho ô {1}!");
+        return;
+      }
+      const blanks = {
+        "1": {
+          options: clozeBlank1Opts.split(',').map(s => s.trim()).filter(Boolean),
+          correct_answer: clozeBlank1Correct.trim()
+        }
+      };
+      if (clozeBlank2Opts.trim() && clozeBlank2Correct.trim()) {
+        blanks["2"] = {
+          options: clozeBlank2Opts.split(',').map(s => s.trim()).filter(Boolean),
+          correct_answer: clozeBlank2Correct.trim()
+        };
+      }
+      if (clozeBlank3Opts.trim() && clozeBlank3Correct.trim()) {
+        blanks["3"] = {
+          options: clozeBlank3Opts.split(',').map(s => s.trim()).filter(Boolean),
+          correct_answer: clozeBlank3Correct.trim()
+        };
+      }
+      newQuestion = {
+        id: uniqueId,
+        title: clozeTitle.trim() || "Đoạn văn điền từ",
+        type: 'PASSAGE_CLOZE',
+        instruction: "Đọc đoạn văn sau và chọn từ thích hợp cho mỗi chỗ trống:",
+        passage_title: clozePassageTitle.trim(),
+        passage_text: clozePassageText.trim(),
+        blanks,
+        explanation: clozeExplanation.trim()
+      };
+    } else if (selectedQuestionType === 'READING_COMPREHENSION') {
+      if (!readPassageText.trim()) {
+        showToast("Vui lòng nhập nội dung đoạn văn bài đọc!");
+        return;
+      }
+      if (!readSub1Q.trim() || !readSub1Opts.trim() || !readSub1Correct.trim()) {
+        showToast("Vui lòng hoàn thành câu hỏi con số 1!");
+        return;
+      }
+      const subQ = [
+        {
+          id: "sub_1",
+          question: readSub1Q.trim(),
+          options: readSub1Opts.split(/[\n,]+/).map(s => s.trim()).filter(Boolean),
+          correct_answer: readSub1Correct.trim()
+        }
+      ];
+      if (readSub2Q.trim() && readSub2Opts.trim() && readSub2Correct.trim()) {
+        subQ.push({
+          id: "sub_2",
+          question: readSub2Q.trim(),
+          options: readSub2Opts.split(/[\n,]+/).map(s => s.trim()).filter(Boolean),
+          correct_answer: readSub2Correct.trim()
+        });
+      }
+      newQuestion = {
+        id: uniqueId,
+        title: readTitle.trim() || "Đọc hiểu văn bản",
+        type: 'READING_COMPREHENSION',
+        instruction: "Đọc kỹ đoạn văn sau và trả lời các câu hỏi liên quan:",
+        passage_title: readPassageTitle.trim(),
+        passage_text: readPassageText.trim(),
+        sub_questions: subQ,
+        explanation: readExplanation.trim()
+      };
+    } else if (selectedQuestionType === 'AUDIO_LISTENING') {
+      if (!audioQuestion.trim()) {
+        showToast("Vui lòng nhập nội dung câu hỏi nghe!");
+        return;
+      }
+      if (!audioOptions.trim() || !audioCorrect.trim()) {
+        showToast("Vui lòng nhập các lựa chọn đáp án và đáp án đúng!");
+        return;
+      }
+      newQuestion = {
+        id: uniqueId,
+        title: audioTitle.trim() || "Nghe Audio và trả lời câu hỏi",
+        type: 'AUDIO_LISTENING',
+        instruction: "Nghe đoạn ghi âm sau và chọn câu trả lời đúng nhất:",
+        audio_url: audioUrl.trim(),
+        transcript: audioTranscript.trim(),
+        question_text: audioQuestion.trim(),
+        options: audioOptions.split(/[\n,]+/).map(s => s.trim()).filter(Boolean),
+        correct_answer: audioCorrect.trim(),
+        explanation: audioExplanation.trim()
+      };
     }
 
     if (!newQuestion) return;
@@ -375,6 +548,44 @@ const GrammarAdminCMSPage = ({ user }) => {
     setCardOptions('');
     setCardCorrect('');
     setCardExplanation('');
+
+    setImgTitle('');
+    setImgUrl('');
+    setImgCaption('');
+    setImgQuestion('');
+    setImgOptions('');
+    setImgCorrect('');
+    setImgExplanation('');
+
+    setClozeTitle('');
+    setClozePassageTitle('');
+    setClozePassageText('');
+    setClozeBlank1Opts('');
+    setClozeBlank1Correct('');
+    setClozeBlank2Opts('');
+    setClozeBlank2Correct('');
+    setClozeBlank3Opts('');
+    setClozeBlank3Correct('');
+    setClozeExplanation('');
+
+    setReadTitle('');
+    setReadPassageTitle('');
+    setReadPassageText('');
+    setReadSub1Q('');
+    setReadSub1Opts('');
+    setReadSub1Correct('');
+    setReadSub2Q('');
+    setReadSub2Opts('');
+    setReadSub2Correct('');
+    setReadExplanation('');
+
+    setAudioTitle('');
+    setAudioUrl('');
+    setAudioTranscript('');
+    setAudioQuestion('');
+    setAudioOptions('');
+    setAudioCorrect('');
+    setAudioExplanation('');
 
     showToast(`Đã lưu câu hỏi thành công vào "${targetGroup.title}"!`);
   };
@@ -433,7 +644,7 @@ const GrammarAdminCMSPage = ({ user }) => {
         },
         explanation: dropExplanation || "Giải thích đáp án sẽ hiển thị tại đây sau khi hoàn thành câu hỏi."
       };
-    } else {
+    } else if (selectedQuestionType === 'FILL_BLANK_CARDS') {
       const opts = cardOptions ? cardOptions.split(',').map(s => s.trim()).filter(Boolean) : ["Đáp án A", "Đáp án B"];
       return {
         id: "preview_card",
@@ -448,6 +659,98 @@ const GrammarAdminCMSPage = ({ user }) => {
           }
         },
         explanation: cardExplanation || "Giải thích đáp án sẽ hiển thị tại đây sau khi hoàn thành câu hỏi."
+      };
+    } else if (selectedQuestionType === 'IMAGE_QUESTION') {
+      const opts = imgOptions ? imgOptions.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : ["Lựa chọn A", "Lựa chọn B", "Lựa chọn C", "Lựa chọn D"];
+      return {
+        id: "preview_img",
+        title: imgTitle || "Xem trước: Câu hỏi hình ảnh",
+        type: 'IMAGE_QUESTION',
+        instruction: "Quan sát bức ảnh bên dưới và chọn câu trả lời chính xác nhất:",
+        image_url: imgUrl || "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+        image_caption: imgCaption || "Ảnh minh họa xem trước",
+        question_text: imgQuestion || "What is happening in the picture?",
+        options: opts,
+        correct_answer: imgCorrect.trim() || opts[0] || "",
+        explanation: imgExplanation || "Giải thích đáp án sẽ hiển thị tại đây sau khi hoàn thành câu hỏi."
+      };
+    } else if (selectedQuestionType === 'PASSAGE_CLOZE') {
+      const blanks = {
+        "1": {
+          options: clozeBlank1Opts ? clozeBlank1Opts.split(',').map(s => s.trim()).filter(Boolean) : ["habitats", "buildings", "factories"],
+          correct_answer: clozeBlank1Correct.trim() || "habitats"
+        }
+      };
+      if (clozeBlank2Opts.trim()) {
+        blanks["2"] = {
+          options: clozeBlank2Opts.split(',').map(s => s.trim()).filter(Boolean),
+          correct_answer: clozeBlank2Correct.trim()
+        };
+      }
+      if (clozeBlank3Opts.trim()) {
+        blanks["3"] = {
+          options: clozeBlank3Opts.split(',').map(s => s.trim()).filter(Boolean),
+          correct_answer: clozeBlank3Correct.trim()
+        };
+      }
+      return {
+        id: "preview_cloze",
+        title: clozeTitle || "Xem trước: Đoạn văn điền từ",
+        type: 'PASSAGE_CLOZE',
+        instruction: "Đọc đoạn văn sau và chọn từ thích hợp cho mỗi chỗ trống:",
+        passage_title: clozePassageTitle || "Bài đọc mẫu xem trước",
+        passage_text: clozePassageText || "Human activities have damaged natural {1} for decades. Communities must focus on renewable {2}.",
+        blanks,
+        explanation: clozeExplanation || "Giải thích đáp án sẽ hiển thị tại đây sau khi hoàn thành câu hỏi."
+      };
+    } else if (selectedQuestionType === 'READING_COMPREHENSION') {
+      const subQ = [];
+      const opts1 = readSub1Opts ? readSub1Opts.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : ["Lựa chọn A", "Lựa chọn B"];
+      subQ.push({
+        id: "sub_1",
+        question: readSub1Q || "Câu hỏi đọc hiểu số 1?",
+        options: opts1,
+        correct_answer: readSub1Correct.trim() || opts1[0] || ""
+      });
+      if (readSub2Q.trim()) {
+        const opts2 = readSub2Opts ? readSub2Opts.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : ["Lựa chọn A", "Lựa chọn B"];
+        subQ.push({
+          id: "sub_2",
+          question: readSub2Q,
+          options: opts2,
+          correct_answer: readSub2Correct.trim() || opts2[0] || ""
+        });
+      }
+      return {
+        id: "preview_reading",
+        title: readTitle || "Xem trước: Đọc hiểu văn bản",
+        type: 'READING_COMPREHENSION',
+        instruction: "Đọc kỹ đoạn văn sau và trả lời các câu hỏi liên quan:",
+        passage_title: readPassageTitle || "Tiêu đề bài đọc",
+        passage_text: readPassageText || "Đoạn văn đọc hiểu mẫu xem trước. Học viên sẽ đọc nội dung bên trái và trả lời các câu hỏi con bên phải.",
+        sub_questions: subQ,
+        explanation: readExplanation || "Giải thích đáp án sẽ hiển thị tại đây sau khi hoàn thành câu hỏi."
+      };
+    } else if (selectedQuestionType === 'AUDIO_LISTENING') {
+      const audioOpts = audioOptions ? audioOptions.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : ["Đáp án A", "Đáp án B", "Đáp án C"];
+      return {
+        id: "preview_audio",
+        title: audioTitle || "Xem trước: Nghe Audio",
+        type: 'AUDIO_LISTENING',
+        instruction: "Nghe đoạn ghi âm sau và chọn câu trả lời đúng nhất:",
+        audio_url: audioUrl.trim(),
+        transcript: audioTranscript || "Attention passengers. Flight VN123 is now boarding at Gate 14.",
+        question_text: audioQuestion || "Câu hỏi nghe xem trước?",
+        options: audioOpts,
+        correct_answer: audioCorrect.trim() || audioOpts[0] || "",
+        explanation: audioExplanation || "Giải thích đáp án sẽ hiển thị tại đây sau khi hoàn thành câu hỏi."
+      };
+    } else {
+      return {
+        id: "preview_unknown",
+        title: "Xem trước",
+        type: selectedQuestionType,
+        instruction: "Xem trước câu hỏi"
       };
     }
   };
@@ -488,6 +791,14 @@ const GrammarAdminCMSPage = ({ user }) => {
 
         {/* CÁC NÚT ĐIỀU HƯỚNG NHANH */}
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            className="btn btn-glass btn-sm"
+            onClick={() => setShowPrintModal(true)}
+            title="In đề thi hoặc xuất ra file PDF chuẩn khổ A4"
+            style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <span>🖨️</span> In Đề / Xuất PDF
+          </button>
           <button
             className="btn btn-primary btn-sm"
             onClick={() => navigate('/grammar/practice')}
@@ -974,18 +1285,467 @@ const GrammarAdminCMSPage = ({ user }) => {
                 </div>
               )}
 
+              {/* --- FORM 5: CÂU HỎI HÌNH ẢNH --- */}
+              {selectedQuestionType === 'IMAGE_QUESTION' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label className="form-label">Tiêu đề câu hỏi:</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={imgTitle}
+                      onChange={(e) => setImgTitle(e.target.value)}
+                      placeholder="Ví dụ: Câu 1: Quan sát hình ảnh lớp học"
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="form-label">Đường dẫn hình ảnh (URL):</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={imgUrl}
+                        onChange={(e) => setImgUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/... hoặc link ảnh"
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Chú thích ảnh (tùy chọn):</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={imgCaption}
+                        onChange={(e) => setImgCaption(e.target.value)}
+                        placeholder="Ví dụ: Hoạt động trong lớp học"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Nội dung câu hỏi liên quan đến ảnh:</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={imgQuestion}
+                      onChange={(e) => setImgQuestion(e.target.value)}
+                      placeholder="Ví dụ: What are the students and teacher doing in the classroom?"
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="form-label">Các lựa chọn đáp án (ngăn cách bằng dấu phẩy):</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={imgOptions}
+                        onChange={(e) => setImgOptions(e.target.value)}
+                        placeholder="Ví dụ: The teacher is teaching, The students are sleeping, Playing football"
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Đáp án đúng:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={imgCorrect}
+                        onChange={(e) => setImgCorrect(e.target.value)}
+                        placeholder="Nhập chính xác đáp án đúng"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Giải thích đáp án (sẽ hiển thị sau khi hoàn thành):</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={imgExplanation}
+                      onChange={(e) => setImgExplanation(e.target.value)}
+                      placeholder="Giải thích chi tiết câu trả lời..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* --- FORM 6: ĐOẠN VĂN ĐIỀN TỪ --- */}
+              {selectedQuestionType === 'PASSAGE_CLOZE' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="form-label">Tiêu đề câu hỏi:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={clozeTitle}
+                        onChange={(e) => setClozeTitle(e.target.value)}
+                        placeholder="Ví dụ: Câu 2: Đoạn văn điền từ - Môi trường"
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Tiêu đề đoạn văn (tùy chọn):</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={clozePassageTitle}
+                        onChange={(e) => setClozePassageTitle(e.target.value)}
+                        placeholder="Ví dụ: Protecting Our Environment"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Nội dung đoạn văn (Dùng {'{1}'}, {'{2}'}, {'{3}'} để đánh dấu chỗ trống):</label>
+                    <textarea
+                      className="form-input"
+                      rows={4}
+                      value={clozePassageText}
+                      onChange={(e) => setClozePassageText(e.target.value)}
+                      placeholder="Nhập đoạn văn. Ví dụ: Pollution is a challenge. Human activities damaged {1}. We must focus on {2} plastic and renewable {3}."
+                    />
+                  </div>
+
+                  {/* Chỗ trống 1 */}
+                  <div style={{ padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--primary)', marginBottom: '8px' }}>Chỗ trống {'{1}'} (Bắt buộc):</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="form-label">Các lựa chọn (ngăn cách dấu phẩy):</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={clozeBlank1Opts}
+                          onChange={(e) => setClozeBlank1Opts(e.target.value)}
+                          placeholder="Ví dụ: habitats, buildings, factories, roads"
+                        />
+                      </div>
+                      <div>
+                        <label className="form-label">Đáp án đúng {'{1}'}:</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={clozeBlank1Correct}
+                          onChange={(e) => setClozeBlank1Correct(e.target.value)}
+                          placeholder="Ví dụ: habitats"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chỗ trống 2 */}
+                  <div style={{ padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--primary)', marginBottom: '8px' }}>Chỗ trống {'{2}'} (Nếu có):</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="form-label">Các lựa chọn (ngăn cách dấu phẩy):</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={clozeBlank2Opts}
+                          onChange={(e) => setClozeBlank2Opts(e.target.value)}
+                          placeholder="Ví dụ: recycling, burning, throwing, buying"
+                        />
+                      </div>
+                      <div>
+                        <label className="form-label">Đáp án đúng {'{2}'}:</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={clozeBlank2Correct}
+                          onChange={(e) => setClozeBlank2Correct(e.target.value)}
+                          placeholder="Ví dụ: recycling"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chỗ trống 3 */}
+                  <div style={{ padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--primary)', marginBottom: '8px' }}>Chỗ trống {'{3}'} (Nếu có):</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="form-label">Các lựa chọn (ngăn cách dấu phẩy):</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={clozeBlank3Opts}
+                          onChange={(e) => setClozeBlank3Opts(e.target.value)}
+                          placeholder="Ví dụ: energy, vehicles, clothes, food"
+                        />
+                      </div>
+                      <div>
+                        <label className="form-label">Đáp án đúng {'{3}'}:</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={clozeBlank3Correct}
+                          onChange={(e) => setClozeBlank3Correct(e.target.value)}
+                          placeholder="Ví dụ: energy"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Giải thích đáp án (sẽ hiển thị sau khi hoàn thành):</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={clozeExplanation}
+                      onChange={(e) => setClozeExplanation(e.target.value)}
+                      placeholder="Giải thích lý do chọn từng đáp án..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* --- FORM 7: ĐỌC HIỂU VĂN BẢN --- */}
+              {selectedQuestionType === 'READING_COMPREHENSION' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="form-label">Tiêu đề câu hỏi:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={readTitle}
+                        onChange={(e) => setReadTitle(e.target.value)}
+                        placeholder="Ví dụ: Câu 3: Đọc hiểu - Trí tuệ nhân tạo"
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Tiêu đề bài đọc:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={readPassageTitle}
+                        onChange={(e) => setReadPassageTitle(e.target.value)}
+                        placeholder="Ví dụ: Artificial Intelligence in Modern Learning"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Nội dung bài đọc (Đoạn văn đọc hiểu):</label>
+                    <textarea
+                      className="form-input"
+                      rows={6}
+                      value={readPassageText}
+                      onChange={(e) => setReadPassageText(e.target.value)}
+                      placeholder="Nhập toàn bộ nội dung bài đọc..."
+                    />
+                  </div>
+
+                  {/* Câu hỏi con 1 */}
+                  <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--primary)' }}>Câu hỏi con 1 (Bắt buộc):</div>
+                    <div>
+                      <label className="form-label">Nội dung câu hỏi 1:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={readSub1Q}
+                        onChange={(e) => setReadSub1Q(e.target.value)}
+                        placeholder="Ví dụ: How does AI benefit students?"
+                      />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="form-label">Các lựa chọn (ngăn cách bằng dấu phẩy):</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={readSub1Opts}
+                          onChange={(e) => setReadSub1Opts(e.target.value)}
+                          placeholder="Ví dụ: Learn at their own pace, Replace teachers, Eliminate homework"
+                        />
+                      </div>
+                      <div>
+                        <label className="form-label">Đáp án đúng câu 1:</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={readSub1Correct}
+                          onChange={(e) => setReadSub1Correct(e.target.value)}
+                          placeholder="Nhập chính xác 1 lựa chọn"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Câu hỏi con 2 */}
+                  <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--primary)' }}>Câu hỏi con 2 (Nếu có):</div>
+                    <div>
+                      <label className="form-label">Nội dung câu hỏi 2:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={readSub2Q}
+                        onChange={(e) => setReadSub2Q(e.target.value)}
+                        placeholder="Ví dụ: What qualities of teachers cannot be replicated by AI?"
+                      />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label className="form-label">Các lựa chọn (ngăn cách bằng dấu phẩy):</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={readSub2Opts}
+                          onChange={(e) => setReadSub2Opts(e.target.value)}
+                          placeholder="Ví dụ: Emotional support, Storing scores, Printing papers"
+                        />
+                      </div>
+                      <div>
+                        <label className="form-label">Đáp án đúng câu 2:</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          value={readSub2Correct}
+                          onChange={(e) => setReadSub2Correct(e.target.value)}
+                          placeholder="Nhập chính xác 1 lựa chọn"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Giải thích đáp án (sẽ hiển thị sau khi hoàn thành):</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={readExplanation}
+                      onChange={(e) => setReadExplanation(e.target.value)}
+                      placeholder="Giải thích chi tiết hoặc dẫn chứng từ bài đọc..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* --- FORM 8: NGHE AUDIO TRẢ LỜI CÂU HỎI --- */}
+              {selectedQuestionType === 'AUDIO_LISTENING' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label className="form-label">Tiêu đề câu hỏi:</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={audioTitle}
+                      onChange={(e) => setAudioTitle(e.target.value)}
+                      placeholder="Ví dụ: Câu 4: Nghe thông báo tại sân bay"
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="form-label">Đường dẫn file Audio (URL - để trống nếu dùng giọng máy đọc):</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={audioUrl}
+                        onChange={(e) => setAudioUrl(e.target.value)}
+                        placeholder="https://... hoặc để trống để hệ thống tự phát âm lời thoại"
+                      />
+                    </div>
+                    <div>
+                      <label className="form-label">Đáp án đúng:</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={audioCorrect}
+                        onChange={(e) => setAudioCorrect(e.target.value)}
+                        placeholder="Nhập chính xác đáp án đúng"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="form-label">Nội dung lời thoại / Transcript (Dùng phát âm AI & hiện sau khi hoàn thành):</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={audioTranscript}
+                      onChange={(e) => setAudioTranscript(e.target.value)}
+                      placeholder="Ví dụ: Attention all passengers on flight VN123 to Tokyo. Your flight is boarding at Gate Number 14."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Nội dung câu hỏi nghe:</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={audioQuestion}
+                      onChange={(e) => setAudioQuestion(e.target.value)}
+                      placeholder="Ví dụ: Which gate is flight VN123 boarding at?"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Các lựa chọn đáp án (ngăn cách bằng dấu phẩy):</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={audioOptions}
+                      onChange={(e) => setAudioOptions(e.target.value)}
+                      placeholder="Ví dụ: Gate Number 14, Gate Number 24, Gate Number 4, Gate Number 40"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="form-label">Giải thích đáp án (sẽ hiển thị sau khi hoàn thành):</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      value={audioExplanation}
+                      onChange={(e) => setAudioExplanation(e.target.value)}
+                      placeholder="Giải thích câu trả lời nghe được trong lời thoại..."
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* KHUNG XEM TRƯỚC TRỰC QUAN (LIVE INTERACTIVE PREVIEW) */}
               <div style={{ marginTop: '24px', padding: '20px', borderRadius: '14px', background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '12px' }}>
                   👁️ Xem trước giao diện học viên (Live Preview):
                 </span>
-                {previewQuestion.type === 'SPOT_ERROR' ? (
+                {previewQuestion.type === 'SPOT_ERROR' && (
                   <SpotTheErrorQuestion
                     question={previewQuestion}
                     onAnswerResult={() => {}}
                   />
-                ) : (
+                )}
+                {(previewQuestion.type === 'FILL_BLANK_TEXT' ||
+                  previewQuestion.type === 'FILL_BLANK_DROPDOWN' ||
+                  previewQuestion.type === 'FILL_BLANK_CARDS') && (
                   <FillBlankQuestion
+                    question={previewQuestion}
+                    onAnswerResult={() => {}}
+                  />
+                )}
+                {previewQuestion.type === 'IMAGE_QUESTION' && (
+                  <ImageQuestion
+                    question={previewQuestion}
+                    onAnswerResult={() => {}}
+                  />
+                )}
+                {previewQuestion.type === 'PASSAGE_CLOZE' && (
+                  <PassageClozeQuestion
+                    question={previewQuestion}
+                    onAnswerResult={() => {}}
+                  />
+                )}
+                {previewQuestion.type === 'READING_COMPREHENSION' && (
+                  <ReadingComprehensionQuestion
+                    question={previewQuestion}
+                    onAnswerResult={() => {}}
+                  />
+                )}
+                {previewQuestion.type === 'AUDIO_LISTENING' && (
+                  <AudioListeningQuestion
                     question={previewQuestion}
                     onAnswerResult={() => {}}
                   />
@@ -1143,7 +1903,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                               <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                                 {q.type === 'SPOT_ERROR'
                                   ? q.tokens?.map(t => t.text).join(' ')
-                                  : q.template}
+                                  : (q.template || q.question_text || q.passage_title || q.instruction || '')}
                               </p>
                             </div>
 
@@ -1171,6 +1931,15 @@ const GrammarAdminCMSPage = ({ user }) => {
             })}
           </div>
         </div>
+      )}
+
+      {/* MODAL IN ĐỀ THI / XUẤT PDF CHUẨN A4 */}
+      {showPrintModal && (
+        <PrintTestModal
+          groups={groups}
+          currentGroupId={selectedGroupId}
+          onClose={() => setShowPrintModal(false)}
+        />
       )}
 
     </div>

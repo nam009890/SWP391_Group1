@@ -58,6 +58,54 @@ export const QUESTION_TYPES = [
     description: 'Học viên bấm chọn vào các thẻ từ vựng nổi bật bên dưới để ghép vào chỗ trống trong câu.',
     badge: 'Card Selector',
     category: 'card_interaction'
+  },
+  {
+    id: 'IMAGE_QUESTION',
+    label: 'Câu Hỏi Kèm Hình Ảnh',
+    shortLabel: 'Hình ảnh',
+    icon: '🖼️',
+    color: '#ec4899',
+    bg: 'rgba(236, 72, 153, 0.15)',
+    border: 'rgba(236, 72, 153, 0.35)',
+    description: 'Học viên quan sát hình ảnh và trả lời các câu hỏi liên quan.',
+    badge: 'Image Question',
+    category: 'media'
+  },
+  {
+    id: 'PASSAGE_CLOZE',
+    label: 'Đoạn Văn Điền Từ Vào Chỗ Trống',
+    shortLabel: 'Đoạn văn đục lỗ',
+    icon: '📄',
+    color: '#06b6d4',
+    bg: 'rgba(6, 182, 212, 0.15)',
+    border: 'rgba(6, 182, 212, 0.35)',
+    description: 'Đọc đoạn văn dài và chọn từ thích hợp cho từng vị trí trống.',
+    badge: 'Cloze Passage',
+    category: 'passage'
+  },
+  {
+    id: 'READING_COMPREHENSION',
+    label: 'Đoạn Văn Đọc Hiểu & Trả Lời Câu Hỏi',
+    shortLabel: 'Đọc hiểu',
+    icon: '📖',
+    color: '#8b5cf6',
+    bg: 'rgba(139, 92, 246, 0.15)',
+    border: 'rgba(139, 92, 246, 0.35)',
+    description: 'Đọc bài văn và trả lời bộ câu hỏi trắc nghiệm liên quan.',
+    badge: 'Reading Comp',
+    category: 'passage'
+  },
+  {
+    id: 'AUDIO_LISTENING',
+    label: 'Nghe Audio Trả Lời Câu Hỏi',
+    shortLabel: 'Nghe Audio',
+    icon: '🎧',
+    color: '#f59e0b',
+    bg: 'rgba(245, 158, 11, 0.15)',
+    border: 'rgba(245, 158, 11, 0.35)',
+    description: 'Nghe đoạn ghi âm âm thanh hoặc phát âm tiếng Anh để trả lời câu hỏi.',
+    badge: 'Audio Listening',
+    category: 'media'
   }
   // =========================================================================================
   // HƯỚNG DẪN MỞ RỘNG (HOW TO ADD NEW QUESTION TYPES IN THE FUTURE):

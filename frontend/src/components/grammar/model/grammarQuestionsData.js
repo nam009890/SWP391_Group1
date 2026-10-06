@@ -168,11 +168,109 @@ export const INITIAL_GRAMMAR_DATA = {
           explanation: "Dùng 'at' trước mốc giờ cụ thể (at 9:00 AM) và 'on' trước ngày/thứ trong tuần (on Monday)."
         }
       ]
+    },
+    {
+      id: "group_test_04",
+      title: "Test 4 (Đa Phương Tiện & Đọc Hiểu)",
+      description: "Bài kiểm tra nâng cao: Hình ảnh, Đoạn văn điền từ, Đọc hiểu văn bản & Nghe Audio",
+      icon: "🌟",
+      questions: [
+        {
+          id: "cau_img_1",
+          title: "Câu 1: Quan sát hình ảnh lớp học",
+          type: "IMAGE_QUESTION",
+          instruction: "Quan sát bức ảnh bên dưới và chọn câu miêu tả chính xác nhất:",
+          image_url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+          image_caption: "Hoạt động trong lớp học hiện đại",
+          question_text: "What are the students and teacher doing in the classroom?",
+          options: [
+            "The teacher is teaching and students are raising their hands.",
+            "The students are sleeping at their desks.",
+            "Everyone is playing football on the sports field.",
+            "The classroom is completely empty."
+          ],
+          correct_answer: "The teacher is teaching and students are raising their hands.",
+          explanation: "Trong bức ảnh, cô giáo đang giảng bài và các học sinh hào hứng giơ tay phát biểu ý kiến."
+        },
+        {
+          id: "cau_cloze_1",
+          title: "Câu 2: Đoạn văn điền từ - Bảo vệ môi trường",
+          type: "PASSAGE_CLOZE",
+          instruction: "Đọc đoạn văn sau và chọn từ thích hợp cho mỗi chỗ trống:",
+          passage_title: "Protecting Our Environment",
+          passage_text: "Environmental pollution is one of the greatest challenges of our century. Human activities have damaged natural {1} for decades. To create a greener future, communities must focus on {2} plastic and reducing daily waste. Furthermore, governments should invest in renewable {3} like solar and wind power.",
+          blanks: {
+            "1": {
+              options: ["habitats", "buildings", "factories", "roads"],
+              correct_answer: "habitats"
+            },
+            "2": {
+              options: ["recycling", "burning", "throwing", "buying"],
+              correct_answer: "recycling"
+            },
+            "3": {
+              options: ["energy", "vehicles", "clothes", "food"],
+              correct_answer: "energy"
+            }
+          },
+          explanation: "1. 'natural habitats' (môi trường sống tự nhiên). 2. 'recycling plastic' (tái chế đồ nhựa). 3. 'renewable energy' (năng lượng tái tạo)."
+        },
+        {
+          id: "cau_reading_1",
+          title: "Câu 3: Đọc hiểu - Trí tuệ nhân tạo trong giáo dục",
+          type: "READING_COMPREHENSION",
+          instruction: "Đọc kỹ đoạn văn sau và trả lời các câu hỏi liên quan:",
+          passage_title: "Artificial Intelligence in Modern Learning",
+          passage_text: "Artificial Intelligence (AI) is transforming the landscape of modern education worldwide. With adaptive learning platforms, students can study at their own pace and receive instant feedback on their exercises, allowing them to overcome weaknesses effectively.\n\nHowever, experts emphasize that AI cannot replace human educators. Teachers provide emotional support, encourage creativity, and nurture ethical thinking—qualities that no algorithm can replicate. Therefore, the future of education is a collaborative partnership between smart technology and inspiring teachers.",
+          sub_questions: [
+            {
+              id: "sub_1",
+              question: "According to the passage, how does AI benefit students?",
+              options: [
+                "It allows students to learn at their own pace.",
+                "It replaces teachers completely in schools.",
+                "It eliminates all homework and exams.",
+                "It forces students to memorize everything."
+              ],
+              correct_answer: "It allows students to learn at their own pace."
+            },
+            {
+              id: "sub_2",
+              question: "What qualities of human teachers CANNOT be replicated by AI?",
+              options: [
+                "Emotional support and ethical thinking.",
+                "Storing test scores in databases.",
+                "Printing multiple choice question papers.",
+                "Calculating percentages automatically."
+              ],
+              correct_answer: "Emotional support and ethical thinking."
+            }
+          ],
+          explanation: "Đoạn 1 nêu: 'students can study at their own pace'. Đoạn 2 nêu: 'Teachers provide emotional support, encourage creativity, and nurture ethical thinking'."
+        },
+        {
+          id: "cau_audio_1",
+          title: "Câu 4: Nghe audio - Thông báo chuyến bay tại sân bay",
+          type: "AUDIO_LISTENING",
+          instruction: "Nghe đoạn thông báo sau và chọn câu trả lời đúng nhất:",
+          audio_url: "",
+          transcript: "Attention all passengers on flight VN123 to Tokyo. Your flight is now boarding at Gate Number 14. Please have your boarding pass and passport ready.",
+          question_text: "Which gate is flight VN123 boarding at?",
+          options: [
+            "Gate Number 14",
+            "Gate Number 4",
+            "Gate Number 40",
+            "Gate Number 24"
+          ],
+          correct_answer: "Gate Number 14",
+          explanation: "Trong đoạn băng thông báo rõ: 'Your flight is now boarding at Gate Number 14'."
+        }
+      ]
     }
   ]
 };
 
-const STORAGE_KEY = "studye_grammar_groups_bank_v3";
+const STORAGE_KEY = "studye_grammar_groups_bank_v4";
 
 /**
  * Trả về danh sách phẳng tất cả câu hỏi kèm theo thông tin groupId và groupTitle

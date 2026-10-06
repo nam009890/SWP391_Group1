@@ -13,6 +13,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SpotTheErrorQuestion from './components/SpotTheErrorQuestion';
 import FillBlankQuestion from './components/FillBlankQuestion';
+import ImageQuestion from './components/ImageQuestion';
+import PassageClozeQuestion from './components/PassageClozeQuestion';
+import ReadingComprehensionQuestion from './components/ReadingComprehensionQuestion';
+import AudioListeningQuestion from './components/AudioListeningQuestion';
+import PrintTestModal from './components/PrintTestModal';
 import { getStoredQuestions, fetchGrammarQuestions } from '../model/grammarQuestionsData';
 import { getQuestionTypeInfo } from '../model/questionTypesRegistry';
 import { isCreatorUser } from '../model/authHelper';
@@ -41,6 +46,9 @@ const GrammarLearnerPage = ({ user }) => {
 
   // Modal kết quả khi làm xong bài
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  // Modal in đề thi / xuất PDF
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   const isCreator = isCreatorUser(user);
 
@@ -142,7 +150,15 @@ const GrammarLearnerPage = ({ user }) => {
               Chọn bài tập để bắt đầu luyện tập:
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <button
+              className="btn btn-glass btn-sm"
+              onClick={() => setShowPrintModal(true)}
+              title="Xuất file PDF hoặc in đề kiểm tra chuẩn A4"
+              style={{ fontWeight: 600, color: '#38bdf8' }}
+            >
+              🖨️ In Đề / Xuất PDF
+            </button>
             {isCreator && (
               <button
                 className="btn btn-primary btn-sm"
@@ -209,6 +225,15 @@ const GrammarLearnerPage = ({ user }) => {
             );
           })}
         </div>
+
+        {/* Modal in đề thi / xuất PDF */}
+        {showPrintModal && (
+          <PrintTestModal
+            groups={groups}
+            currentGroupId={currentGroup?.id}
+            onClose={() => setShowPrintModal(false)}
+          />
+        )}
       </div>
     );
   }
@@ -247,7 +272,15 @@ const GrammarLearnerPage = ({ user }) => {
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            className="btn btn-glass btn-sm"
+            onClick={() => setShowPrintModal(true)}
+            title="In đề bài hoặc xuất PDF"
+            style={{ color: '#38bdf8' }}
+          >
+            🖨️ In Đề / PDF
+          </button>
           {isCreator && (
             <button
               className="btn btn-glass btn-sm"
@@ -283,29 +316,75 @@ const GrammarLearnerPage = ({ user }) => {
         </div>
       </div>
 
-      {/* Hiển thị câu hỏi tương tác (Hoàn toàn không có phần Gợi ý) */}
-      {currentQuestion ? (
-        currentQuestion.type === 'SPOT_ERROR' ? (
-          <SpotTheErrorQuestion
-            key={currentQuestion.id || currentIndex}
-            question={currentQuestion}
-            onAnswerResult={handleAnswerResult}
-          />
-        ) : (
-          <FillBlankQuestion
-            key={currentQuestion.id || currentIndex}
-            question={currentQuestion}
-            onAnswerResult={handleAnswerResult}
-          />
-        )
-      ) : (
-        <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
-          <p>Bài tập này hiện chưa có câu hỏi.</p>
-          <button className="btn btn-glass" onClick={handleBackToGroupsList}>
-            ← Quay lại danh sách bài
-          </button>
-        </div>
-      )}
+      {/* Hiển thị câu hỏi tương tác (Hỗ trợ toàn bộ các dạng bài) */}
+      {(() => {
+        if (!currentQuestion) {
+          return (
+            <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
+              <p>Bài tập này hiện chưa có câu hỏi.</p>
+              <button className="btn btn-glass" onClick={handleBackToGroupsList}>
+                ← Quay lại danh sách bài
+              </button>
+            </div>
+          );
+        }
+
+        const qKey = currentQuestion.id || currentIndex;
+
+        switch (currentQuestion.type) {
+          case 'SPOT_ERROR':
+            return (
+              <SpotTheErrorQuestion
+                key={qKey}
+                question={currentQuestion}
+                onAnswerResult={handleAnswerResult}
+              />
+            );
+          case 'IMAGE_QUESTION':
+            return (
+              <ImageQuestion
+                key={qKey}
+                question={currentQuestion}
+                onAnswerResult={handleAnswerResult}
+              />
+            );
+          case 'PASSAGE_CLOZE':
+            return (
+              <PassageClozeQuestion
+                key={qKey}
+                question={currentQuestion}
+                onAnswerResult={handleAnswerResult}
+              />
+            );
+          case 'READING_COMPREHENSION':
+            return (
+              <ReadingComprehensionQuestion
+                key={qKey}
+                question={currentQuestion}
+                onAnswerResult={handleAnswerResult}
+              />
+            );
+          case 'AUDIO_LISTENING':
+            return (
+              <AudioListeningQuestion
+                key={qKey}
+                question={currentQuestion}
+                onAnswerResult={handleAnswerResult}
+              />
+            );
+          case 'FILL_BLANK_TEXT':
+          case 'FILL_BLANK_DROPDOWN':
+          case 'FILL_BLANK_CARDS':
+          default:
+            return (
+              <FillBlankQuestion
+                key={qKey}
+                question={currentQuestion}
+                onAnswerResult={handleAnswerResult}
+              />
+            );
+        }
+      })()}
 
       {/* Thanh chọn số câu (Căn giữa, đẹp mắt) */}
       <div className="step-controls-bar" style={{ marginTop: '24px' }}>
@@ -362,6 +441,15 @@ const GrammarLearnerPage = ({ user }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal in đề thi / xuất PDF trong session làm bài */}
+      {showPrintModal && (
+        <PrintTestModal
+          groups={groups}
+          currentGroupId={currentGroup?.id}
+          onClose={() => setShowPrintModal(false)}
+        />
       )}
     </div>
   );

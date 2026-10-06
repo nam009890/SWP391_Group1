@@ -1288,3 +1288,422 @@
   backdrop-filter: blur(10px);
 }
 
+/* =========================================================
+   PRINT & PDF GENERATOR STYLES
+   ========================================================= */
+.print-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.print-modal-container {
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 24px 30px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.print-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Khung tài liệu đề thi trên màn hình xem trước */
+.printable-test-document {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 36px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  font-family: 'Times New Roman', Times, serif, system-ui;
+  line-height: 1.6;
+}
+
+.print-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #000;
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.print-header-left {
+  flex: 1.2;
+}
+
+.print-school-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.print-exam-type {
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 4px;
+  color: #0f172a;
+}
+
+.print-subject {
+  font-size: 13px;
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.print-header-right {
+  flex: 1;
+  text-align: right;
+  font-size: 13px;
+}
+
+.print-meta-field {
+  margin-bottom: 4px;
+}
+
+.print-score-box {
+  display: inline-block;
+  border: 2px solid #000;
+  border-radius: 6px;
+  margin-top: 8px;
+  text-align: center;
+  overflow: hidden;
+  min-width: 110px;
+}
+
+.score-box-title {
+  background: #000;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+}
+
+.score-box-content {
+  font-size: 16px;
+  font-weight: 800;
+  padding: 8px 12px;
+}
+
+.print-test-title-divider {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.print-test-main-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0;
+  color: #000;
+}
+
+.print-test-subdesc {
+  font-size: 12px;
+  font-style: italic;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.print-question-item {
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #cbd5e1;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.print-question-header {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.print-q-number {
+  font-weight: 800;
+  color: #000;
+  margin-right: 6px;
+}
+
+.print-q-instruction {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.print-question-body {
+  font-size: 14.5px;
+  padding-left: 12px;
+}
+
+.print-spot-sentence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.print-token-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.print-token-text {
+  font-size: 15px;
+  border-bottom: 1px solid #000;
+  padding: 0 4px;
+}
+
+.print-token-text.teacher-target-error {
+  background: #fecdd3;
+  color: #b91c1c;
+  font-weight: 800;
+  border-bottom: 2px solid #ef4444;
+}
+
+.print-token-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.print-template-sentence {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+.print-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.print-option-row {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.print-option-row.teacher-correct-choice,
+.teacher-correct-choice {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  font-weight: 800 !important;
+  border: 1px solid #16a34a !important;
+}
+
+.print-student-answer-line {
+  font-size: 13.5px;
+  margin-top: 8px;
+  color: #334155;
+}
+
+.print-teacher-inline-ans {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border-left: 3px solid #0284c7;
+  font-size: 13px;
+  color: #0369a1;
+}
+
+.print-image-wrap {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.print-inline-img {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.print-caption {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.print-passage-headline {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.print-passage-content {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  white-space: pre-line;
+  text-align: justify;
+}
+
+.print-cloze-options-block {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.print-cloze-row {
+  font-size: 13.5px;
+}
+
+.print-cloze-pill {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.print-sub-questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.print-sub-q-item {
+  padding-left: 8px;
+  border-left: 2px solid #cbd5e1;
+}
+
+.print-sub-q-title {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.print-audio-notice {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+  margin-bottom: 6px;
+}
+
+.print-answer-key-appendix {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #000;
+  page-break-before: always;
+  break-before: always;
+}
+
+.print-appendix-title {
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  margin: 0 0 16px 0;
+}
+
+.print-answer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.print-answer-table th,
+.print-answer-table td {
+  border: 1px solid #000;
+  padding: 6px 10px;
+}
+
+.print-answer-table th {
+  background: #f1f5f9;
+  font-weight: 700;
+}
+
+.print-test-footer {
+  text-align: center;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 24px;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================================
+   MEDIA QUERY CHO CHẾ ĐỘ IN ẤN THỰC TẾ (@MEDIA PRINT)
+   ========================================================= */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .no-print,
+  .navbar,
+  header,
+  footer,
+  .print-modal-header,
+  .print-config-panel,
+  .admin-toast {
+    display: none !important;
+  }
+
+  .print-modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .print-modal-container {
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .printable-test-document,
+  .printable-test-document * {
+    visibility: visible;
+  }
+
+  .printable-test-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}
+
+
