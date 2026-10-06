@@ -1,3 +1,34 @@
 package com.example.demo.weakvocabulary.entity;
-import com.example.demo.user.entity.User; import jakarta.persistence.*; import lombok.*; import java.time.LocalDateTime;
-@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @Table(name="weak_practice_sessions") public class WeakPracticeSession { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id; @ManyToOne(optional=false) @JoinColumn(name="user_id") private User user; @Enumerated(EnumType.STRING) private WeakQuestionType questionType; @Enumerated(EnumType.STRING) @Builder.Default private WeakPracticeStatus status=WeakPracticeStatus.IN_PROGRESS; @Builder.Default private LocalDateTime startedAt=LocalDateTime.now(); private LocalDateTime completedAt; private int totalQuestions; private int correctAnswers; private int wrongAnswers; }
+
+import com.example.demo.user.entity.User;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "weak_practice_sessions")
+public class WeakPracticeSession {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
+    @Enumerated(EnumType.STRING)
+    private WeakQuestionType questionType;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private WeakPracticeStatus status = WeakPracticeStatus.IN_PROGRESS;
+    @Builder.Default
+    private LocalDateTime startedAt = LocalDateTime.now();
+    private LocalDateTime completedAt;
+    private int totalQuestions;
+    private int correctAnswers;
+    private int wrongAnswers;
+}
