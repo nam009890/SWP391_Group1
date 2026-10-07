@@ -18,6 +18,7 @@ import PassageClozeQuestion from './components/PassageClozeQuestion';
 import ReadingComprehensionQuestion from './components/ReadingComprehensionQuestion';
 import AudioListeningQuestion from './components/AudioListeningQuestion';
 import PrintTestModal from './components/PrintTestModal';
+import ReportQuestionModal from './components/ReportQuestionModal';
 import { getStoredQuestions, fetchGrammarQuestions } from '../model/grammarQuestionsData';
 import { getQuestionTypeInfo } from '../model/questionTypesRegistry';
 import { isCreatorUser } from '../model/authHelper';
@@ -50,6 +51,9 @@ const GrammarLearnerPage = ({ user }) => {
   // Modal in đề thi / xuất PDF
   const [showPrintModal, setShowPrintModal] = useState(false);
 
+  // Modal báo lỗi câu hỏi gửi cho tác giả qua Gmail
+  const [showReportModal, setShowReportModal] = useState(false);
+
   const isCreator = isCreatorUser(user);
 
   useEffect(() => {
@@ -78,6 +82,7 @@ const GrammarLearnerPage = ({ user }) => {
 
   // Quay lại danh sách bài tập
   const handleBackToGroupsList = () => {
+    setData(getStoredQuestions());
     setViewMode('GROUPS_LIST');
     setShowCompletionModal(false);
   };
@@ -159,23 +164,22 @@ const GrammarLearnerPage = ({ user }) => {
             >
               🖨️ In Đề / Xuất PDF
             </button>
-            {isCreator && (
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => navigate('/grammar/admin')}
-                style={{ fontWeight: 600 }}
-              >
-                ⚙️ Tạo Câu Hỏi
-              </button>
-            )}
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => navigate('/grammar/admin')}
+              title="Tự tạo bài tập mới và chia sẻ lên bảng tin"
+              style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <span>✍️</span> Tạo & Đăng Bài Mới
+            </button>
             <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
               ← Trang Chủ
             </button>
           </div>
         </div>
 
-        {/* Lưới danh sách bài tập gọn gàng (chỉ có tên bài và số câu, không chi tiết thừa) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
+        {/* Lưới danh sách bài tập gọn gàng (kèm tên tác giả và số câu) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }}>
           {groups.map((group, idx) => {
             const count = group.questions?.length || 0;
             const score = scoreMap[group.id];
@@ -196,7 +200,7 @@ const GrammarLearnerPage = ({ user }) => {
                 onClick={() => handleStartTest(idx)}
               >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <h3 style={{ margin: 0, fontSize: '19px', color: 'var(--primary)' }}>
                       {group.title}
                     </h3>
@@ -206,9 +210,16 @@ const GrammarLearnerPage = ({ user }) => {
                       </span>
                     )}
                   </div>
-                  <p style={{ margin: '0 0 18px 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+
+                  <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-muted)' }}>
                     {count} câu hỏi
                   </p>
+
+                  {/* THÔNG TIN TÁC GIẢ BÀI TẬP */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '18px' }}>
+                    <span>👤</span>
+                    <span>Tác giả: <strong style={{ color: 'var(--text-main)' }}>{group.author?.name || 'Cộng đồng'}</strong></span>
+                  </div>
                 </div>
 
                 <button
@@ -275,21 +286,27 @@ const GrammarLearnerPage = ({ user }) => {
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
             className="btn btn-glass btn-sm"
+            onClick={() => setShowReportModal(true)}
+            title="Báo lỗi câu hỏi này cho tác giả qua Gmail"
+            style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.35)', background: 'rgba(239, 68, 68, 0.1)', fontWeight: 600 }}
+          >
+            🚩 Báo Lỗi
+          </button>
+          <button
+            className="btn btn-glass btn-sm"
             onClick={() => setShowPrintModal(true)}
             title="In đề bài hoặc xuất PDF"
             style={{ color: '#38bdf8' }}
           >
             🖨️ In Đề / PDF
           </button>
-          {isCreator && (
-            <button
-              className="btn btn-glass btn-sm"
-              onClick={() => navigate('/grammar/admin')}
-              title="Chuyển sang trang tạo câu hỏi"
-            >
-              ⚙️ Tạo câu hỏi
-            </button>
-          )}
+          <button
+            className="btn btn-glass btn-sm"
+            onClick={() => navigate('/grammar/admin')}
+            title="Chuyển sang trang tạo câu hỏi"
+          >
+            ✍️ Tạo câu hỏi
+          </button>
           <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
             Trang chủ
           </button>
@@ -435,6 +452,13 @@ const GrammarLearnerPage = ({ user }) => {
               <button className="btn btn-glass" onClick={handleRestartGroup}>
                 🔄 Làm lại bài này
               </button>
+              <button
+                className="btn btn-glass"
+                onClick={() => setShowReportModal(true)}
+                style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.35)' }}
+              >
+                🚩 Báo lỗi câu hỏi
+              </button>
               <button className="btn btn-primary" onClick={handleBackToGroupsList}>
                 ← Quay lại danh sách bài
               </button>
@@ -449,6 +473,17 @@ const GrammarLearnerPage = ({ user }) => {
           groups={groups}
           currentGroupId={currentGroup?.id}
           onClose={() => setShowPrintModal(false)}
+        />
+      )}
+
+      {/* Modal báo lỗi câu hỏi gửi Gmail cho tác giả */}
+      {showReportModal && (
+        <ReportQuestionModal
+          question={currentQuestion}
+          allQuestions={questions}
+          group={currentGroup}
+          user={user}
+          onClose={() => setShowReportModal(false)}
         />
       )}
     </div>

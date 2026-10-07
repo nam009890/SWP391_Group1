@@ -44,7 +44,14 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
         }
       }
     } else if (question.transcript) {
-      playSpeechSynthesis();
+      if (isPlaying) {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        setIsPlaying(false);
+      } else {
+        playSpeechSynthesis();
+      }
     }
   };
 

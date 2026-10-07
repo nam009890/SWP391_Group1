@@ -29,7 +29,9 @@ import {
   resetStoredQuestions,
   fetchGrammarQuestions,
   createGrammarQuestionInBackend,
-  deleteGrammarQuestionFromBackend
+  deleteGrammarQuestionFromBackend,
+  resolveQuestionReport,
+  getReportsForUser
 } from '../model/grammarQuestionsData';
 import {
   getAllQuestionTypes,
@@ -183,11 +185,19 @@ const GrammarAdminCMSPage = ({ user }) => {
     }
 
     const newGroupId = `group_${Date.now()}`;
+    const authorName = user?.name || user?.username || (user?.email ? user.email.split('@')[0] : "Thành viên cộng đồng");
+    const authorEmail = user?.email || "buiquangviet032@gmail.com";
+
     const newGroup = {
       id: newGroupId,
       title: newGroupTitle.trim(),
       description: newGroupDesc.trim() || `Bài kiểm tra ${newGroupTitle.trim()}`,
       icon: newGroupIcon || "📝",
+      author: {
+        name: authorName,
+        email: authorEmail
+      },
+      reports: [],
       questions: []
     };
 
@@ -200,6 +210,25 @@ const GrammarAdminCMSPage = ({ user }) => {
     setNewGroupTitle('');
     setNewGroupDesc('');
     showToast(`Đã tạo nhóm bài tập mới: "${newGroup.title}"!`);
+  };
+
+  // Lấy danh sách toàn bộ báo cáo lỗi từ học viên gửi về
+  const allReports = groups.flatMap(g => (g.reports || []).map(r => ({ ...r, groupTitle: g.title, groupId: g.id })));
+  const openReportsCount = allReports.filter(r => r.status === 'OPEN').length;
+
+  // Đánh dấu đã sửa xong một báo cáo
+  const handleResolveReport = (groupId, reportId) => {
+    const updated = resolveQuestionReport(groupId, reportId);
+    setLessonData(updated);
+    showToast("Đã đánh dấu báo cáo đã được giải quyết!");
+  };
+
+  // Mở tab Gmail để phản hồi trực tiếp cho học viên đã báo lỗi
+  const handleReplyReportViaGmail = (rep) => {
+    const subject = `[StudyE - Phản hồi từ tác giả] Bài tập: ${rep.testTitle} - ${rep.questionTitle}`;
+    const body = `Xin chào ${rep.reporterName || 'bạn'},\n\nMình là tác giả bài tập "${rep.testTitle}" trên StudyE. Cảm ơn bạn rất nhiều vì đã báo lỗi cho câu hỏi "${rep.questionTitle}".\n\nMình đã kiểm tra lại và cập nhật câu hỏi theo góp ý của bạn.\n\nChúc bạn học tập thật tốt trên StudyE nhé!\n\nThân ái,`;
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(rep.reporterEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   // Xóa một nhóm bài tập
@@ -785,7 +814,7 @@ const GrammarAdminCMSPage = ({ user }) => {
             🛠️ Quản Lý & Soạn Bài Tập
           </span>
           <span className="grammar-lesson-subtitle">
-            Tài khoản: <strong style={{ color: '#38bdf8' }}>buiquangviet032@gmail.com</strong>
+            Tác giả: <strong style={{ color: '#38bdf8' }}>{user?.name || user?.email || 'buiquangviet032@gmail.com'}</strong>
           </span>
         </div>
 
@@ -813,8 +842,8 @@ const GrammarAdminCMSPage = ({ user }) => {
         </div>
       </div>
 
-      {/* THANH TAB CHÍNH: SOẠN CÂU HỎI HOẶC DANH SÁCH BÀI TẬP */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px' }}>
+      {/* THANH TAB CHÍNH: SOẠN CÂU HỎI, DANH SÁCH BÀI TẬP HOẶC HỘP THƯ BÁO LỖI */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px', flexWrap: 'wrap' }}>
         <button
           className={`btn ${mainTab === 'CREATE_STEPPER' ? 'btn-primary' : 'btn-glass'}`}
           onClick={() => setMainTab('CREATE_STEPPER')}
@@ -828,6 +857,18 @@ const GrammarAdminCMSPage = ({ user }) => {
           style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600 }}
         >
           📚 Danh Sách Bài Tập ({groups.length} bài)
+        </button>
+        <button
+          className={`btn ${mainTab === 'REPORTS_INBOX' ? 'btn-primary' : 'btn-glass'}`}
+          onClick={() => setMainTab('REPORTS_INBOX')}
+          style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <span>📬 Hộp Thư Báo Lỗi</span>
+          {openReportsCount > 0 && (
+            <span style={{ padding: '2px 8px', borderRadius: '10px', background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
+              {openReportsCount}
+            </span>
+          )}
         </button>
       </div>
 
@@ -1930,6 +1971,136 @@ const GrammarAdminCMSPage = ({ user }) => {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* =================================================================================== */}
+      {/* TAB 3: HỘP THƯ BÁO LỖI TỪ HỌC VIÊN (REPORTS INBOX)                                   */}
+      {/* =================================================================================== */}
+      {mainTab === 'REPORTS_INBOX' && (
+        <div className="animate-fade-in">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>📬</span> Hộp Thư Báo Lỗi & Góp Ý Từ Học Viên
+              </h3>
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                Các phản ánh lỗi câu hỏi được gửi trực tiếp từ người làm bài. Tác giả có thể kiểm tra, sửa câu hỏi và gửi email phản hồi.
+              </p>
+            </div>
+            <div style={{ padding: '6px 14px', borderRadius: '10px', background: openReportsCount > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)', color: openReportsCount > 0 ? '#ef4444' : '#10b981', fontWeight: 600, fontSize: '13px', border: `1px solid ${openReportsCount > 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}` }}>
+              {openReportsCount > 0 ? `⚠️ ${openReportsCount} báo lỗi đang chờ xử lý` : '✅ Không có báo lỗi nào chưa xử lý'}
+            </div>
+          </div>
+
+          {allReports.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {allReports.map((rep, rIdx) => {
+                const isOpen = rep.status === 'OPEN';
+                return (
+                  <div
+                    key={rep.id || rIdx}
+                    className="glass-panel"
+                    style={{
+                      padding: '20px',
+                      borderRadius: '14px',
+                      border: `1px solid ${isOpen ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                      background: isOpen ? 'rgba(239, 68, 68, 0.04)' : 'rgba(255, 255, 255, 0.02)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{
+                          padding: '3px 10px',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          background: isOpen ? '#ef4444' : '#10b981',
+                          color: '#fff'
+                        }}>
+                          {isOpen ? 'CHƯA XỬ LÝ' : 'ĐÃ SỬA XONG'}
+                        </span>
+                        <strong style={{ fontSize: '15px', color: 'var(--text-main)' }}>
+                          {rep.errorType}
+                        </strong>
+                      </div>
+
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {rep.createdAt ? new Date(rep.createdAt).toLocaleString('vi-VN') : ''}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                      Bài tập: <strong style={{ color: 'var(--primary)' }}>{rep.testTitle || rep.groupTitle}</strong> • Câu: <strong style={{ color: '#38bdf8' }}>{rep.questionTitle}</strong>
+                    </div>
+
+                    <div style={{
+                      padding: '12px 16px',
+                      borderRadius: '10px',
+                      background: 'rgba(0, 0, 0, 0.25)',
+                      fontSize: '14px',
+                      color: 'var(--text-main)',
+                      lineHeight: '1.5',
+                      marginBottom: '14px',
+                      borderLeft: '4px solid #ef4444'
+                    }}>
+                      "{rep.description}"
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        Người gửi: <strong>{rep.reporterName || 'Học viên'}</strong> ({rep.reporterEmail})
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {rep.reporterEmail && rep.reporterEmail !== 'Học viên ẩn danh' && (
+                          <button
+                            className="btn btn-glass btn-sm"
+                            onClick={() => handleReplyReportViaGmail(rep)}
+                            title="Mở Gmail để gửi lời cảm ơn và thông báo cho người học"
+                            style={{ fontSize: '12px' }}
+                          >
+                            📧 Trả lời qua Gmail
+                          </button>
+                        )}
+
+                        <button
+                          className="btn btn-glass btn-sm"
+                          onClick={() => {
+                            setSelectedGroupId(rep.groupId);
+                            setMainTab('QUESTION_BANK');
+                          }}
+                          style={{ fontSize: '12px' }}
+                        >
+                          🔍 Xem câu này trong bài
+                        </button>
+
+                        {isOpen && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleResolveReport(rep.groupId, rep.id)}
+                            style={{ fontSize: '12px', background: '#10b981', borderColor: '#10b981' }}
+                          >
+                            ✓ Đã sửa xong
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="glass-panel" style={{ padding: '50px 20px', textAlign: 'center', borderRadius: '16px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '14px' }}>📭</div>
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: 'var(--text-main)' }}>
+                Hộp thư trống
+              </h4>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
+                Chưa có báo lỗi nào từ người làm bài. Khi học viên báo lỗi một câu hỏi, thông báo sẽ hiển thị tại đây và gửi vào Gmail của bạn!
+              </p>
+            </div>
+          )}
         </div>
       )}
 

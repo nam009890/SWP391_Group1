@@ -105,15 +105,15 @@ function GrammarModuleDispatcher({ user, token }) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Kiểm tra nếu là tài khoản tác giả buiquangviet032@gmail.com
-  const isCreator = isCreatorUser(user);
+  // 2. Mặc định mở giao diện bài tập & bảng tin cộng đồng (GrammarLearnerPage).
+  // Người dùng có thể bấm "Tạo câu hỏi mới" để mở Creator Studio bất kỳ lúc nào.
+  // Nếu là tài khoản buiquangviet032@gmail.com thì ưu tiên mở màn hình Soạn bài:
+  const isPrimaryAdmin = (user?.email || '').toLowerCase() === 'buiquangviet032@gmail.com';
 
-  if (isCreator) {
-    // Tác giả -> Hiển thị trực tiếp màn hình Soạn câu hỏi & Quản trị CMS
+  if (isPrimaryAdmin) {
     return <GrammarAdminCMSPage user={user} />;
   }
 
-  // Học viên thông thường -> Hiển thị màn hình Luyện tập bài tập
   return <GrammarLearnerPage user={user} />;
 }
 
@@ -175,9 +175,13 @@ function MainApp() {
           element={token ? <GrammarLearnerPage user={user} /> : <Navigate to="/login" replace />}
         />
 
-        {/* Đường dẫn trang quản trị CMS */}
+        {/* Đường dẫn trang quản trị & soạn bài (dành cho mọi người dùng) */}
         <Route
           path="/grammar/admin"
+          element={token ? <GrammarAdminCMSPage user={user} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/grammar/create"
           element={token ? <GrammarAdminCMSPage user={user} /> : <Navigate to="/login" replace />}
         />
 

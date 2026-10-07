@@ -20,6 +20,11 @@ export const INITIAL_GRAMMAR_DATA = {
       title: "Test 1",
       description: "Bài kiểm tra tổng hợp: Thì Quá khứ, Hiện tại đơn, Dropdown & Thẻ từ",
       icon: "📝",
+      author: {
+        name: "StudyE Official",
+        email: "buiquangviet032@gmail.com"
+      },
+      reports: [],
       questions: [
         {
           id: "cau_1_tim_loi_sai",
@@ -86,6 +91,11 @@ export const INITIAL_GRAMMAR_DATA = {
       title: "Test 2",
       description: "Bài kiểm tra chuyên đề: Câu điều kiện loại 1 & loại 2",
       icon: "🎯",
+      author: {
+        name: "StudyE Official",
+        email: "buiquangviet032@gmail.com"
+      },
+      reports: [],
       questions: [
         {
           id: "cau_cond_1",
@@ -139,6 +149,11 @@ export const INITIAL_GRAMMAR_DATA = {
       title: "Test 3",
       description: "Bài kiểm tra: Giới từ, Cụm tính từ và Cấu trúc thường gặp",
       icon: "📍",
+      author: {
+        name: "StudyE Official",
+        email: "buiquangviet032@gmail.com"
+      },
+      reports: [],
       questions: [
         {
           id: "cau_prep_1",
@@ -174,6 +189,11 @@ export const INITIAL_GRAMMAR_DATA = {
       title: "Test 4 (Đa Phương Tiện & Đọc Hiểu)",
       description: "Bài kiểm tra nâng cao: Hình ảnh, Đoạn văn điền từ, Đọc hiểu văn bản & Nghe Audio",
       icon: "🌟",
+      author: {
+        name: "StudyE Official",
+        email: "buiquangviet032@gmail.com"
+      },
+      reports: [],
       questions: [
         {
           id: "cau_img_1",
@@ -270,7 +290,131 @@ export const INITIAL_GRAMMAR_DATA = {
   ]
 };
 
-const STORAGE_KEY = "studye_grammar_groups_bank_v4";
+const STORAGE_KEY = "studye_grammar_groups_bank_v5";
+
+/**
+ * Gửi báo cáo lỗi câu hỏi cho tác giả bài viết
+ * - Lưu vào localStorage
+ * - Tạo sẵn link mở trực tiếp trên Gmail Web và mailto link
+ */
+export const submitQuestionReport = ({
+  groupId,
+  questionId,
+  questionTitle,
+  errorType,
+  description,
+  reporterEmail,
+  reporterName,
+  testTitle,
+  authorEmail
+}) => {
+  const reportId = `report_${Date.now()}`;
+  const reportData = {
+    id: reportId,
+    groupId,
+    testTitle: testTitle || "Bài tập ngữ pháp",
+    questionId,
+    questionTitle: questionTitle || "Câu hỏi",
+    errorType: errorType || "Sai đáp án",
+    description: description || "",
+    reporterEmail: reporterEmail || "Học viên ẩn danh",
+    reporterName: reporterName || "Người học",
+    authorEmail: authorEmail || "buiquangviet032@gmail.com",
+    createdAt: new Date().toISOString(),
+    status: "OPEN" // 'OPEN' | 'RESOLVED'
+  };
+
+  // 1. Cập nhật vào danh sách bài tập hiện tại
+  const currentData = getStoredQuestions();
+  const updatedGroups = (currentData.groups || []).map(g => {
+    if (g.id === groupId) {
+      return {
+        ...g,
+        reports: [...(g.reports || []), reportData]
+      };
+    }
+    return g;
+  });
+  const updatedData = { ...currentData, groups: updatedGroups };
+  saveStoredQuestions(updatedData);
+
+  // 2. Lưu bảng báo cáo tổng hợp
+  try {
+    const allReports = JSON.parse(localStorage.getItem('studye_community_reports') || '[]');
+    allReports.unshift(reportData);
+    localStorage.setItem('studye_community_reports', JSON.stringify(allReports));
+  } catch (e) {
+    console.warn("Could not save to studye_community_reports:", e);
+  }
+
+  // 3. Tạo link thông báo trực tiếp qua Gmail
+  const targetEmail = authorEmail || "buiquangviet032@gmail.com";
+  const subject = `[StudyE - Báo lỗi bài tập] ${testTitle} - ${questionTitle}`;
+  const bodyText = `Xin chào tác giả,\n\n` +
+    `Người học "${reporterName || 'Học viên'}" (${reporterEmail || 'Ẩn danh'}) vừa gửi phản ánh báo lỗi cho bài tập của bạn trên StudyE:\n\n` +
+    `--------------------------------------------------\n` +
+    `• Bài tập: ${testTitle}\n` +
+    `• Câu hỏi: ${questionTitle}\n` +
+    `• Phân loại lỗi: ${errorType}\n` +
+    `• Chi tiết phản ánh: "${description}"\n` +
+    `• Thời gian gửi: ${new Date().toLocaleString('vi-VN')}\n` +
+    `--------------------------------------------------\n\n` +
+    `Bạn vui lòng truy cập StudyE để kiểm tra và cập nhật lại câu hỏi nhé!\n\n` +
+    `Trân trọng,\nStudyE Community Platform`;
+
+  const gmailWebUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+  const mailtoUrl = `mailto:${encodeURIComponent(targetEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+
+  return {
+    report: reportData,
+    gmailWebUrl,
+    mailtoUrl
+  };
+};
+
+/**
+ * Đánh dấu báo cáo lỗi đã được tác giả xử lý / sửa xong
+ */
+export const resolveQuestionReport = (groupId, reportId) => {
+  const currentData = getStoredQuestions();
+  const updatedGroups = (currentData.groups || []).map(g => {
+    if (g.id === groupId && Array.isArray(g.reports)) {
+      return {
+        ...g,
+        reports: g.reports.map(r => r.id === reportId ? { ...r, status: 'RESOLVED' } : r)
+      };
+    }
+    return g;
+  });
+  const updatedData = { ...currentData, groups: updatedGroups };
+  saveStoredQuestions(updatedData);
+
+  try {
+    const allReports = JSON.parse(localStorage.getItem('studye_community_reports') || '[]');
+    const updatedAll = allReports.map(r => r.id === reportId ? { ...r, status: 'RESOLVED' } : r);
+    localStorage.setItem('studye_community_reports', JSON.stringify(updatedAll));
+  } catch (e) {
+    console.warn("Could not update studye_community_reports:", e);
+  }
+
+  return updatedData;
+};
+
+/**
+ * Lấy tất cả báo cáo dành cho tác giả hiện tại
+ */
+export const getReportsForUser = (userEmail) => {
+  if (!userEmail) return [];
+  const currentData = getStoredQuestions();
+  const list = [];
+  (currentData.groups || []).forEach(g => {
+    const isOwner = (g.author?.email || '').toLowerCase() === userEmail.toLowerCase();
+    if (isOwner && Array.isArray(g.reports)) {
+      list.push(...g.reports);
+    }
+  });
+  return list;
+};
 
 /**
  * Trả về danh sách phẳng tất cả câu hỏi kèm theo thông tin groupId và groupTitle
