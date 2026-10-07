@@ -21,7 +21,6 @@ import PrintTestModal from './components/PrintTestModal';
 import ReportQuestionModal from './components/ReportQuestionModal';
 import { getStoredQuestions, fetchGrammarQuestions } from '../model/grammarQuestionsData';
 import { getQuestionTypeInfo } from '../model/questionTypesRegistry';
-import { isCreatorUser } from '../model/authHelper';
 import '../Grammar.css';
 
 const GrammarLearnerPage = ({ user }) => {
@@ -53,8 +52,6 @@ const GrammarLearnerPage = ({ user }) => {
 
   // Modal báo lỗi câu hỏi gửi cho tác giả qua Gmail
   const [showReportModal, setShowReportModal] = useState(false);
-
-  const isCreator = isCreatorUser(user);
 
   useEffect(() => {
     fetchGrammarQuestions().then(res => {
@@ -166,8 +163,8 @@ const GrammarLearnerPage = ({ user }) => {
             </button>
             <button
               className="btn btn-primary btn-sm"
-              onClick={() => navigate('/grammar/admin')}
-              title="Tự tạo bài tập mới và chia sẻ lên bảng tin"
+              onClick={() => navigate('/grammar/create')}
+              title="Tự tạo bài tập mới và chia sẻ lên bảng tin cộng đồng"
               style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <span>✍️</span> Tạo & Đăng Bài Mới
@@ -302,8 +299,8 @@ const GrammarLearnerPage = ({ user }) => {
           </button>
           <button
             className="btn btn-glass btn-sm"
-            onClick={() => navigate('/grammar/admin')}
-            title="Chuyển sang trang tạo câu hỏi"
+            onClick={() => navigate('/grammar/create')}
+            title="Chuyển sang trang tạo câu hỏi cộng đồng"
           >
             ✍️ Tạo câu hỏi
           </button>

@@ -348,7 +348,7 @@ export const submitQuestionReport = ({
   }
 
   // 3. Tạo link thông báo trực tiếp qua Gmail
-  const targetEmail = authorEmail || "buiquangviet032@gmail.com";
+  const targetEmail = authorEmail || "community@studye.edu.vn";
   const subject = `[StudyE - Báo lỗi bài tập] ${testTitle} - ${questionTitle}`;
   const bodyText = `Xin chào tác giả,\n\n` +
     `Người học "${reporterName || 'Học viên'}" (${reporterEmail || 'Ẩn danh'}) vừa gửi phản ánh báo lỗi cho bài tập của bạn trên StudyE:\n\n` +

@@ -105,15 +105,7 @@ function GrammarModuleDispatcher({ user, token }) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Mặc định mở giao diện bài tập & bảng tin cộng đồng (GrammarLearnerPage).
-  // Người dùng có thể bấm "Tạo câu hỏi mới" để mở Creator Studio bất kỳ lúc nào.
-  // Nếu là tài khoản buiquangviet032@gmail.com thì ưu tiên mở màn hình Soạn bài:
-  const isPrimaryAdmin = (user?.email || '').toLowerCase() === 'buiquangviet032@gmail.com';
-
-  if (isPrimaryAdmin) {
-    return <GrammarAdminCMSPage user={user} />;
-  }
-
+  // 2. Mặc định mở Bảng Tin Bài Tập Cộng Đồng (Community Board) cho tất cả thành viên
   return <GrammarLearnerPage user={user} />;
 }
 
@@ -132,15 +124,14 @@ function MainApp() {
           console.warn("Token expired on load");
           handleLogout();
         } else {
-          // Trích xuất email từ payload (sub hoặc email)
+          // Trích xuất thông tin người dùng từ token
           const email = (payload.email || payload.sub || '').trim();
-          const isCreator = email.toLowerCase() === 'buiquangviet032@gmail.com';
           
           setUser({
             name: payload.name || email,
             email: email,
-            role: isCreator ? 'ROLE_ADMIN' : (payload.role || 'ROLE_USER'),
-            isAdmin: isCreator
+            role: payload.role || 'ROLE_USER',
+            isAdmin: payload.role === 'ROLE_ADMIN'
           });
         }
       } catch (e) {

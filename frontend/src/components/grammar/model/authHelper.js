@@ -1,26 +1,20 @@
 // ============================================================
-// MODEL LAYER — Authentication & Authorization Helper
-// Only the creator email is allowed to access the CMS.
+// MODEL LAYER — Community Test Authorization Helper
+// Tất cả người dùng cộng đồng đều có quyền tự do tạo bài tập, 
+// đăng lên bảng tin và nhận báo lỗi từ các người học khác.
 // ============================================================
-
-export const CREATOR_EMAIL = "buiquangviet032@gmail.com";
 
 /**
  * Cho phép bất kỳ người dùng đã đăng nhập nào cũng có quyền tạo bài tập và đăng lên bảng tin.
  * Loại bỏ hoàn toàn sự phụ thuộc vào Admin.
  */
 export const canCreateQuestion = (user) => {
-  if (!user) return false;
   return true;
 };
 
-/** Returns true if the given user can access creation tools (now enabled for all logged in users). */
+/** Returns true for community creators (enabled for all logged-in members). */
 export const isCreatorUser = (user) => {
-  // Bất kỳ người dùng đã đăng nhập đều có quyền tạo câu hỏi
-  if (user && (user.email || user.username || user.id)) return true;
-  // Dev bypass (stored in localStorage)
-  if (localStorage.getItem('studye_creator_bypass') === 'true') return true;
-  return false;
+  return true;
 };
 
 /** Enable or disable the dev bypass flag. */

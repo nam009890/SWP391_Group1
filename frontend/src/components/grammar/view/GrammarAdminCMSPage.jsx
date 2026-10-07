@@ -1,17 +1,15 @@
 // =========================================================================================
-// VIEW LAYER — GRAMMAR ADMIN CMS PAGE (GIAO DIỆN TẠO VÀ QUẢN LÝ CÂU HỎI NGỮ PHÁP)
+// VIEW LAYER — GRAMMAR COMMUNITY CREATOR STUDIO (GIAO DIỆN SOẠN & ĐĂNG BÀI TẬP CỘNG ĐỒNG)
 // =========================================================================================
-// Dành riêng cho tài khoản tác giả / Admin: buiquangviet032@gmail.com
-//
-// Thực hiện các yêu cầu:
-// 1. Giao diện Tạo Câu Hỏi được cấu trúc theo 3 bước tuần tự rõ ràng (Requirement 4):
+// Dành cho tất cả người dùng trong cộng đồng StudyE để sáng tạo và chia sẻ bài tập:
+// 1. Giao diện Tạo Câu Hỏi được cấu trúc theo 3 bước tuần tự rõ ràng:
 //    - Bước 1: Group Name (Chọn nhóm có sẵn hoặc tạo nhóm mới, ví dụ: Test 1, Test 2,...)
 //    - Bước 2: Question Type (Chọn loại câu hỏi từ hệ thống Registry linh hoạt mở rộng)
 //    - Bước 3: The Question Itself (Soạn nội dung chi tiết câu hỏi theo từng dạng)
 // 2. Kiến trúc mở rộng (Extensible Question Types):
 //    -> Sử dụng questionTypesRegistry.js, khi thêm dạng câu hỏi mới không cần sửa layout gốc.
-// 3. Quản lý Ngân hàng câu hỏi theo từng Nhóm Bài Tập (Requirement 3).
-// 4. Có nút xem thử giao diện người học (Learner View) để kiểm tra trải nghiệm thực tế.
+// 3. Quản lý Ngân hàng câu hỏi theo từng Nhóm Bài Tập.
+// 4. Có nút quay lại Bảng Tin Bài Tập Cộng Đồng để làm bài và kiểm tra.
 // =========================================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -38,7 +36,6 @@ import {
   getQuestionTypeInfo,
   countQuestionTypesInGroup
 } from '../model/questionTypesRegistry';
-import { CREATOR_EMAIL, isCreatorUser } from '../model/authHelper';
 import '../Grammar.css';
 
 const GrammarAdminCMSPage = ({ user }) => {
@@ -186,7 +183,7 @@ const GrammarAdminCMSPage = ({ user }) => {
 
     const newGroupId = `group_${Date.now()}`;
     const authorName = user?.name || user?.username || (user?.email ? user.email.split('@')[0] : "Thành viên cộng đồng");
-    const authorEmail = user?.email || "buiquangviet032@gmail.com";
+    const authorEmail = user?.email || "community@studye.edu.vn";
 
     const newGroup = {
       id: newGroupId,
@@ -807,14 +804,14 @@ const GrammarAdminCMSPage = ({ user }) => {
         </div>
       )}
 
-      {/* THANH TIÊU ĐỀ QUẢN LÝ BÀI TẬP */}
+      {/* THANH TIÊU ĐỀ SOẠN BÀI TẬP CỘNG ĐỒNG */}
       <div className="grammar-page-titlebar" style={{ marginBottom: '20px' }}>
         <div className="grammar-title-left">
-          <span className="grammar-lesson-badge" style={{ background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', borderColor: 'rgba(236, 72, 153, 0.35)' }}>
-            🛠️ Quản Lý & Soạn Bài Tập
+          <span className="grammar-lesson-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)' }}>
+            🎨 Soạn & Đăng Đề Thi Cộng Đồng
           </span>
           <span className="grammar-lesson-subtitle">
-            Tác giả: <strong style={{ color: '#38bdf8' }}>{user?.name || user?.email || 'buiquangviet032@gmail.com'}</strong>
+            Người tạo: <strong style={{ color: '#38bdf8' }}>{user?.name || user?.email || 'Thành viên cộng đồng'}</strong>
           </span>
         </div>
 
@@ -830,11 +827,11 @@ const GrammarAdminCMSPage = ({ user }) => {
           </button>
           <button
             className="btn btn-primary btn-sm"
-            onClick={() => navigate('/grammar/practice')}
-            title="Xem giao diện người học để kiểm tra bài tập"
+            onClick={() => navigate('/grammar')}
+            title="Quay lại Bảng tin bài tập cộng đồng để làm bài"
             style={{ fontWeight: 600 }}
           >
-            👁️ Xem Thử Giao Diện Học Viên
+            📋 Bảng Tin Bài Tập Cộng Đồng
           </button>
           <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
             ← Trang Chủ

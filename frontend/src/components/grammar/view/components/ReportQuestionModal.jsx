@@ -29,7 +29,7 @@ const ReportQuestionModal = ({
   const [emailUrls, setEmailUrls] = useState(null);
 
   const targetQuestion = allQuestions.find((q, idx) => (q.id || String(idx)) === selectedQuestionId) || question || allQuestions[0];
-  const authorEmail = group?.author?.email || "buiquangviet032@gmail.com";
+  const authorEmail = group?.author?.email || "community@studye.edu.vn";
   const authorName = group?.author?.name || "Tác giả bài tập";
 
   const reporterEmail = user?.email || "hocvien@studye.edu.vn";
