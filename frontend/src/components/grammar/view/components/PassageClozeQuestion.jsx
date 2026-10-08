@@ -138,8 +138,8 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag" style={{ color: '#06b6d4', borderColor: 'rgba(6, 182, 212, 0.35)', background: 'rgba(6, 182, 212, 0.12)' }}>
-        📄 DẠNG: ĐOẠN VĂN ĐIỀN TỪ VÀO CHỖ TRỐNG
+      <div className="exercise-meta-tag">
+        Dạng bài: Điền từ vào đoạn văn
       </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '18px', color: 'var(--text-main)', fontWeight: 600 }}>
@@ -149,15 +149,15 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
       {/* TIÊU ĐỀ BÀI ĐỌC */}
       {question.passage_title && (
         <h3 style={{
-          fontSize: '20px',
-          color: '#06b6d4',
+          fontSize: '18px',
+          color: 'var(--text-main)',
           margin: '0 0 16px 0',
           fontWeight: 700,
           display: 'flex',
           alignItems: 'center',
           gap: '10px'
         }}>
-          <span>📖</span> {question.passage_title}
+          {question.passage_title}
         </h3>
       )}
 
@@ -167,7 +167,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
       {/* BẢNG TỔNG KẾT TIẾN ĐỘ ĐIỀN */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          Đã điền: <strong style={{ color: '#06b6d4' }}>{answeredCount}</strong> / {totalBlanks} chỗ trống
+          Đã điền: <strong style={{ color: 'var(--primary, #3b82f6)' }}>{answeredCount}</strong> / {totalBlanks} chỗ trống
         </span>
         {submitted && (
           <span style={{
@@ -201,7 +201,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
             >
-              🔄 Làm lại đoạn văn
+              Làm lại đoạn văn
             </button>
           )}
 
@@ -211,7 +211,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích" : "📖 Xem giải thích"}
+              {showExplanation ? "Ẩn giải thích" : "Xem giải thích"}
             </button>
           )}
         </div>
@@ -221,7 +221,6 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
       {submitted && showExplanation && question.explanation && (
         <div className="feedback-box correct-box animate-pop" style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <span className="feedback-icon">💡</span>
             <strong>Giải thích chi tiết các chỗ trống:</strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px', lineHeight: '1.7' }}>

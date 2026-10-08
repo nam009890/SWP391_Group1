@@ -5,11 +5,11 @@ import React, { useState } from 'react';
 import { submitQuestionReport } from '../../model/grammarQuestionsData';
 
 const ERROR_TYPES = [
-  { id: 'WRONG_ANSWER', label: '❌ Sai đáp án (Đáp án hệ thống chấm không đúng)' },
-  { id: 'AMBIGUOUS_PROMPT', label: '📝 Đề bài hoặc câu hỏi không rõ ràng / gây hiểu nhầm' },
-  { id: 'TYPO_GRAMMAR', label: '🔤 Lỗi chính tả / lỗi gõ văn bản trong câu' },
-  { id: 'MEDIA_ERROR', label: '🖼️ / 🎧 Lỗi hiển thị hình ảnh hoặc phát âm thanh' },
-  { id: 'OTHER', label: '❓ Lỗi khác' }
+  { id: 'WRONG_ANSWER', label: 'Sai đáp án (Đáp án hệ thống chấm không đúng)' },
+  { id: 'AMBIGUOUS_PROMPT', label: 'Đề bài hoặc câu hỏi không rõ ràng / gây hiểu nhầm' },
+  { id: 'TYPO_GRAMMAR', label: 'Lỗi chính tả / câu chữ trong câu hỏi' },
+  { id: 'MEDIA_ERROR', label: 'Lỗi hiển thị hình ảnh hoặc phát âm thanh' },
+  { id: 'OTHER', label: 'Lỗi khác' }
 ];
 
 const ReportQuestionModal = ({
@@ -30,15 +30,15 @@ const ReportQuestionModal = ({
 
   const targetQuestion = allQuestions.find((q, idx) => (q.id || String(idx)) === selectedQuestionId) || question || allQuestions[0];
   const authorEmail = group?.author?.email || "community@studye.edu.vn";
-  const authorName = group?.author?.name || "Tác giả bài tập";
+  const authorName = group?.author?.name || "Người tạo bài tập";
 
   const reporterEmail = user?.email || "hocvien@studye.edu.vn";
-  const reporterName = user?.name || user?.username || "Học viên StudyE";
+  const reporterName = user?.name || user?.username || "Người học";
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!description.trim()) {
-      alert("Vui lòng nhập mô tả chi tiết lỗi để tác giả dễ dàng sửa bài!");
+      alert("Vui lòng nhập mô tả chi tiết lỗi!");
       return;
     }
 
@@ -52,7 +52,7 @@ const ReportQuestionModal = ({
       description: description.trim(),
       reporterEmail,
       reporterName,
-      testTitle: group?.title || "Bài kiểm tra ngữ pháp",
+      testTitle: group?.title || "Bài kiểm tra",
       authorEmail
     });
 
@@ -86,34 +86,36 @@ const ReportQuestionModal = ({
       background: 'rgba(0, 0, 0, 0.75)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       justifyContent: 'center',
       zIndex: 10000,
-      padding: '20px'
+      padding: 'calc(var(--nav-height, 70px) + 20px) 20px 40px',
+      overflowY: 'auto'
     }}>
       <div className="report-modal-box glass-panel animate-pop" style={{
         maxWidth: '560px',
         width: '100%',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        borderRadius: '20px',
+        margin: '0 auto',
+        maxHeight: 'none',
+        overflowY: 'visible',
+        borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.15)',
-        background: 'var(--card-bg, #1e293b)',
-        padding: '28px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+        background: '#172033',
+        padding: '24px 28px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
       }}>
 
         {/* HEADER MODAL */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 10px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', fontSize: '12px', fontWeight: 700, marginBottom: '6px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-              <span>🚩</span> BÁO LỖI BÀI TẬP
+            <div style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 8px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', fontSize: '11px', fontWeight: 600, marginBottom: '6px' }}>
+              Báo lỗi câu hỏi
             </div>
-            <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--text-main)' }}>
-              Góp ý & Báo lỗi cho tác giả
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
+              Góp ý và báo lỗi câu hỏi
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-              Phản hồi của bạn sẽ được gửi trực tiếp đến Gmail của người tạo bài tập để cập nhật.
+              Phản hồi sẽ được gửi đến người tạo bài tập để cập nhật và sửa đổi.
             </p>
           </div>
           <button
@@ -122,7 +124,7 @@ const ReportQuestionModal = ({
               background: 'transparent',
               border: 'none',
               color: 'var(--text-muted)',
-              fontSize: '22px',
+              fontSize: '20px',
               cursor: 'pointer',
               padding: '4px',
               lineHeight: 1
@@ -135,36 +137,35 @@ const ReportQuestionModal = ({
         {/* MÀN HÌNH SAU KHI GỬI THÀNH CÔNG */}
         {isSubmitted ? (
           <div style={{ textAlign: 'center', padding: '16px 0' }}>
-            <div style={{ fontSize: '48px', marginBottom: '14px' }}>🎉</div>
             <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#10b981' }}>
-              Đã ghi nhận báo lỗi thành công!
+              Đã ghi nhận báo lỗi thành công
             </h4>
             <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '20px' }}>
-              Hệ thống đã lưu phản ánh vào bài tập của tác giả <strong>{authorName}</strong>. Hãy bấm nút dưới đây để kích hoạt gửi Gmail trực tiếp cho tác giả:
+              Hệ thống đã lưu phản ánh vào bài tập của <strong>{authorName}</strong>. Bạn có thể mở Gmail để gửi thông tin trực tiếp:
             </p>
 
             <div style={{
-              padding: '16px',
-              borderRadius: '12px',
+              padding: '14px 16px',
+              borderRadius: '10px',
               background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              marginBottom: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              marginBottom: '20px',
               textAlign: 'left',
               fontSize: '13px'
             }}>
-              <div style={{ marginBottom: '6px' }}><strong>Tác giả nhận:</strong> <span style={{ color: '#38bdf8' }}>{authorEmail}</span></div>
+              <div style={{ marginBottom: '6px' }}><strong>Người tạo:</strong> {authorName} ({authorEmail})</div>
               <div style={{ marginBottom: '6px' }}><strong>Bài tập:</strong> {group?.title}</div>
-              <div><strong>Nội dung phản ánh:</strong> "{description}"</div>
+              <div><strong>Nội dung:</strong> "{description}"</div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
                 type="button"
                 className="btn btn-primary"
                 onClick={handleOpenGmail}
-                style={{ padding: '12px 20px', fontSize: '15px', fontWeight: 700, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ padding: '10px 16px', fontSize: '14px', fontWeight: 600 }}
               >
-                <span>📧</span> Mở Gmail Gửi Ngay Cho Tác Giả
+                Mở Gmail gửi phản hồi
               </button>
 
               <button
@@ -173,16 +174,16 @@ const ReportQuestionModal = ({
                 onClick={handleOpenMailto}
                 style={{ fontSize: '13px', padding: '8px' }}
               >
-                Hoặc mở ứng dụng Email mặc định (Mailto)
+                Mở ứng dụng email
               </button>
 
               <button
                 type="button"
                 className="btn btn-glass"
                 onClick={onClose}
-                style={{ marginTop: '8px', fontSize: '14px' }}
+                style={{ marginTop: '4px', fontSize: '13px' }}
               >
-                Hoàn tất & Đóng
+                Đóng
               </button>
             </div>
           </div>
@@ -190,21 +191,16 @@ const ReportQuestionModal = ({
           /* FORM NHẬP THÔNG TIN BÁO LỖI */
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* THÔNG TIN TÁC GIẢ NHẬN THÔNG BÁO */}
+            {/* THÔNG TIN NGƯỜI TẠO BÀI TẬP */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
               padding: '12px 16px',
-              borderRadius: '12px',
-              background: 'rgba(56, 189, 248, 0.08)',
-              border: '1px solid rgba(56, 189, 248, 0.25)'
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              fontSize: '13px'
             }}>
-              <span style={{ fontSize: '24px' }}>👨‍🏫</span>
-              <div style={{ fontSize: '13px' }}>
-                <div style={{ color: 'var(--text-main)', fontWeight: 600 }}>Tác giả bài tập: {authorName}</div>
-                <div style={{ color: '#38bdf8' }}>Gmail nhận phản ánh: {authorEmail}</div>
-              </div>
+              <div style={{ color: 'var(--text-main)', fontWeight: 600 }}>Người tạo: {authorName}</div>
+              <div style={{ color: 'var(--text-muted)', marginTop: '2px' }}>Email: {authorEmail}</div>
             </div>
 
             {/* CHỌN CÂU HỎI BỊ LỖI */}
@@ -281,28 +277,22 @@ const ReportQuestionModal = ({
               />
             </div>
 
-            {/* NGƯỜI BÁO LỖI */}
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-              <span>Người báo lỗi: <strong>{reporterName}</strong></span>
-              <span>Email: <strong>{reporterEmail}</strong></span>
-            </div>
-
             {/* NÚT SUBMIT */}
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
               <button
                 type="button"
                 className="btn btn-glass"
                 onClick={onClose}
-                style={{ flex: 1, padding: '12px', borderRadius: '10px' }}
+                style={{ flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px' }}
               >
                 Hủy bỏ
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
-                style={{ flex: 2, padding: '12px', borderRadius: '10px', fontWeight: 700, background: 'linear-gradient(135deg, #ef4444, #f43f5e)', borderColor: '#ef4444' }}
+                style={{ flex: 2, padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
               >
-                🚀 Gửi Báo Lỗi & Thông Báo Gmail
+                Gửi báo lỗi
               </button>
             </div>
           </form>

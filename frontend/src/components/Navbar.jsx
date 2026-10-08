@@ -17,21 +17,11 @@ const Navbar = ({ user, onLogout }) => {
           <h2>StudyE</h2>
         </div>
 
-        {/* Nút truy cập nhanh Module Bài Tập Ngữ Pháp */}
-        {!isOnGrammarPage && (
-          <button
-            className="btn btn-glass grammar-pill-btn"
-            onClick={() => navigate('/grammar')}
-            title="Bảng Tin Bài Tập Ngữ Pháp Cộng Đồng"
-          >
-            ✏️ <span className="grammar-pill-text">Bài Tập Ngữ Pháp</span>
-          </button>
-        )}
-
         <div className="navbar-menu">
           {user ? (
             <div className="user-profile">
               <button className="btn btn-glass" onClick={() => navigate('/')}>Dashboard</button>
+              <button className="btn btn-glass" onClick={() => navigate('/grammar')}>Bài tập</button>
               <button className="btn btn-glass" onClick={() => navigate('/weak-vocabulary')}>Từ yếu</button>
               <button className="btn btn-glass" onClick={() => navigate('/weak-vocabulary/practice')}>Ôn luyện</button>
               <span className="welcome-text">Hi, {user.name}</span>

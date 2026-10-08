@@ -55,8 +55,8 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag" style={{ color: '#8b5cf6', borderColor: 'rgba(139, 92, 246, 0.35)', background: 'rgba(139, 92, 246, 0.12)' }}>
-        📖 DẠNG: ĐOẠN VĂN ĐỌC HIỂU & TRẢ LỜI CÂU HỎI
+      <div className="exercise-meta-tag">
+        Dạng bài: Đọc hiểu và trả lời câu hỏi
       </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '20px', color: 'var(--text-main)', fontWeight: 600 }}>
@@ -83,13 +83,13 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
             <h4 style={{
               margin: '0 0 14px 0',
               fontSize: '18px',
-              color: '#8b5cf6',
+              color: 'var(--text-main)',
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               gap: '8px'
             }}>
-              <span>📜</span> {question.passage_title}
+              {question.passage_title}
             </h4>
           )}
           <div style={{
@@ -126,7 +126,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
                   marginBottom: '12px',
                   lineHeight: '1.5'
                 }}>
-                  <span style={{ color: '#8b5cf6', marginRight: '6px' }}>Q{sIdx + 1}:</span>
+                  <span style={{ color: 'var(--primary, #3b82f6)', marginRight: '6px' }}>Q{sIdx + 1}:</span>
                   {sub.question}
                 </div>
 
@@ -148,8 +148,8 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
                         optBorder = '2px dashed #10b981';
                       }
                     } else if (isSelected) {
-                      optBg = 'rgba(139, 92, 246, 0.2)';
-                      optBorder = '2px solid #8b5cf6';
+                      optBg = 'rgba(59, 130, 246, 0.2)';
+                      optBorder = '2px solid var(--primary, #3b82f6)';
                     }
 
                     return (
@@ -177,7 +177,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
                           width: '24px',
                           height: '24px',
                           borderRadius: '50%',
-                          background: isSelected ? '#8b5cf6' : 'rgba(255, 255, 255, 0.08)',
+                          background: isSelected ? 'var(--primary, #3b82f6)' : 'rgba(255, 255, 255, 0.08)',
                           color: isSelected ? '#fff' : 'var(--text-muted)',
                           fontWeight: 700,
                           fontSize: '12px'
@@ -194,7 +194,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
 
                 {submitted && subRes && !subRes.isCorrect && (
                   <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
-                    ✓ Đáp án đúng: {sub.correct_answer}
+                    Đáp án đúng: {sub.correct_answer}
                   </div>
                 )}
               </div>
@@ -206,7 +206,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
       {/* TỔNG KẾT & TIẾN ĐỘ */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          Đã chọn: <strong style={{ color: '#8b5cf6' }}>{answeredCount}</strong> / {subQuestions.length} câu hỏi
+          Đã chọn: <strong style={{ color: 'var(--primary, #3b82f6)' }}>{answeredCount}</strong> / {subQuestions.length} câu hỏi
         </span>
         {submitted && (
           <span style={{
@@ -240,7 +240,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
             >
-              🔄 Làm lại bài đọc
+              Làm lại bài đọc
             </button>
           )}
 
@@ -250,7 +250,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích" : "📖 Xem giải thích"}
+              {showExplanation ? "Ẩn giải thích" : "Xem giải thích"}
             </button>
           )}
         </div>
@@ -260,7 +260,6 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
       {submitted && showExplanation && question.explanation && (
         <div className="feedback-box correct-box animate-pop" style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <span className="feedback-icon">💡</span>
             <strong>Giải thích chi tiết bài đọc hiểu:</strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px', lineHeight: '1.7' }}>

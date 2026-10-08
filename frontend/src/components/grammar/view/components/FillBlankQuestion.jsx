@@ -217,9 +217,9 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
   return (
     <div className="exercise-card glass-panel">
       <div className="exercise-meta-tag">
-        {isText && "✍️ DẠNG 2A: ĐIỀN VÀO Ô TRỐNG (GÕ TỪ)"}
-        {isDropdown && "🔽 DẠNG 2B: CHỌN ĐÁP ÁN (DANH SÁCH THẢ XUỐNG)"}
-        {isCards && "🃏 DẠNG 2C: CHỌN THẺ ĐÁP ÁN (A, B, C, D)"}
+        {isText && "Dạng bài: Điền từ vào ô trống"}
+        {isDropdown && "Dạng bài: Chọn đáp án thả xuống"}
+        {isCards && "Dạng bài: Trắc nghiệm thẻ đáp án"}
       </div>
 
       <div className="exercise-instruction">
@@ -251,7 +251,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
 
           {submitted && (
             <button className="btn btn-glass" onClick={handleReset}>
-              🔄 Làm Lại
+              Làm Lại
             </button>
           )}
         </div>
@@ -259,9 +259,9 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
         {submitted && (
           <div style={{ fontSize: '15px', fontWeight: '600' }}>
             {isEntirelyCorrect ? (
-              <span style={{ color: '#34d399' }}>✓ Xuất sắc! Tất cả các vị trí đều chính xác.</span>
+              <span style={{ color: '#34d399' }}>Xuất sắc! Tất cả các vị trí đều chính xác.</span>
             ) : (
-              <span style={{ color: '#fb7185' }}>✗ Có vị trí chưa chính xác. Vui lòng đối chiếu với đáp án đúng màu xanh.</span>
+              <span style={{ color: '#fb7185' }}>Có vị trí chưa chính xác. Vui lòng kiểm tra lại.</span>
             )}
           </div>
         )}
@@ -270,7 +270,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
       {showExplanation && question.explanation && (
         <div className="feedback-box success-box">
           <div className="feedback-title">
-            <span>📖 Phân tích ngữ pháp chi tiết:</span>
+            <span>Phân tích ngữ pháp chi tiết:</span>
           </div>
           <div className="feedback-content">
             <p>{question.explanation}</p>

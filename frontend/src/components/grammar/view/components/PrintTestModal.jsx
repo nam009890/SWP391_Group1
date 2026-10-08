@@ -8,22 +8,95 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
   const activeGroup = groups.find(g => g.id === selectedGroupId) || groups[0];
   const questions = activeGroup?.questions || [];
 
-  const handleTriggerPrint = () => {
+  // Tải trực tiếp file HTML đề thi về máy
+  const handleDownloadFile = () => {
+    const sheetElement = document.getElementById('printable-test-sheet');
+    if (!sheetElement) {
+      window.print();
+      return;
+    }
+    const title = activeGroup?.title || 'De_thi';
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <style>
+    body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #111; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+    .print-header-section { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 14px; margin-bottom: 20px; }
+    .print-school-title { font-size: 13px; font-weight: bold; text-transform: uppercase; }
+    .print-exam-type { font-size: 15px; font-weight: bold; margin-top: 4px; }
+    .print-subject { font-size: 13px; font-style: italic; }
+    .print-meta-field { font-size: 13px; margin-bottom: 4px; }
+    .print-score-box { border: 2px solid #000; border-radius: 4px; text-align: center; min-width: 100px; }
+    .score-box-title { background: #000; color: #fff; font-size: 11px; padding: 2px 6px; font-weight: bold; }
+    .score-box-content { font-size: 16px; font-weight: bold; padding: 6px; }
+    .print-test-main-title { font-size: 18px; font-weight: bold; text-align: center; margin: 16px 0; text-transform: uppercase; }
+    .print-question-item { margin-bottom: 18px; page-break-inside: avoid; }
+    .print-q-header { font-weight: bold; margin-bottom: 4px; }
+    .print-token-text { text-decoration: underline; padding: 0 4px; }
+    .print-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0; }
+    .teacher-correct-choice { font-weight: bold; color: #15803d; }
+    .print-teacher-inline-ans { background: #f8fafc; border-left: 3px solid #0284c7; padding: 6px 10px; margin-top: 6px; font-size: 13px; }
+    @media print { @page { size: A4; margin: 15mm; } }
+  </style>
+</head>
+<body>
+  ${sheetElement.innerHTML}
+</body>
+</html>`;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${title.replace(/\s+/g, '_')}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrintPdf = () => {
     window.print();
   };
 
   return (
-    <div className="print-modal-backdrop animate-fade-in">
-      <div className="print-modal-container glass-panel animate-pop">
+    <div className="print-modal-backdrop animate-fade-in" style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.75)',
+      backdropFilter: 'blur(8px)',
+      zIndex: 10000,
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      padding: 'calc(var(--nav-height, 70px) + 20px) 20px 40px',
+      overflowY: 'auto'
+    }}>
+      <div className="print-modal-container glass-panel animate-pop" style={{
+        maxWidth: '920px',
+        width: '100%',
+        margin: '0 auto',
+        maxHeight: 'none',
+        overflowY: 'visible',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        background: '#0f172a',
+        padding: '24px 28px',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
+      }}>
 
         {/* HEADER MODAL (ẨN KHI IN) */}
         <div className="print-modal-header no-print">
           <div>
-            <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>🖨️</span> Xuất PDF & In Đề Kiểm Tra Chuẩn A4
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
+              Tải Xuống Đề Kiểm Tra
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-              Định dạng trang in chuẩn mực, tối ưu giấy A4, có thể lưu thành file PDF bằng trình duyệt.
+              Định dạng chuẩn khổ giấy A4, có thể tải file về máy hoặc lưu thành PDF.
             </p>
           </div>
           <button className="btn btn-glass btn-sm" onClick={onClose} style={{ fontSize: '16px' }}>
@@ -31,27 +104,27 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
           </button>
         </div>
 
-        {/* KHUNG CẤU HÌNH TÙY CHỌN IN (ẨN KHI IN) */}
+        {/* KHUNG CẤU HÌNH TÙY CHỌN TẢI XUỐNG (ẨN KHI IN) */}
         <div className="print-config-panel no-print" style={{
-          padding: '16px 20px',
+          padding: '14px 18px',
           background: 'rgba(255, 255, 255, 0.04)',
-          borderRadius: '12px',
+          borderRadius: '10px',
           margin: '16px 0 20px',
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '20px',
+          gap: '16px',
           alignItems: 'center',
           justifyContent: 'space-between',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
+          border: '1px solid rgba(255, 255, 255, 0.08)'
         }}>
           {/* Chọn bài test */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}>Bài kiểm tra:</label>
             <select
               className="form-input"
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
-              style={{ padding: '6px 12px', fontSize: '14px', maxWidth: '240px' }}
+              style={{ padding: '6px 12px', fontSize: '13px', maxWidth: '240px', borderRadius: '8px' }}
             >
               {groups.map(g => (
                 <option key={g.id} value={g.id}>
@@ -62,37 +135,47 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
           </div>
 
           {/* Chọn chế độ: Học sinh vs Giáo viên */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}>Chế độ in:</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}>Chế độ:</label>
             <div style={{ display: 'flex', gap: '6px' }}>
               <button
                 type="button"
                 className={`btn btn-sm ${printMode === 'STUDENT' ? 'btn-primary' : 'btn-glass'}`}
                 onClick={() => setPrintMode('STUDENT')}
-                style={{ fontSize: '13px' }}
+                style={{ fontSize: '12px' }}
               >
-                👨‍🎓 Bản Học Sinh (Đề thi)
+                Bản học sinh (Đề thi)
               </button>
               <button
                 type="button"
                 className={`btn btn-sm ${printMode === 'TEACHER' ? 'btn-primary' : 'btn-glass'}`}
                 onClick={() => setPrintMode('TEACHER')}
-                style={{ fontSize: '13px' }}
+                style={{ fontSize: '12px' }}
               >
-                👨‍🏫 Bản Giáo Viên (Có đáp án)
+                Bản có đáp án
               </button>
             </div>
           </div>
 
           {/* Nút hành động */}
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
               type="button"
-              className="btn btn-primary"
-              onClick={handleTriggerPrint}
-              style={{ fontWeight: 700, padding: '8px 20px' }}
+              className="btn btn-primary btn-sm"
+              onClick={handleDownloadFile}
+              style={{ fontWeight: 600 }}
+              title="Tải trực tiếp file đề thi về máy"
             >
-              🖨️ In Đề / Lưu PDF
+              Tải file về máy
+            </button>
+            <button
+              type="button"
+              className="btn btn-glass btn-sm"
+              onClick={handlePrintPdf}
+              style={{ fontWeight: 600 }}
+              title="Mở hộp thoại in / lưu thành PDF"
+            >
+              In / Lưu PDF
             </button>
           </div>
         </div>
@@ -254,7 +337,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                   {/* 5. Dạng Đoạn văn điền từ PASSAGE_CLOZE */}
                   {q.type === 'PASSAGE_CLOZE' && (
                     <div className="print-question-body">
-                      {q.passage_title && <div className="print-passage-headline">📖 {q.passage_title}</div>}
+                      {q.passage_title && <div className="print-passage-headline">{q.passage_title}</div>}
                       <div className="print-passage-content">{q.passage_text}</div>
                       <div className="print-cloze-options-block">
                         {Object.keys(q.blanks || {}).map(bKey => (
@@ -273,7 +356,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                         ))}
                       </div>
                       {printMode === 'TEACHER' && q.explanation && (
-                        <div className="print-teacher-inline-ans">➔ {q.explanation}</div>
+                        <div className="print-teacher-inline-ans">→ {q.explanation}</div>
                       )}
                     </div>
                   )}
@@ -281,7 +364,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                   {/* 6. Dạng Đọc hiểu READING_COMPREHENSION */}
                   {q.type === 'READING_COMPREHENSION' && (
                     <div className="print-question-body">
-                      {q.passage_title && <div className="print-passage-headline">📖 {q.passage_title}</div>}
+                      {q.passage_title && <div className="print-passage-headline">{q.passage_title}</div>}
                       <div className="print-passage-content">{q.passage_text}</div>
                       <div className="print-sub-questions-list">
                         {(q.sub_questions || []).map((sub, sIdx) => (
@@ -304,7 +387,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                         ))}
                       </div>
                       {printMode === 'TEACHER' && q.explanation && (
-                        <div className="print-teacher-inline-ans">➔ {q.explanation}</div>
+                        <div className="print-teacher-inline-ans">→ {q.explanation}</div>
                       )}
                     </div>
                   )}
@@ -313,7 +396,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                   {q.type === 'AUDIO_LISTENING' && (
                     <div className="print-question-body">
                       <div className="print-audio-notice">
-                        [🎧 PHẦN THI NGHE HIỂU • AUDIO LISTENING]
+                        [PHẦN THI NGHE HIỂU • AUDIO LISTENING]
                       </div>
                       <div className="print-q-lead">{q.question_text}</div>
                       <div className="print-options-grid">

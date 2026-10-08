@@ -19,7 +19,7 @@ export const INITIAL_GRAMMAR_DATA = {
       id: "group_test_01",
       title: "Test 1",
       description: "Bài kiểm tra tổng hợp: Thì Quá khứ, Hiện tại đơn, Dropdown & Thẻ từ",
-      icon: "📝",
+      icon: "",
       author: {
         name: "StudyE Official",
         email: "buiquangviet032@gmail.com"
@@ -90,7 +90,7 @@ export const INITIAL_GRAMMAR_DATA = {
       id: "group_test_02",
       title: "Test 2",
       description: "Bài kiểm tra chuyên đề: Câu điều kiện loại 1 & loại 2",
-      icon: "🎯",
+      icon: "",
       author: {
         name: "StudyE Official",
         email: "buiquangviet032@gmail.com"
@@ -148,7 +148,7 @@ export const INITIAL_GRAMMAR_DATA = {
       id: "group_test_03",
       title: "Test 3",
       description: "Bài kiểm tra: Giới từ, Cụm tính từ và Cấu trúc thường gặp",
-      icon: "📍",
+      icon: "",
       author: {
         name: "StudyE Official",
         email: "buiquangviet032@gmail.com"
@@ -188,7 +188,7 @@ export const INITIAL_GRAMMAR_DATA = {
       id: "group_test_04",
       title: "Test 4 (Đa Phương Tiện & Đọc Hiểu)",
       description: "Bài kiểm tra nâng cao: Hình ảnh, Đoạn văn điền từ, Đọc hiểu văn bản & Nghe Audio",
-      icon: "🌟",
+      icon: "",
       author: {
         name: "StudyE Official",
         email: "buiquangviet032@gmail.com"

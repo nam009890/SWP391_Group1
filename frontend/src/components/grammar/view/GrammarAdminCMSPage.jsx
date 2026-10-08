@@ -20,7 +20,6 @@ import ImageQuestion from './components/ImageQuestion';
 import PassageClozeQuestion from './components/PassageClozeQuestion';
 import ReadingComprehensionQuestion from './components/ReadingComprehensionQuestion';
 import AudioListeningQuestion from './components/AudioListeningQuestion';
-import PrintTestModal from './components/PrintTestModal';
 import {
   getStoredQuestions,
   saveStoredQuestions,
@@ -45,14 +44,23 @@ const GrammarAdminCMSPage = ({ user }) => {
   const [lessonData, setLessonData] = useState(() => getStoredQuestions());
   const groups = lessonData.groups || [];
 
+  const userEmail = (user?.email || '').toLowerCase().trim();
+  const userName = (user?.name || user?.username || '').toLowerCase().trim();
+
+  // Danh sách các bài tập do người dùng hiện tại tạo ra (Requirement 7)
+  const myGroups = groups.filter(g => {
+    const authorEmail = (g.author?.email || '').toLowerCase().trim();
+    const authorName = (g.author?.name || '').toLowerCase().trim();
+    if (userEmail && authorEmail === userEmail) return true;
+    if (userName && authorName === userName) return true;
+    return false;
+  });
+
   // Tab chính trên thanh điều hướng: 'CREATE_STEPPER' (Tạo câu hỏi) | 'QUESTION_BANK' (Ngân hàng câu hỏi)
   const [mainTab, setMainTab] = useState('CREATE_STEPPER');
 
   // Thông báo Toast phản hồi người dùng
   const [toastMessage, setToastMessage] = useState('');
-
-  // Modal in đề thi / xuất PDF
-  const [showPrintModal, setShowPrintModal] = useState(false);
 
   // =========================================================================================
   // BƯỚC 1 STATE: GROUP NAME (CHỌN HOẶC TẠO NHÓM BÀI TẬP: Test 1, Test 2,...)
@@ -61,7 +69,7 @@ const GrammarAdminCMSPage = ({ user }) => {
   const [isCreatingNewGroup, setIsCreatingNewGroup] = useState(false);
   const [newGroupTitle, setNewGroupTitle] = useState('');
   const [newGroupDesc, setNewGroupDesc] = useState('');
-  const [newGroupIcon, setNewGroupIcon] = useState('📝');
+  const [newGroupIcon, setNewGroupIcon] = useState('');
 
   // =========================================================================================
   // BƯỚC 2 STATE: QUESTION TYPE (CHỌN DẠNG CÂU HỎI TỪ REGISTRY)
@@ -189,7 +197,7 @@ const GrammarAdminCMSPage = ({ user }) => {
       id: newGroupId,
       title: newGroupTitle.trim(),
       description: newGroupDesc.trim() || `Bài kiểm tra ${newGroupTitle.trim()}`,
-      icon: newGroupIcon || "📝",
+      icon: newGroupIcon || "",
       author: {
         name: authorName,
         email: authorEmail
@@ -807,62 +815,54 @@ const GrammarAdminCMSPage = ({ user }) => {
       {/* THANH TIÊU ĐỀ SOẠN BÀI TẬP CỘNG ĐỒNG */}
       <div className="grammar-page-titlebar" style={{ marginBottom: '20px' }}>
         <div className="grammar-title-left">
-          <span className="grammar-lesson-badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.35)' }}>
-            🎨 Soạn & Đăng Đề Thi Cộng Đồng
+          <span className="grammar-lesson-badge" style={{ background: 'rgba(255, 255, 255, 0.06)', color: 'var(--text-main)', borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+            Soạn bài tập cộng đồng
           </span>
           <span className="grammar-lesson-subtitle">
-            Người tạo: <strong style={{ color: '#38bdf8' }}>{user?.name || user?.email || 'Thành viên cộng đồng'}</strong>
+            Người tạo: <strong style={{ color: 'var(--text-main)' }}>{user?.name || user?.email || 'Thành viên cộng đồng'}</strong>
           </span>
         </div>
 
         {/* CÁC NÚT ĐIỀU HƯỚNG NHANH */}
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button
-            className="btn btn-glass btn-sm"
-            onClick={() => setShowPrintModal(true)}
-            title="In đề thi hoặc xuất ra file PDF chuẩn khổ A4"
-            style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <span>🖨️</span> In Đề / Xuất PDF
-          </button>
-          <button
             className="btn btn-primary btn-sm"
             onClick={() => navigate('/grammar')}
             title="Quay lại Bảng tin bài tập cộng đồng để làm bài"
             style={{ fontWeight: 600 }}
           >
-            📋 Bảng Tin Bài Tập Cộng Đồng
+            Bảng tin bài tập
           </button>
           <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
-            ← Trang Chủ
+            Trang chủ
           </button>
         </div>
       </div>
 
       {/* THANH TAB CHÍNH: SOẠN CÂU HỎI, DANH SÁCH BÀI TẬP HOẶC HỘP THƯ BÁO LỖI */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px', flexWrap: 'wrap' }}>
         <button
           className={`btn ${mainTab === 'CREATE_STEPPER' ? 'btn-primary' : 'btn-glass'}`}
           onClick={() => setMainTab('CREATE_STEPPER')}
-          style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600 }}
+          style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
         >
-          ✍️ Tạo Câu Hỏi Mới
+          Tạo câu hỏi mới
         </button>
         <button
           className={`btn ${mainTab === 'QUESTION_BANK' ? 'btn-primary' : 'btn-glass'}`}
           onClick={() => setMainTab('QUESTION_BANK')}
-          style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600 }}
+          style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
         >
-          📚 Danh Sách Bài Tập ({groups.length} bài)
+          Bài tập của tôi ({myGroups.length} bài)
         </button>
         <button
           className={`btn ${mainTab === 'REPORTS_INBOX' ? 'btn-primary' : 'btn-glass'}`}
           onClick={() => setMainTab('REPORTS_INBOX')}
-          style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}
+          style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
         >
-          <span>📬 Hộp Thư Báo Lỗi</span>
+          <span>Hộp thư báo lỗi</span>
           {openReportsCount > 0 && (
-            <span style={{ padding: '2px 8px', borderRadius: '10px', background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
+            <span style={{ padding: '2px 6px', borderRadius: '10px', background: '#ef4444', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
               {openReportsCount}
             </span>
           )}
@@ -895,7 +895,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                 onClick={() => setIsCreatingNewGroup(!isCreatingNewGroup)}
                 style={{ fontSize: '13px', color: isCreatingNewGroup ? '#f43f5e' : 'var(--primary)' }}
               >
-                {isCreatingNewGroup ? "✕ Hủy tạo mới" : "➕ Tạo bài tập mới (Test 4, Test 5...)"}
+                {isCreatingNewGroup ? "Hủy tạo mới" : "+ Tạo bài tập mới"}
               </button>
             </div>
 
@@ -946,7 +946,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                   >
                     {groups.map(g => (
                       <option key={g.id} value={g.id}>
-                        {g.icon || "📝"} {g.title} ({g.questions?.length || 0} câu hỏi hiện có)
+                        {g.title} ({g.questions?.length || 0} câu hỏi)
                       </option>
                     ))}
                   </select>
@@ -994,11 +994,10 @@ const GrammarAdminCMSPage = ({ user }) => {
                       boxShadow: isSelected ? `0 0 15px ${typeObj.color}33` : 'none'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '24px' }}>{typeObj.icon}</span>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '8px' }}>
                       {isSelected && (
                         <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', background: typeObj.color, color: '#000' }}>
-                          ✓ Đang chọn
+                          Đang chọn
                         </span>
                       )}
                     </div>
@@ -1065,7 +1064,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                         onClick={handleAutoTokenize}
                         style={{ whiteSpace: 'nowrap' }}
                       >
-                        ⚡ Tách từ
+                        Tách từ
                       </button>
                     </div>
                   </div>
@@ -1073,7 +1072,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                   {spotTokens.length > 0 && (
                     <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px' }}>
                       <label className="form-label" style={{ marginBottom: '10px', display: 'block' }}>
-                        👉 Bấm chọn từ bị sai trong câu:
+                        Bấm chọn từ bị sai trong câu:
                       </label>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                         {spotTokens.map(token => {
@@ -1093,7 +1092,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                                 cursor: 'pointer'
                               }}
                             >
-                              {token.text} {isWrong && "❌ (Lỗi)"}
+                              {token.text} {isWrong && " (Lỗi)"}
                             </button>
                           );
                         })}
@@ -1748,7 +1747,7 @@ const GrammarAdminCMSPage = ({ user }) => {
               {/* KHUNG XEM TRƯỚC TRỰC QUAN (LIVE INTERACTIVE PREVIEW) */}
               <div style={{ marginTop: '24px', padding: '20px', borderRadius: '14px', background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '12px' }}>
-                  👁️ Xem trước giao diện học viên (Live Preview):
+                  Xem trước giao diện học viên (Live Preview):
                 </span>
                 {previewQuestion.type === 'SPOT_ERROR' && (
                   <SpotTheErrorQuestion
@@ -1759,11 +1758,11 @@ const GrammarAdminCMSPage = ({ user }) => {
                 {(previewQuestion.type === 'FILL_BLANK_TEXT' ||
                   previewQuestion.type === 'FILL_BLANK_DROPDOWN' ||
                   previewQuestion.type === 'FILL_BLANK_CARDS') && (
-                  <FillBlankQuestion
-                    question={previewQuestion}
-                    onAnswerResult={() => {}}
-                  />
-                )}
+                    <FillBlankQuestion
+                      question={previewQuestion}
+                      onAnswerResult={() => {}}
+                    />
+                  )}
                 {previewQuestion.type === 'IMAGE_QUESTION' && (
                   <ImageQuestion
                     question={previewQuestion}
@@ -1797,7 +1796,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                   className="btn btn-primary"
                   style={{ padding: '14px 28px', fontSize: '16px', fontWeight: 700, borderRadius: '10px' }}
                 >
-                  💾 Lưu Câu Hỏi Vào "{selectedGroupObj?.title}"
+                  Lưu Câu Hỏi Vào "{selectedGroupObj?.title}"
                 </button>
               </div>
             </form>
@@ -1806,68 +1805,66 @@ const GrammarAdminCMSPage = ({ user }) => {
       )}
 
       {/* =================================================================================== */}
-      {/* TAB 2: NGÂN HÀNG CÂU HỎI THEO TỪNG NHÓM BÀI TẬP (QUESTION BANK)                     */}
+      {/* TAB 2: CÁC BÀI TẬP DO NGƯỜI DÙNG TẠO RA (MY GROUPS)                                 */}
       {/* =================================================================================== */}
       {mainTab === 'QUESTION_BANK' && (
         <div className="animate-fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
             <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: 'var(--text-main)' }}>
-                Ngân Hàng Câu Hỏi Theo Từng Nhóm Bài Tập
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
+                Bài Tập Của Tôi
               </h3>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                Xem danh sách tất cả các bài test và câu hỏi con bên trong mỗi bài.
+                Danh sách các bài tập và câu hỏi do bạn tạo và quản lý trên bảng tin cộng đồng.
               </p>
             </div>
-            <button className="btn btn-glass btn-sm" onClick={handleResetToDefaults} style={{ color: '#f43f5e' }}>
-              🔄 Khôi Phục Dữ Liệu Gốc (Test 1, Test 2, Test 3)
+            <button className="btn btn-glass btn-sm" onClick={handleResetToDefaults} style={{ fontSize: '12px' }}>
+              Khôi phục dữ liệu mẫu
             </button>
           </div>
 
-          {/* DANH SÁCH TỪNG NHÓM BÀI TẬP VÀ CÂU HỎI CON */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {groups.map((group, gIdx) => {
-              const groupQuestions = group.questions || [];
-              const typeBreakdown = countQuestionTypesInGroup(groupQuestions);
+          {/* DANH SÁCH BÀI TẬP CỦA TÔI */}
+          {myGroups.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {myGroups.map((group, gIdx) => {
+                const groupQuestions = group.questions || [];
+                const typeBreakdown = countQuestionTypesInGroup(groupQuestions);
 
-              return (
-                <div key={group.id || gIdx} className="glass-panel" style={{ padding: '24px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.12)' }}>
-                  
-                  {/* Header nhóm */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '28px' }}>{group.icon || "📝"}</span>
+                return (
+                  <div key={group.id || gIdx} className="glass-panel" style={{ padding: '20px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                    
+                    {/* Header nhóm */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
-                        <h4 style={{ margin: 0, fontSize: '18px', color: 'var(--primary)' }}>
+                        <h4 style={{ margin: 0, fontSize: '17px', color: 'var(--primary)' }}>
                           {group.title}
                         </h4>
-                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
                           {group.description}
                         </p>
                       </div>
-                    </div>
 
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <button
-                        className="btn btn-glass btn-sm"
-                        onClick={() => {
-                          setSelectedGroupId(group.id);
-                          setMainTab('CREATE_STEPPER');
-                        }}
-                        title="Soạn thêm câu hỏi vào nhóm này"
-                      >
-                        ➕ Thêm Câu Hỏi
-                      </button>
-                      <button
-                        className="btn btn-glass btn-sm"
-                        onClick={() => handleDeleteGroup(group.id, group.title)}
-                        style={{ color: '#ef4444' }}
-                        title="Xóa nhóm bài tập này"
-                      >
-                        🗑️ Xóa Nhóm
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button
+                          className="btn btn-glass btn-sm"
+                          onClick={() => {
+                            setSelectedGroupId(group.id);
+                            setMainTab('CREATE_STEPPER');
+                          }}
+                          title="Soạn thêm câu hỏi vào nhóm này"
+                        >
+                          Thêm câu hỏi
+                        </button>
+                        <button
+                          className="btn btn-glass btn-sm"
+                          onClick={() => handleDeleteGroup(group.id, group.title)}
+                          style={{ color: '#ef4444' }}
+                          title="Xóa nhóm bài tập này"
+                        >
+                          Xóa bài tập
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
                   {/* Tóm tắt các dạng câu hỏi có trong nhóm này */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '18px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.03)' }}>
@@ -1951,7 +1948,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                                 onClick={() => handleDeleteQuestion(group.id, q.id, q.title)}
                                 style={{ color: '#ef4444', fontSize: '11px', padding: '4px 8px' }}
                               >
-                                🗑️ Xóa Câu Này
+                                Xóa câu
                               </button>
                             </div>
                           </div>
@@ -1960,7 +1957,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                     </div>
                   ) : (
                     <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                      Nhóm này chưa có câu hỏi nào. Bấm "+ Thêm Câu Hỏi" ở trên để soạn bài!
+                      Nhóm này chưa có câu hỏi nào. Bấm "Thêm câu hỏi" ở trên để soạn bài.
                     </div>
                   )}
 
@@ -1968,8 +1965,21 @@ const GrammarAdminCMSPage = ({ user }) => {
               );
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="glass-panel" style={{ padding: '40px 20px', textAlign: 'center', borderRadius: '14px' }}>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-main)' }}>
+              Chưa có bài tập nào do bạn tạo
+            </h4>
+            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+              Bạn có thể bắt đầu tạo bài tập đầu tiên để chia sẻ lên bảng tin cộng đồng.
+            </p>
+            <button className="btn btn-primary btn-sm" onClick={() => setMainTab('CREATE_STEPPER')}>
+              Tạo câu hỏi mới
+            </button>
+          </div>
+        )}
+      </div>
+    )}
 
       {/* =================================================================================== */}
       {/* TAB 3: HỘP THƯ BÁO LỖI TỪ HỌC VIÊN (REPORTS INBOX)                                   */}
@@ -1978,15 +1988,15 @@ const GrammarAdminCMSPage = ({ user }) => {
         <div className="animate-fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
             <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '20px', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>📬</span> Hộp Thư Báo Lỗi & Góp Ý Từ Học Viên
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
+                Hộp Thư Báo Lỗi & Góp Ý
               </h3>
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                Các phản ánh lỗi câu hỏi được gửi trực tiếp từ người làm bài. Tác giả có thể kiểm tra, sửa câu hỏi và gửi email phản hồi.
+                Các phản ánh lỗi câu hỏi được gửi trực tiếp từ người làm bài tập của bạn.
               </p>
             </div>
-            <div style={{ padding: '6px 14px', borderRadius: '10px', background: openReportsCount > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)', color: openReportsCount > 0 ? '#ef4444' : '#10b981', fontWeight: 600, fontSize: '13px', border: `1px solid ${openReportsCount > 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}` }}>
-              {openReportsCount > 0 ? `⚠️ ${openReportsCount} báo lỗi đang chờ xử lý` : '✅ Không có báo lỗi nào chưa xử lý'}
+            <div style={{ padding: '4px 12px', borderRadius: '8px', background: openReportsCount > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)', color: openReportsCount > 0 ? '#ef4444' : '#10b981', fontWeight: 600, fontSize: '12px' }}>
+              {openReportsCount > 0 ? `${openReportsCount} báo lỗi đang chờ xử lý` : 'Không có báo lỗi nào chưa xử lý'}
             </div>
           </div>
 
@@ -1999,25 +2009,25 @@ const GrammarAdminCMSPage = ({ user }) => {
                     key={rep.id || rIdx}
                     className="glass-panel"
                     style={{
-                      padding: '20px',
-                      borderRadius: '14px',
-                      border: `1px solid ${isOpen ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                      background: isOpen ? 'rgba(239, 68, 68, 0.04)' : 'rgba(255, 255, 255, 0.02)'
+                      padding: '18px',
+                      borderRadius: '12px',
+                      border: `1px solid ${isOpen ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.08)'}`,
+                      background: isOpen ? 'rgba(239, 68, 68, 0.03)' : 'rgba(255, 255, 255, 0.02)'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{
-                          padding: '3px 10px',
-                          borderRadius: '8px',
-                          fontSize: '12px',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
                           fontWeight: 700,
                           background: isOpen ? '#ef4444' : '#10b981',
                           color: '#fff'
                         }}>
-                          {isOpen ? 'CHƯA XỬ LÝ' : 'ĐÃ SỬA XONG'}
+                          {isOpen ? 'CHƯA XỬ LÝ' : 'ĐÃ SỬA'}
                         </span>
-                        <strong style={{ fontSize: '15px', color: 'var(--text-main)' }}>
+                        <strong style={{ fontSize: '14px', color: 'var(--text-main)' }}>
                           {rep.errorType}
                         </strong>
                       </div>
@@ -2032,24 +2042,24 @@ const GrammarAdminCMSPage = ({ user }) => {
                     </div>
 
                     <div style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      background: 'rgba(0, 0, 0, 0.25)',
-                      fontSize: '14px',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      fontSize: '13px',
                       color: 'var(--text-main)',
                       lineHeight: '1.5',
-                      marginBottom: '14px',
-                      borderLeft: '4px solid #ef4444'
+                      marginBottom: '12px',
+                      borderLeft: '3px solid #ef4444'
                     }}>
                       "{rep.description}"
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                       <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        Người gửi: <strong>{rep.reporterName || 'Học viên'}</strong> ({rep.reporterEmail})
+                        Người gửi: <strong>{rep.reporterName || 'Người học'}</strong> ({rep.reporterEmail})
                       </div>
 
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
                         {rep.reporterEmail && rep.reporterEmail !== 'Học viên ẩn danh' && (
                           <button
                             className="btn btn-glass btn-sm"
@@ -2057,7 +2067,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                             title="Mở Gmail để gửi lời cảm ơn và thông báo cho người học"
                             style={{ fontSize: '12px' }}
                           >
-                            📧 Trả lời qua Gmail
+                            Trả lời qua Gmail
                           </button>
                         )}
 
@@ -2069,7 +2079,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                           }}
                           style={{ fontSize: '12px' }}
                         >
-                          🔍 Xem câu này trong bài
+                          Xem câu trong bài
                         </button>
 
                         {isOpen && (
@@ -2078,7 +2088,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                             onClick={() => handleResolveReport(rep.groupId, rep.id)}
                             style={{ fontSize: '12px', background: '#10b981', borderColor: '#10b981' }}
                           >
-                            ✓ Đã sửa xong
+                            Đã sửa xong
                           </button>
                         )}
                       </div>
@@ -2088,26 +2098,16 @@ const GrammarAdminCMSPage = ({ user }) => {
               })}
             </div>
           ) : (
-            <div className="glass-panel" style={{ padding: '50px 20px', textAlign: 'center', borderRadius: '16px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '14px' }}>📭</div>
-              <h4 style={{ margin: '0 0 8px 0', fontSize: '18px', color: 'var(--text-main)' }}>
+            <div className="glass-panel" style={{ padding: '40px 20px', textAlign: 'center', borderRadius: '14px' }}>
+              <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-main)' }}>
                 Hộp thư trống
               </h4>
-              <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
-                Chưa có báo lỗi nào từ người làm bài. Khi học viên báo lỗi một câu hỏi, thông báo sẽ hiển thị tại đây và gửi vào Gmail của bạn!
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                Chưa có báo lỗi nào cho các bài tập của bạn. Khi có người báo lỗi, thông báo sẽ hiển thị tại đây.
               </p>
             </div>
           )}
         </div>
-      )}
-
-      {/* MODAL IN ĐỀ THI / XUẤT PDF CHUẨN A4 */}
-      {showPrintModal && (
-        <PrintTestModal
-          groups={groups}
-          currentGroupId={selectedGroupId}
-          onClose={() => setShowPrintModal(false)}
-        />
       )}
 
     </div>

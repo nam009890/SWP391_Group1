@@ -154,23 +154,15 @@ const GrammarLearnerPage = ({ user }) => {
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button
-              className="btn btn-glass btn-sm"
-              onClick={() => setShowPrintModal(true)}
-              title="Xuất file PDF hoặc in đề kiểm tra chuẩn A4"
-              style={{ fontWeight: 600, color: '#38bdf8' }}
-            >
-              🖨️ In Đề / Xuất PDF
-            </button>
-            <button
               className="btn btn-primary btn-sm"
               onClick={() => navigate('/grammar/create')}
               title="Tự tạo bài tập mới và chia sẻ lên bảng tin cộng đồng"
-              style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ fontWeight: 600 }}
             >
-              <span>✍️</span> Tạo & Đăng Bài Mới
+              Tạo bài tập mới
             </button>
             <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
-              ← Trang Chủ
+              Trang chủ
             </button>
           </div>
         </div>
@@ -214,7 +206,6 @@ const GrammarLearnerPage = ({ user }) => {
 
                   {/* THÔNG TIN TÁC GIẢ BÀI TẬP */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '18px' }}>
-                    <span>👤</span>
                     <span>Tác giả: <strong style={{ color: 'var(--text-main)' }}>{group.author?.name || 'Cộng đồng'}</strong></span>
                   </div>
                 </div>
@@ -227,21 +218,12 @@ const GrammarLearnerPage = ({ user }) => {
                     handleStartTest(idx);
                   }}
                 >
-                  Bắt đầu làm bài →
+                  Bắt đầu làm bài
                 </button>
               </div>
             );
           })}
         </div>
-
-        {/* Modal in đề thi / xuất PDF */}
-        {showPrintModal && (
-          <PrintTestModal
-            groups={groups}
-            currentGroupId={currentGroup?.id}
-            onClose={() => setShowPrintModal(false)}
-          />
-        )}
       </div>
     );
   }
@@ -268,7 +250,7 @@ const GrammarLearnerPage = ({ user }) => {
           onClick={handleBackToGroupsList}
           style={{ fontSize: '13px', fontWeight: 600 }}
         >
-          ← Quay lại danh sách bài
+          Quay lại danh sách
         </button>
 
         <div style={{ textAlign: 'center' }}>
@@ -284,25 +266,18 @@ const GrammarLearnerPage = ({ user }) => {
           <button
             className="btn btn-glass btn-sm"
             onClick={() => setShowReportModal(true)}
-            title="Báo lỗi câu hỏi này cho tác giả qua Gmail"
-            style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.35)', background: 'rgba(239, 68, 68, 0.1)', fontWeight: 600 }}
+            title="Báo lỗi câu hỏi này cho tác giả"
+            style={{ fontSize: '13px', fontWeight: 600 }}
           >
-            🚩 Báo Lỗi
+            Báo lỗi
           </button>
           <button
             className="btn btn-glass btn-sm"
             onClick={() => setShowPrintModal(true)}
-            title="In đề bài hoặc xuất PDF"
-            style={{ color: '#38bdf8' }}
+            title="Tải xuống đề thi để in hoặc lưu trữ"
+            style={{ fontSize: '13px', fontWeight: 600 }}
           >
-            🖨️ In Đề / PDF
-          </button>
-          <button
-            className="btn btn-glass btn-sm"
-            onClick={() => navigate('/grammar/create')}
-            title="Chuyển sang trang tạo câu hỏi cộng đồng"
-          >
-            ✍️ Tạo câu hỏi
+            Tải xuống
           </button>
           <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
             Trang chủ
@@ -429,7 +404,7 @@ const GrammarLearnerPage = ({ user }) => {
         </div>
 
         <button className="btn btn-primary" onClick={handleNext}>
-          {currentIndex === questions.length - 1 ? "Hoàn thành 🎉" : "Câu tiếp →"}
+          {currentIndex === questions.length - 1 ? "Hoàn thành" : "Câu tiếp"}
         </button>
       </div>
 
@@ -437,9 +412,8 @@ const GrammarLearnerPage = ({ user }) => {
       {showCompletionModal && (
         <div className="completion-modal-overlay">
           <div className="glass-panel completion-modal-card animate-pop">
-            <div className="completion-trophy-icon">🏆</div>
-            <h2>Hoàn thành {currentGroup.title}!</h2>
-            <p>Bạn đã trả lời xong tất cả các câu hỏi trong bài này.</p>
+            <h2>Hoàn thành {currentGroup.title}</h2>
+            <p>Bạn đã hoàn thành tất cả câu hỏi trong bài tập này.</p>
 
             <div className="completion-score-badge">
               {currentScore} / {questions.length} câu đúng
@@ -447,17 +421,16 @@ const GrammarLearnerPage = ({ user }) => {
 
             <div className="completion-actions-row">
               <button className="btn btn-glass" onClick={handleRestartGroup}>
-                🔄 Làm lại bài này
+                Làm lại bài
               </button>
               <button
                 className="btn btn-glass"
                 onClick={() => setShowReportModal(true)}
-                style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.35)' }}
               >
-                🚩 Báo lỗi câu hỏi
+                Báo lỗi
               </button>
               <button className="btn btn-primary" onClick={handleBackToGroupsList}>
-                ← Quay lại danh sách bài
+                Quay lại danh sách
               </button>
             </div>
           </div>

@@ -37,8 +37,8 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag" style={{ color: '#ec4899', borderColor: 'rgba(236, 72, 153, 0.35)', background: 'rgba(236, 72, 153, 0.12)' }}>
-        🖼️ DẠNG: CÂU HỎI KÈM HÌNH ẢNH
+      <div className="exercise-meta-tag">
+        Dạng bài: Câu hỏi kèm hình ảnh
       </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '18px', color: 'var(--text-main)', fontWeight: 600 }}>
@@ -84,18 +84,17 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               fontSize: '11px',
               backdropFilter: 'blur(4px)'
             }}>
-              🔍 {isZoomed ? "Thu nhỏ" : "Phóng to"}
+              {isZoomed ? "Thu nhỏ" : "Phóng to"}
             </span>
           </div>
           {question.image_caption && (
             <p style={{ margin: '8px 0 0', fontSize: '13px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-              📷 {question.image_caption}
+              {question.image_caption}
             </p>
           )}
         </div>
       ) : (
         <div style={{ padding: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '20px', border: '1px dashed rgba(255,255,255,0.2)' }}>
-          <span style={{ fontSize: '32px' }}>🖼️</span>
           <p style={{ margin: '8px 0 0', color: 'var(--text-muted)', fontSize: '13px' }}>Chưa có đường dẫn ảnh cho câu hỏi này.</p>
         </div>
       )}
@@ -107,7 +106,7 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
           background: 'rgba(255, 255, 255, 0.05)',
           borderRadius: '12px',
           marginBottom: '20px',
-          borderLeft: '4px solid #ec4899',
+          borderLeft: '4px solid var(--primary, #3b82f6)',
           fontSize: '17px',
           fontWeight: 600,
           color: 'var(--text-main)',
@@ -187,7 +186,9 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
                 {opt}
               </span>
               {submitted && isSelected && (
-                <span>{isCorrect ? '✅' : '❌'}</span>
+                <span style={{ color: isCorrect ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+                  {isCorrect ? '✓' : '✗'}
+                </span>
               )}
             </div>
           );
@@ -212,7 +213,7 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
             >
-              🔄 Làm lại
+              Làm lại
             </button>
           )}
 
@@ -222,7 +223,7 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích" : "📖 Xem giải thích"}
+              {showExplanation ? "Ẩn giải thích" : "Xem giải thích"}
             </button>
           )}
         </div>
@@ -232,7 +233,6 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
       {submitted && (showExplanation || !isCorrect) && (
         <div className={`feedback-box animate-pop ${isCorrect ? 'correct-box' : 'incorrect-box'}`} style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <span className="feedback-icon">{isCorrect ? '🎉' : '⚠️'}</span>
             <strong>{isCorrect ? 'Chính xác!' : 'Chưa chính xác'}</strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px' }}>

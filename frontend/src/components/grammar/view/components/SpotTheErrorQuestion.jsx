@@ -41,7 +41,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
   return (
     <div className="exercise-card glass-panel">
       <div className="exercise-meta-tag">
-        🔍 DẠNG 1: CHỈ RA LỖI SAI TRONG CÂU
+        Dạng bài: Tìm lỗi sai trong câu
       </div>
 
       <div className="exercise-instruction">
@@ -73,7 +73,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
               {submitted && isCorrect && isTargetErrorToken ? (
                 <>
                   <span className="strikethrough-error">{token.text}</span>
-                  <span className="replacement-text">➔ {question.correction || 'went'}</span>
+                  <span className="replacement-text">→ {question.correction || 'went'}</span>
                 </>
               ) : (
                 token.text
@@ -106,7 +106,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
 
           {submitted && (
             <button className="btn btn-glass" onClick={handleReset}>
-              🔄 Thử Lại
+              Thử Lại
             </button>
           )}
         </div>
@@ -114,9 +114,9 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
         {submitted && (
           <div style={{ fontSize: '15px', fontWeight: '600' }}>
             {isCorrect ? (
-              <span style={{ color: '#34d399' }}>✓ Chính xác! Bạn đã tìm đúng lỗi sai.</span>
+              <span style={{ color: '#34d399' }}>Chính xác! Bạn đã tìm đúng lỗi sai.</span>
             ) : (
-              <span style={{ color: '#fb7185' }}>✗ Chưa chính xác. Vui lòng chọn lại.</span>
+              <span style={{ color: '#fb7185' }}>Chưa chính xác. Vui lòng chọn lại.</span>
             )}
           </div>
         )}
@@ -126,7 +126,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
       {showExplanation && (
         <div className="feedback-box success-box">
           <div className="feedback-title">
-            <span>📚 Phân tích ngữ pháp chi tiết:</span>
+            <span>Phân tích ngữ pháp chi tiết:</span>
             {question.error_type && (
               <span style={{ fontSize: '12px', background: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '4px' }}>
                 {question.error_type}

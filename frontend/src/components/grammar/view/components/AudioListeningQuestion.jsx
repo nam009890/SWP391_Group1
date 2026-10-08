@@ -91,8 +91,8 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag" style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.35)', background: 'rgba(245, 158, 11, 0.12)' }}>
-        🎧 DẠNG: NGHE AUDIO TRẢ LỜI CÂU HỎI
+      <div className="exercise-meta-tag">
+        Dạng bài: Nghe audio trả lời câu hỏi
       </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '20px', color: 'var(--text-main)', fontWeight: 600 }}>
@@ -248,7 +248,9 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
                 {opt}
               </span>
               {submitted && isSelected && (
-                <span>{isCorrect ? '✅' : '❌'}</span>
+                <span style={{ color: isCorrect ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+                  {isCorrect ? '✓' : '✗'}
+                </span>
               )}
             </div>
           );
@@ -273,7 +275,7 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
             >
-              🔄 Làm lại câu nghe
+              Làm lại câu nghe
             </button>
           )}
 
@@ -283,7 +285,7 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích & Lời thoại" : "📖 Xem lời thoại & Giải thích"}
+              {showExplanation ? "Ẩn giải thích & Lời thoại" : "Xem lời thoại & Giải thích"}
             </button>
           )}
         </div>
@@ -293,7 +295,6 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
       {submitted && (showExplanation || !isCorrect) && (
         <div className={`feedback-box animate-pop ${isCorrect ? 'correct-box' : 'incorrect-box'}`} style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <span className="feedback-icon">{isCorrect ? '🎉' : '⚠️'}</span>
             <strong>{isCorrect ? 'Chính xác!' : 'Chưa chính xác'}</strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px' }}>
@@ -306,7 +307,7 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
             {question.transcript && (
               <div style={{ marginTop: '10px', padding: '10px 14px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px' }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  📝 Lời thoại gốc (Transcript):
+                  Lời thoại gốc (Transcript):
                 </span>
                 <span style={{ fontStyle: 'italic', color: 'var(--text-main)' }}>"{question.transcript}"</span>
               </div>
