@@ -21,6 +21,6 @@ public class Deck {
 
     @Column(columnDefinition = "NVARCHAR(255)")
     private String name;
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 }

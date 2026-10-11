@@ -1,31 +1,26 @@
 -- =====================================================
--- 1. CREATE DATABASE IF NOT EXISTS
+-- 1. RECREATE DATABASE (Clean Slate)
 -- =====================================================
-IF DB_ID(N'demo_db') IS NULL
+USE master;
+GO
+
+IF DB_ID(N'demo_db') IS NOT NULL
 BEGIN
-    CREATE DATABASE demo_db;
+    -- Terminate active connections so the DB can be safely dropped
+    ALTER DATABASE demo_db SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE demo_db;
 END;
 GO
+
+CREATE DATABASE demo_db;
+GO
+
 -- =====================================================
 -- 2. USE DATABASE
 -- =====================================================
 USE demo_db;
 GO
--- =====================================================
--- 3. DROP EXISTING TABLES (children before parents)
--- =====================================================
-IF OBJECT_ID(N'dbo.grammar_question_reports', N'U') IS NOT NULL DROP TABLE dbo.grammar_question_reports;
-IF OBJECT_ID(N'dbo.grammar_questions', N'U') IS NOT NULL DROP TABLE dbo.grammar_questions;
-IF OBJECT_ID(N'dbo.grammar_groups', N'U') IS NOT NULL DROP TABLE dbo.grammar_groups;
-IF OBJECT_ID(N'dbo.weak_practice_attempts', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_attempts;
-IF OBJECT_ID(N'dbo.weak_practice_items', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_items;
-IF OBJECT_ID(N'dbo.weak_practice_sessions', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_sessions;
-IF OBJECT_ID(N'dbo.user_weak_vocabularies', N'U') IS NOT NULL DROP TABLE dbo.user_weak_vocabularies;
-IF OBJECT_ID(N'dbo.user_flashcard_reviews', N'U') IS NOT NULL DROP TABLE dbo.user_flashcard_reviews;
-IF OBJECT_ID(N'dbo.flashcards', N'U') IS NOT NULL DROP TABLE dbo.flashcards;
-IF OBJECT_ID(N'dbo.decks', N'U') IS NOT NULL DROP TABLE dbo.decks;
-IF OBJECT_ID(N'dbo.users', N'U') IS NOT NULL DROP TABLE dbo.users;
-GO
+
 -- =====================================================
 -- 4. CREATE TABLES (derived from current JPA entities)
 -- =====================================================
@@ -127,7 +122,7 @@ INSERT @words VALUES
  (N'define',N'định nghĩa',N'/dɪˈfaɪn/'),(N'demonstrate',N'chứng minh',N'/ˈdemənstreɪt/'),(N'determine',N'xác định',N'/dɪˈtɜːmɪn/'),(N'develop',N'phát triển',N'/dɪˈveləp/'),(N'efficient',N'hiệu quả',N'/ɪˈfɪʃənt/'),(N'emphasize',N'nhấn mạnh',N'/ˈemfəsaɪz/'),(N'encourage',N'khuyến khích',N'/ɪnˈkʌrɪdʒ/'),(N'environment',N'môi trường',N'/ɪnˈvaɪrənmənt/'),(N'establish',N'thiết lập',N'/ɪˈstæblɪʃ/'),(N'estimate',N'ước tính',N'/ˈestɪmeɪt/'),
  (N'evaluate',N'đánh giá',N'/ɪˈvæljueɪt/'),(N'evidence',N'bằng chứng',N'/ˈevɪdəns/'),(N'expand',N'mở rộng',N'/ɪkˈspænd/'),(N'factor',N'yếu tố',N'/ˈfæktə/'),(N'feature',N'đặc điểm',N'/ˈfiːtʃə/'),(N'focus',N'tập trung',N'/ˈfəʊkəs/'),(N'function',N'chức năng',N'/ˈfʌŋkʃən/'),(N'generate',N'tạo ra',N'/ˈdʒenəreɪt/'),(N'identify',N'xác định',N'/aɪˈdentɪfaɪ/'),(N'impact',N'tác động',N'/ˈɪmpækt/'),
  (N'improve',N'cải thiện',N'/ɪmˈpruːv/'),(N'indicate',N'chỉ ra',N'/ˈɪndɪkeɪt/'),(N'influence',N'ảnh hưởng',N'/ˈɪnfluəns/'),(N'maintain',N'duy trì',N'/meɪnˈteɪn/'),(N'major',N'chủ yếu',N'/ˈmeɪdʒə/'),(N'method',N'phương pháp',N'/ˈmeθəd/'),(N'occur',N'xảy ra',N'/əˈkɜː/'),(N'participate',N'tham gia',N'/pɑːˈtɪsɪpeɪt/'),(N'perform',N'thực hiện',N'/pəˈfɔːm/'),(N'prevent',N'ngăn chặn',N'/prɪˈvent/'),
- (N'principle',N'nguyên tắc',N'/ˈprɪnsəpəl/'),(N'process',N'quy trình',N'/ˈprəʊses/'),(N'require',N'yêu cầu',N'/rɪˈkwaɪə/'),(N'respond',N'phản hồi',N'/rɪˈspɒnd/'),(N'significant',N'đáng kể',N'/sɪɡˈnɪfɪkənt/'),(N'similar',N'tương tự',N'/ˈsɪmɪlə/'),(N'specific',N'cụ thể',N'/spəˈsɪfɪk/'),(N'strategy',N'chiến lược',N'/ˈstrætədʒi/'),(N'structure',N'cấu trúc',N'/ˈstrʌktʃə/'),(N'sufficient',N'đủ',N'/səˈfɪʃənt/'),
+ (N'principle',N'nguyên tắc',N'/ˈprɪnsəpəl/'),(N'process',N'quy trình',N'/ˈprəʊses/'),(N'require',N'yêu cầu',N'/rɪˈkwaɪə/'),(N'respond',N'phản hồi',N'/rɪˈspɒnd/'),(N'significant',N'đáng kể',N'/sɪɡˈnɪfɪkənt/'),(N'similar',N'tương tự',N'/ˈsɪmɪlə/'),(N'specific',N'c cụ thể',N'/spəˈsɪfɪk/'),(N'strategy',N'chiến lược',N'/ˈstrætədʒi/'),(N'structure',N'cấu trúc',N'/ˈstrʌktʃə/'),(N'sufficient',N'đủ',N'/səˈfɪʃənt/'),
  (N'support',N'hỗ trợ',N'/səˈpɔːt/'),(N'tendency',N'xu hướng',N'/ˈtendənsi/'),(N'theory',N'lý thuyết',N'/ˈθɪəri/'),(N'transfer',N'chuyển giao',N'/trænsˈfɜː/'),(N'vary',N'thay đổi',N'/ˈveəri/'),(N'accept',N'chấp nhận',N'/əkˈsept/'),(N'access',N'truy cập',N'/ˈækses/'),(N'accurate',N'chính xác',N'/ˈækjərət/'),(N'acquire',N'tiếp thu',N'/əˈkwaɪə/'),(N'beneficial',N'có lợi',N'/benɪˈfɪʃəl/');
 INSERT dbo.flashcards(deck_id,vocabulary,meaning,phonetic,example_sentence) SELECT @demoDeck,word,meaning,phonetic,N'Students should '+word+N' this concept during every lesson.' FROM @words;
 INSERT dbo.user_weak_vocabularies(user_id,flashcard_id,manual_marked,auto_detected,mastery_score,total_attempts,correct_count,wrong_count,consecutive_wrong,last_study_quality,weak_note,weak_deleted,created_at,updated_at)

@@ -22,6 +22,7 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
+    private final GeminiService geminiService;
 
     @Override
     public List<FlashcardResponse> getFlashcardsByDeckId(Long deckId) {
@@ -49,11 +50,17 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     @Override
     public List<FlashcardResponse> generateAiFlashcards(Long deckId, String prompt) {
-        // Tính năng này cần một nhà cung cấp AI bên ngoài, nhưng backend phải hoạt động độc lập.
-        throw new ResponseStatusException(
-                HttpStatus.NOT_IMPLEMENTED,
-                "Tính năng tạo flashcard bằng AI hiện chưa được cấu hình."
-        );
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new ResourceNotFoundException("Deck not found with id: " + deckId));
+
+        List<Flashcard> generatedCards = geminiService.generateFlashcards(prompt);
+
+        List<Flashcard> savedCards = generatedCards.stream().map(card -> {
+            card.setDeck(deck);
+            return flashcardRepository.save(card);
+        }).collect(Collectors.toList());
+
+        return savedCards.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     private FlashcardResponse mapToResponse(Flashcard flashcard) {
