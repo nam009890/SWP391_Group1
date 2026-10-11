@@ -60,17 +60,23 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
                     cb.like(cb.lower(root.get("flashcard").get("vocabulary")), term),
                     cb.like(cb.lower(root.get("flashcard").get("meaning")), term)));
         }
-        if (deckId != null) specification = specification.and((root, query, cb) -> cb.equal(root.get("flashcard").get("deck").get("id"), deckId));
-        if (source != null && !"ALL".equals(source)) specification = specification.and((root, query, cb) -> switch (source) {
-            case "AUTO" -> cb.isTrue(root.get("autoDetected"));
-            case "MANUAL" -> cb.isTrue(root.get("manualMarked"));
-            case "BOTH" -> cb.and(cb.isTrue(root.get("autoDetected")), cb.isTrue(root.get("manualMarked")));
-            default -> cb.conjunction();
-        });
-        if (masteryMin != null) specification = specification.and((root, query, cb) -> cb.ge(root.get("masteryScore"), masteryMin));
-        if (masteryMax != null) specification = specification.and((root, query, cb) -> cb.le(root.get("masteryScore"), masteryMax));
-        if (accuracyMin != null) specification = specification.and((root, query, cb) -> accuracyPredicate(root, cb, accuracyMin, true));
-        if (accuracyMax != null) specification = specification.and((root, query, cb) -> accuracyPredicate(root, cb, accuracyMax, false));
+        if (deckId != null)
+            specification = specification.and((root, query, cb) -> cb.equal(root.get("flashcard").get("deck").get("id"), deckId));
+        if (source != null && !"ALL".equals(source))
+            specification = specification.and((root, query, cb) -> switch (source) {
+                case "AUTO" -> cb.isTrue(root.get("autoDetected"));
+                case "MANUAL" -> cb.isTrue(root.get("manualMarked"));
+                case "BOTH" -> cb.and(cb.isTrue(root.get("autoDetected")), cb.isTrue(root.get("manualMarked")));
+                default -> cb.conjunction();
+            });
+        if (masteryMin != null)
+            specification = specification.and((root, query, cb) -> cb.ge(root.get("masteryScore"), masteryMin));
+        if (masteryMax != null)
+            specification = specification.and((root, query, cb) -> cb.le(root.get("masteryScore"), masteryMax));
+        if (accuracyMin != null)
+            specification = specification.and((root, query, cb) -> accuracyPredicate(root, cb, accuracyMin, true));
+        if (accuracyMax != null)
+            specification = specification.and((root, query, cb) -> accuracyPredicate(root, cb, accuracyMax, false));
 
         String resolvedSort = sort == null ? "WEAKEST_FIRST" : sort;
         Sort pageableSort = switch (resolvedSort) {
@@ -105,10 +111,38 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
         return minimum ? cb.ge(accuracy, boundary / 100d) : cb.le(accuracy, boundary / 100d);
     }
 
-    @Override public WeakResponse patch(Long userId, Long id, PatchRequest request) { UserWeakVocabulary weak = owned(userId, id); if (request.getWeakNote() != null) weak.setWeakNote(request.getWeakNote()); if (request.getManualMarked() != null) weak.setManualMarked(request.getManualMarked()); return map(repo.save(weak)); }
-    @Override public void softDelete(Long userId, Long id) { UserWeakVocabulary weak = owned(userId, id); weak.setWeakDeleted(true); weak.setWeakDeletedAt(LocalDateTime.now()); repo.save(weak); }
-    private UserWeakVocabulary owned(Long userId, Long id) { return repo.findById(id).filter(w -> w.getUser().getId().equals(userId) && !w.isWeakDeleted()).orElseThrow(() -> new ResourceNotFoundException("Weak vocabulary not found")); }
-    private User user(Long id) { return users.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found")); }
-    private Flashcard card(Long id) { return flashcards.findById(id).orElseThrow(() -> new ResourceNotFoundException("Flashcard not found")); }
-    private WeakResponse map(UserWeakVocabulary w) { Flashcard f = w.getFlashcard(); double accuracy = w.getTotalAttempts() == 0 ? 0 : Math.round(w.getCorrectCount() * 10000d / w.getTotalAttempts()) / 100d; String reason = w.isManualMarked() ? "MANUAL_MARK" : w.getConsecutiveWrong() >= 2 ? "CONSECUTIVE_WRONG" : w.getLastStudyQuality() != null && w.getLastStudyQuality() <= 1 ? "STUDY_FORGOT" : w.getLastStudyQuality() != null && w.getLastStudyQuality() <= 3 ? "STUDY_HARD" : w.getTotalAttempts() >= 3 && accuracy < 60 ? "LOW_PRACTICE_ACCURACY" : "STUDY_HARD"; return WeakResponse.builder().weakVocabularyId(w.getId()).flashcardId(f.getId()).deckId(f.getDeck() == null ? null : f.getDeck().getId()).deckName(f.getDeck() == null ? null : f.getDeck().getName()).vocabulary(f.getVocabulary()).meaning(f.getMeaning()).phonetic(f.getPhonetic()).exampleSentence(f.getExampleSentence()).manualMarked(w.isManualMarked()).autoDetected(w.isAutoDetected()).masteryScore(w.getMasteryScore()).totalAttempts(w.getTotalAttempts()).correctCount(w.getCorrectCount()).wrongCount(w.getWrongCount()).consecutiveWrong(w.getConsecutiveWrong()).accuracy(accuracy).weakReason(reason).weakNote(w.getWeakNote()).lastStudyQuality(w.getLastStudyQuality()).lastPracticedAt(w.getLastPracticedAt()).createdAt(w.getCreatedAt()).updatedAt(w.getUpdatedAt()).build(); }
+    @Override
+    public WeakResponse patch(Long userId, Long id, PatchRequest request) {
+        UserWeakVocabulary weak = owned(userId, id);
+        if (request.getWeakNote() != null) weak.setWeakNote(request.getWeakNote());
+        if (request.getManualMarked() != null) weak.setManualMarked(request.getManualMarked());
+        return map(repo.save(weak));
+    }
+
+    @Override
+    public void softDelete(Long userId, Long id) {
+        UserWeakVocabulary weak = owned(userId, id);
+        weak.setWeakDeleted(true);
+        weak.setWeakDeletedAt(LocalDateTime.now());
+        repo.save(weak);
+    }
+
+    private UserWeakVocabulary owned(Long userId, Long id) {
+        return repo.findById(id).filter(w -> w.getUser().getId().equals(userId) && !w.isWeakDeleted()).orElseThrow(() -> new ResourceNotFoundException("Weak vocabulary not found"));
+    }
+
+    private User user(Long id) {
+        return users.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    private Flashcard card(Long id) {
+        return flashcards.findById(id).orElseThrow(() -> new ResourceNotFoundException("Flashcard not found"));
+    }
+
+    private WeakResponse map(UserWeakVocabulary w) {
+        Flashcard f = w.getFlashcard();
+        double accuracy = w.getTotalAttempts() == 0 ? 0 : Math.round(w.getCorrectCount() * 10000d / w.getTotalAttempts()) / 100d;
+        String reason = w.isManualMarked() ? "MANUAL_MARK" : w.getConsecutiveWrong() >= 2 ? "CONSECUTIVE_WRONG" : w.getLastStudyQuality() != null && w.getLastStudyQuality() <= 1 ? "STUDY_FORGOT" : w.getLastStudyQuality() != null && w.getLastStudyQuality() <= 3 ? "STUDY_HARD" : w.getTotalAttempts() >= 3 && accuracy < 60 ? "LOW_PRACTICE_ACCURACY" : "STUDY_HARD";
+        return WeakResponse.builder().weakVocabularyId(w.getId()).flashcardId(f.getId()).deckId(f.getDeck() == null ? null : f.getDeck().getId()).deckName(f.getDeck() == null ? null : f.getDeck().getName()).vocabulary(f.getVocabulary()).meaning(f.getMeaning()).phonetic(f.getPhonetic()).exampleSentence(f.getExampleSentence()).manualMarked(w.isManualMarked()).autoDetected(w.isAutoDetected()).masteryScore(w.getMasteryScore()).totalAttempts(w.getTotalAttempts()).correctCount(w.getCorrectCount()).wrongCount(w.getWrongCount()).consecutiveWrong(w.getConsecutiveWrong()).accuracy(accuracy).weakReason(reason).weakNote(w.getWeakNote()).lastStudyQuality(w.getLastStudyQuality()).lastPracticedAt(w.getLastPracticedAt()).createdAt(w.getCreatedAt()).updatedAt(w.getUpdatedAt()).build();
+    }
 }

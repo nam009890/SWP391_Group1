@@ -29,6 +29,6 @@ public class Flashcard {
     private String meaning;
     @Column(columnDefinition = "NVARCHAR(255)")
     private String phonetic;
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String exampleSentence;
 }

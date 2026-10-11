@@ -8,5 +8,5 @@ import java.util.List;
 public interface FlashcardService {
     List<FlashcardResponse> getFlashcardsByDeckId(Long deckId);
     FlashcardResponse addFlashcardToDeck(Long deckId, FlashcardRequest request);
-    List<FlashcardResponse> generateAiFlashcards(Long deckId, String prompt) throws Exception;
+    List<FlashcardResponse> generateAiFlashcards(Long deckId, String prompt);
 }

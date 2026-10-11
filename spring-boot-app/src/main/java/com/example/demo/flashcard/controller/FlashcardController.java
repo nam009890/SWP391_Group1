@@ -8,7 +8,6 @@ import com.example.demo.flashcard.dto.FlashcardRequest;
 import com.example.demo.flashcard.dto.FlashcardResponse;
 import com.example.demo.flashcard.service.DeckService;
 import com.example.demo.flashcard.service.FlashcardService;
-import com.example.demo.flashcard.service.impl.GeminiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,6 @@ public class FlashcardController {
 
     private final DeckService deckService;
     private final FlashcardService flashcardService;
-    private final GeminiService geminiService;
 
     @GetMapping
     public ResponseEntity<List<DeckDto>> getAllDecks() {
@@ -50,12 +48,10 @@ public class FlashcardController {
     }
 
     @PostMapping("/{deckId}/generate-ai")
-    public ResponseEntity<List<FlashcardResponse>> generateAiFlashcards(@PathVariable Long deckId, @RequestBody AiRequestDto request) throws Exception {
+    public ResponseEntity<List<FlashcardResponse>> generateAiFlashcards(
+            @PathVariable Long deckId,
+            @RequestBody AiRequestDto request
+    ) {
         return ResponseEntity.ok(flashcardService.generateAiFlashcards(deckId, request.getPrompt()));
-    }
-
-    @GetMapping("/models")
-    public ResponseEntity<String> getAvailableModels() {
-        return ResponseEntity.ok(geminiService.getAvailableModels());
     }
 }

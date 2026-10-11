@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import com.example.demo.weakvocabulary.exception.InvalidWeakPracticeException;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,18 @@ public class GlobalExceptionHandler {
         ApiErrorResponse response = ApiErrorResponse.builder().status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase()).message(e.getMessage()).timestamp(LocalDateTime.now()).build();
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException e) {
+        HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(e.getReason())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(response, status);
     }
 
     @ExceptionHandler(Exception.class)

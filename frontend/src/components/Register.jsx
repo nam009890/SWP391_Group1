@@ -23,7 +23,7 @@ function Register() {
     setLoading(true);
     
     try {
-      const response = await api.post('http://localhost:8080/api/auth/register', {
+      const response = await api.post('/auth/register', {
         name,
         email,
         password
@@ -42,7 +42,7 @@ function Register() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - var(--nav-height, 70px))', paddingTop: 'calc(var(--nav-height, 70px) + 30px)', paddingBottom: '40px' }}>
       <div className="glass-panel animate-fade-in" style={{ padding: '40px', width: '100%', maxWidth: '400px' }}>
         <h2 style={{ textAlign: 'center', marginBottom: '30px', color: 'var(--secondary)' }}>Tạo Tài Khoản</h2>
         

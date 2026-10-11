@@ -1,1 +1,15 @@
-package com.example.demo.weakvocabulary.service; import com.example.demo.weakvocabulary.dto.WeakDtos.*; public interface WeakVocabularyService { WeakResponse addManual(Long userId,Long flashcardId); void recordStudyDifficulty(Long userId,Long flashcardId,int quality); PageResponse list(Long userId,String keyword,Long deckId,String source,Integer masteryMin,Integer masteryMax,Double accuracyMin,Double accuracyMax,String sort,int page,int size); WeakResponse patch(Long userId,Long id,PatchRequest request); void softDelete(Long userId,Long id); }
+package com.example.demo.weakvocabulary.service;
+
+import com.example.demo.weakvocabulary.dto.WeakDtos.*;
+
+public interface WeakVocabularyService {
+    WeakResponse addManual(Long userId, Long flashcardId);
+
+    void recordStudyDifficulty(Long userId, Long flashcardId, int quality);
+
+    PageResponse list(Long userId, String keyword, Long deckId, String source, Integer masteryMin, Integer masteryMax, Double accuracyMin, Double accuracyMax, String sort, int page, int size);
+
+    WeakResponse patch(Long userId, Long id, PatchRequest request);
+
+    void softDelete(Long userId, Long id);
+}
