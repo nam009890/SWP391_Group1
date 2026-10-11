@@ -1,9 +1,9 @@
--- =====================================================
+﻿-- =====================================================
 -- 1. CREATE DATABASE IF NOT EXISTS
 -- =====================================================
 IF DB_ID(N'demo_db') IS NULL
 BEGIN
-    CREATE DATABASE demo_db;
+    CREATE DATABASE demo_db COLLATE Vietnamese_CI_AS;
 END;
 GO
 -- =====================================================
