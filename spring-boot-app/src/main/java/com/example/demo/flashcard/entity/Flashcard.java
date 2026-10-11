@@ -23,6 +23,9 @@ public class Flashcard {
     @JoinColumn(name = "deck_id")
     private Deck deck;
 
+    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.REMOVE)
+    private java.util.List<com.example.demo.study.entity.UserFlashcardReview> reviews;
+
     @Column(columnDefinition = "NVARCHAR(255)")
     private String vocabulary;
     @Column(columnDefinition = "NVARCHAR(255)")

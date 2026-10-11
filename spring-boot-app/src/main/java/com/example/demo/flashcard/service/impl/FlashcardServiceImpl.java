@@ -53,12 +53,40 @@ public class FlashcardServiceImpl implements FlashcardService {
 
         List<Flashcard> generatedCards = geminiService.generateFlashcards(prompt);
         
-        List<Flashcard> savedCards = generatedCards.stream().map(card -> {
-            card.setDeck(deck);
-            return flashcardRepository.save(card);
-        }).collect(Collectors.toList());
+        generatedCards.forEach(card -> card.setDeck(deck));
+        List<Flashcard> savedCards = flashcardRepository.saveAll(generatedCards);
 
         return savedCards.stream().map(this::mapToResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public FlashcardResponse updateFlashcard(Long deckId, Long flashcardId, FlashcardRequest request) {
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Flashcard not found"));
+
+        if (!flashcard.getDeck().getId().equals(deckId)) {
+            throw new IllegalArgumentException("Flashcard does not belong to this deck");
+        }
+
+        flashcard.setVocabulary(request.getVocabulary());
+        flashcard.setMeaning(request.getMeaning());
+        flashcard.setPhonetic(request.getPhonetic());
+        flashcard.setExampleSentence(request.getExampleSentence());
+
+        Flashcard updatedFlashcard = flashcardRepository.save(flashcard);
+        return mapToResponse(updatedFlashcard);
+    }
+
+    @Override
+    public void deleteFlashcard(Long deckId, Long flashcardId) {
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Flashcard not found"));
+
+        if (!flashcard.getDeck().getId().equals(deckId)) {
+            throw new IllegalArgumentException("Flashcard does not belong to this deck");
+        }
+
+        flashcardRepository.delete(flashcard);
     }
 
     private FlashcardResponse mapToResponse(Flashcard flashcard) {

@@ -6,6 +6,7 @@ import './CreateDeckModal.css';
 const CreateDeckModal = ({ isOpen, onClose, onDeckCreated }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -23,14 +24,16 @@ const CreateDeckModal = ({ isOpen, onClose, onDeckCreated }) => {
     setError(null);
     
     try {
-      const response = await api.post('http://localhost:8080/api/decks', {
+      const response = await api.post('/decks', {
         name: name,
-        description: description
+        description: description,
+        isPublic: isPublic
       });
       
       // Clear form
       setName('');
       setDescription('');
+      setIsPublic(false);
       
       // Notify parent
       if (onDeckCreated) {
@@ -78,8 +81,19 @@ const CreateDeckModal = ({ isOpen, onClose, onDeckCreated }) => {
               rows="3"
             />
           </div>
+
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+            <input 
+              type="checkbox" 
+              id="deckPublic" 
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <label htmlFor="deckPublic" style={{ cursor: 'pointer', margin: 0 }}>Make this deck public to community</label>
+          </div>
           
-          <div className="modal-actions">
+          <div className="modal-actions" style={{ marginTop: '20px' }}>
             <button type="button" className="btn btn-glass" onClick={onClose} disabled={loading}>
               Cancel
             </button>

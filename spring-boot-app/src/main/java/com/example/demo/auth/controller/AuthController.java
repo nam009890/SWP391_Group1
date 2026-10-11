@@ -1,5 +1,7 @@
-package com.example.demo.auth.controller;
+﻿package com.example.demo.auth.controller;
+import com.example.demo.common.security.UserPrincipal;
 
+import com.example.demo.common.security.CurrentUser;
 import com.example.demo.auth.dto.AuthResponse;
 import com.example.demo.auth.dto.LoginRequest;
 import com.example.demo.auth.dto.RegisterRequest;
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -27,7 +29,7 @@ public class AuthController {
     private final JwtTokenProvider tokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -45,9 +47,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<AuthResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email is already taken!");
+            throw new IllegalArgumentException("Email is already taken!");
         }
 
         User user = User.builder()
@@ -62,5 +64,11 @@ public class AuthController {
 
         String jwt = tokenProvider.generateToken(savedUser.getEmail());
         return ResponseEntity.ok(new AuthResponse(jwt, savedUser.getName(), savedUser.getEmail()));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
+        User user = userRepository.findById(userPrincipal.getId()).orElseThrow();
+        return ResponseEntity.ok(user);
     }
 }

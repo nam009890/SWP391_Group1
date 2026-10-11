@@ -6,6 +6,8 @@ import DeckDetails from './components/DeckDetails';
 import Login from './components/Login';
 import Register from './components/Register';
 import StudyMode from './components/StudyMode';
+import Community from './components/Community';
+import UserProfile from './components/UserProfile';
 import api from './api/axiosConfig';
 
 function OAuth2RedirectHandler() {
@@ -69,25 +71,26 @@ function MainApp() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    if (token) {
-      // Decode JWT token directly in frontend for demo purposes to get user info
-      // In a real app, this should be validated by backend api call
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        
-        // Kiểm tra xem token đã hết hạn chưa (exp tính bằng giây)
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (payload.exp && payload.exp < currentTime) {
-          console.warn("Token expired on load");
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const currentTime = Math.floor(Date.now() / 1000);
+          if (payload.exp && payload.exp < currentTime) {
+            console.warn("Token expired on load");
+            handleLogout();
+            return;
+          }
+
+          const response = await api.get('/auth/me');
+          setUser(response.data);
+        } catch (e) {
+          console.error("Invalid token or failed to fetch user");
           handleLogout();
-        } else {
-          setUser({ name: payload.name || payload.sub, email: payload.email });
         }
-      } catch (e) {
-        console.error("Invalid token");
-        handleLogout();
       }
-    }
+    };
+    fetchUser();
   }, [token]);
 
   const handleLogout = () => {
@@ -104,7 +107,9 @@ function MainApp() {
         <Route path="/" element={token ? <Dashboard user={user} /> : <LandingPage />} />
         <Route path="/login" element={token ? <Dashboard user={user} /> : <Login />} />
         <Route path="/register" element={token ? <Dashboard user={user} /> : <Register />} />
-        <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
+        <Route path="/community" element={token ? <Community user={user} /> : <LandingPage />} />
+        <Route path="/user/:id" element={token ? <UserProfile user={user} /> : <LandingPage />} />
+        <Route path="/deck/:id" element={token ? <DeckDetails user={user} /> : <LandingPage />} />
         <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>

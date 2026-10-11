@@ -10,6 +10,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
+@lombok.extern.slf4j.Slf4j
 public class JwtTokenProvider {
     
     private final String jwtSecret = "1234567890123456789012345678901234567890123456789012345678901234";
@@ -45,7 +46,7 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
             return true;
         } catch (Exception ex) {
-            System.out.println("Invalid JWT token: " + ex.getMessage());
+            log.error("Invalid JWT token: {}", ex.getMessage());
         }
         return false;
     }

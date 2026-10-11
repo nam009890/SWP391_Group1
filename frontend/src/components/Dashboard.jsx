@@ -15,7 +15,7 @@ const Dashboard = ({ user }) => {
 
   const fetchDecks = async () => {
     try {
-      const response = await api.get('http://localhost:8080/api/decks');
+      const response = await api.get('/decks');
       setDecks(response.data);
     } catch (error) {
       console.error("Failed to fetch decks:", error);

@@ -215,3 +215,21 @@
 .ai-form { border-left: 4px solid #ec4899; }
 .loading-dots { animation: pulse 1.5s infinite; }
 @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+@media (max-width: 768px) {
+  .cards-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  .header-actions .btn {
+    width: 100%;
+  }
+  .deck-info h1 {
+    font-size: 28px;
+  }
+}

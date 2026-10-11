@@ -23,4 +23,15 @@ public class Deck {
     private String name;
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private com.example.demo.user.entity.User user;
+
+    @Column(name = "is_public", nullable = false, columnDefinition = "bit default 0")
+    @Builder.Default
+    private boolean isPublic = false;
+
+    @OneToMany(mappedBy = "deck", cascade = CascadeType.REMOVE)
+    private java.util.List<Flashcard> flashcards;
 }

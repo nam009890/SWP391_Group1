@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Getter
@@ -22,12 +23,15 @@ public class User {
     private String email;
     private String name;
     private String avatarUrl;
+    
+    @JsonIgnore
     private String password;
 
     // GOOGLE or LOCAL
     private String provider;
     
     // Google sub ID
+    @JsonIgnore
     private String providerId;
 
     private String role; // e.g. ROLE_USER, ROLE_ADMIN

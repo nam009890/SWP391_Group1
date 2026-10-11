@@ -1,4 +1,4 @@
-package com.example.demo.auth.controller;
+﻿package com.example.demo.auth.controller;
 
 import com.example.demo.common.security.JwtTokenProvider;
 import com.example.demo.user.entity.User;
@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class DebugController {
 
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-    
-    @Autowired
-    private UserRepository userRepository;
+    private final JwtTokenProvider tokenProvider;
+    private final UserRepository userRepository;
 
     @GetMapping("/debug-token")
     public String getDebugToken() {
@@ -39,3 +39,4 @@ public class DebugController {
         return "User already exists!";
     }
 }
+

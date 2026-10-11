@@ -15,7 +15,7 @@ const FlashcardPlayer = () => {
   useEffect(() => {
     const fetchFlashcards = async () => {
       try {
-        const response = await api.get(`http://localhost:8080/api/decks/${id}/flashcards`);
+        const response = await api.get(`/decks/${id}/flashcards`);
         setFlashcards(response.data);
       } catch (error) {
         console.error("Failed to fetch flashcards:", error);

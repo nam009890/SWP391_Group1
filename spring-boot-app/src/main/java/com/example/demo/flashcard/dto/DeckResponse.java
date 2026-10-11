@@ -13,4 +13,7 @@ public class DeckResponse {
     private Long id;
     private String name;
     private String description;
+    private boolean isPublic;
+    private Long authorId;
+    private String authorName;
 }

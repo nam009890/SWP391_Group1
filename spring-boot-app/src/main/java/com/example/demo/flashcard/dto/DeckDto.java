@@ -12,4 +12,7 @@ public class DeckDto {
     private String name;
     private String description;
     private Long flashcardCount;
+    private boolean isPublic;
+    private Long authorId;
+    private String authorName;
 }
