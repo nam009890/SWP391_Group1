@@ -25,6 +25,7 @@ import {
   saveStoredQuestions,
   resetStoredQuestions,
   fetchGrammarQuestions,
+  createGrammarGroupInBackend,
   createGrammarQuestionInBackend,
   deleteGrammarQuestionFromBackend,
   resolveQuestionReport,
@@ -210,6 +211,10 @@ const GrammarAdminCMSPage = ({ user }) => {
     const updatedData = { ...lessonData, groups: updatedGroups };
     setLessonData(updatedData);
     saveStoredQuestions(updatedData);
+
+    // Đồng bộ nhóm bài tập mới lên backend Spring Boot
+    createGrammarGroupInBackend(newGroup);
+
     setSelectedGroupId(newGroupId);
     setIsCreatingNewGroup(false);
     setNewGroupTitle('');

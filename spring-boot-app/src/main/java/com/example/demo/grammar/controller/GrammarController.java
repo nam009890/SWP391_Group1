@@ -1,6 +1,9 @@
 package com.example.demo.grammar.controller;
 
+import com.example.demo.grammar.dto.GrammarGroupDto;
 import com.example.demo.grammar.dto.GrammarQuestionDto;
+import com.example.demo.grammar.dto.GrammarReportDto;
+import com.example.demo.grammar.dto.GrammarResponseDto;
 import com.example.demo.grammar.service.GrammarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,20 +20,48 @@ public class GrammarController {
     private final GrammarService grammarService;
 
     /**
-     * Get all grammar exercise questions for learners & CMS
+     * Get root grammar module data with all test groups, questions, and reports
      */
     @GetMapping("/questions")
-    public ResponseEntity<Map<String, Object>> getAllQuestions() {
-        List<GrammarQuestionDto> list = grammarService.getAllQuestions();
-        return ResponseEntity.ok(Map.of(
-                "lesson_id", "grammar_module_01",
-                "lesson_title", "Ngữ Pháp Căn Bản: Thì & Câu Điều Kiện",
-                "questions", list
-        ));
+    public ResponseEntity<GrammarResponseDto> getAllData() {
+        return ResponseEntity.ok(grammarService.getAllData());
     }
 
     /**
-     * Get specific question by ID
+     * Get list of all groups / tests
+     */
+    @GetMapping("/groups")
+    public ResponseEntity<List<GrammarGroupDto>> getAllGroups() {
+        return ResponseEntity.ok(grammarService.getAllGroups());
+    }
+
+    /**
+     * Get a specific group by ID or group key
+     */
+    @GetMapping("/groups/{id}")
+    public ResponseEntity<GrammarGroupDto> getGroupById(@PathVariable String id) {
+        return ResponseEntity.ok(grammarService.getGroupById(id));
+    }
+
+    /**
+     * Create a new test group
+     */
+    @PostMapping("/groups")
+    public ResponseEntity<GrammarGroupDto> createGroup(@RequestBody GrammarGroupDto request) {
+        return ResponseEntity.ok(grammarService.createGroup(request));
+    }
+
+    /**
+     * Delete a test group by key or ID
+     */
+    @DeleteMapping("/groups/{id}")
+    public ResponseEntity<Map<String, String>> deleteGroup(@PathVariable String id) {
+        grammarService.deleteGroup(id);
+        return ResponseEntity.ok(Map.of("message", "Deleted test group successfully: " + id));
+    }
+
+    /**
+     * Get specific question by numeric ID
      */
     @GetMapping("/questions/{id}")
     public ResponseEntity<GrammarQuestionDto> getQuestionById(@PathVariable Long id) {
@@ -66,16 +97,34 @@ public class GrammarController {
     }
 
     /**
-     * Reset questions bank to initial sample defaults
+     * Submit an error report for a question
+     */
+    @PostMapping("/reports")
+    public ResponseEntity<GrammarReportDto> submitReport(@RequestBody GrammarReportDto request) {
+        return ResponseEntity.ok(grammarService.createReport(request));
+    }
+
+    /**
+     * Mark an error report as resolved
+     */
+    @PutMapping("/reports/{id}/resolve")
+    public ResponseEntity<GrammarReportDto> resolveReport(@PathVariable String id) {
+        return ResponseEntity.ok(grammarService.resolveReport(id));
+    }
+
+    /**
+     * Get reports for a specific creator / author
+     */
+    @GetMapping("/reports/user/{userEmail}")
+    public ResponseEntity<List<GrammarReportDto>> getReportsForAuthor(@PathVariable String userEmail) {
+        return ResponseEntity.ok(grammarService.getReportsForAuthor(userEmail));
+    }
+
+    /**
+     * Reset questions bank to initial default 4 tests
      */
     @PostMapping("/reset-defaults")
-    public ResponseEntity<Map<String, Object>> resetDefaults() {
-        List<GrammarQuestionDto> list = grammarService.resetToDefaults();
-        return ResponseEntity.ok(Map.of(
-                "lesson_id", "grammar_module_01",
-                "lesson_title", "Ngữ Pháp Căn Bản: Thì & Câu Điều Kiện",
-                "questions", list,
-                "message", "Reset grammar questions bank to defaults"
-        ));
+    public ResponseEntity<GrammarResponseDto> resetDefaults() {
+        return ResponseEntity.ok(grammarService.resetToDefaults());
     }
 }

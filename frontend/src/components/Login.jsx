@@ -16,7 +16,7 @@ function Login() {
     setError('');
     
     try {
-      const response = await api.post('http://localhost:8080/api/auth/login', {
+      const response = await api.post('/auth/login', {
         email,
         password
       });

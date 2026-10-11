@@ -18,6 +18,8 @@ public class GrammarQuestionDto {
 
     private Long dbId;
 
+    private String groupId;
+
     private String title;
 
     private String type;
@@ -45,4 +47,35 @@ public class GrammarQuestionDto {
     private Object blanks;
 
     private Object validation;
+
+    // Media & Image Question fields
+    @JsonProperty("image_url")
+    private String imageUrl;
+
+    @JsonProperty("image_caption")
+    private String imageCaption;
+
+    @JsonProperty("question_text")
+    private String questionText;
+
+    private Object options;
+
+    @JsonProperty("correct_answer")
+    private String correctAnswer;
+
+    // Passage Cloze & Reading Comprehension fields
+    @JsonProperty("passage_title")
+    private String passageTitle;
+
+    @JsonProperty("passage_text")
+    private String passageText;
+
+    @JsonProperty("sub_questions")
+    private Object subQuestions;
+
+    // Audio Listening fields
+    @JsonProperty("audio_url")
+    private String audioUrl;
+
+    private String transcript;
 }

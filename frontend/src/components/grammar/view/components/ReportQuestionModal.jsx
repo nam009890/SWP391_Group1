@@ -53,6 +53,7 @@ const ReportQuestionModal = ({
       reporterEmail,
       reporterName,
       testTitle: group?.title || "Bài kiểm tra",
+      authorName,
       authorEmail
     });
 

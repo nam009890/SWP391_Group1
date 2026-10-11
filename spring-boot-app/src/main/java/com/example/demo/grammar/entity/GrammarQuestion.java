@@ -26,19 +26,23 @@ public class GrammarQuestion {
     @Column(name = "question_key", length = 100)
     private String questionKey;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private GrammarGroup group;
+
     // Readable title in Vietnamese
     @Column(name = "title", length = 255)
     private String title;
 
-    // Question type: SPOT_ERROR | FILL_BLANK_TEXT | FILL_BLANK_DROPDOWN | FILL_BLANK_CARDS
+    // Question type: SPOT_ERROR | FILL_BLANK_TEXT | FILL_BLANK_DROPDOWN | FILL_BLANK_CARDS | IMAGE_QUESTION | PASSAGE_CLOZE | READING_COMPREHENSION | AUDIO_LISTENING
     @Column(name = "question_type", nullable = false, length = 50)
     private String questionType;
 
     // Instruction prompt
-    @Column(name = "instruction", length = 500)
+    @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;
 
-    // Full JSON content (tokens, template, blanks, options, validation)
+    // Full JSON content (tokens, template, blanks, options, sub_questions, audio_url, etc.)
     @Lob
     @Column(name = "payload_json", columnDefinition = "LONGTEXT")
     private String payloadJson;

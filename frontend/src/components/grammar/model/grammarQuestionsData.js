@@ -306,6 +306,7 @@ export const submitQuestionReport = ({
   reporterEmail,
   reporterName,
   testTitle,
+  authorName,
   authorEmail
 }) => {
   const reportId = `report_${Date.now()}`;
@@ -319,6 +320,7 @@ export const submitQuestionReport = ({
     description: description || "",
     reporterEmail: reporterEmail || "Học viên ẩn danh",
     reporterName: reporterName || "Người học",
+    authorName: authorName || "Tác giả bài tập",
     authorEmail: authorEmail || "buiquangviet032@gmail.com",
     createdAt: new Date().toISOString(),
     status: "OPEN" // 'OPEN' | 'RESOLVED'
@@ -347,7 +349,10 @@ export const submitQuestionReport = ({
     console.warn("Could not save to studye_community_reports:", e);
   }
 
-  // 3. Tạo link thông báo trực tiếp qua Gmail
+  // 3. Gửi đồng bộ lên backend Spring Boot nếu kết nối được
+  submitGrammarReportToBackend(reportData);
+
+  // 4. Tạo link thông báo trực tiếp qua Gmail
   const targetEmail = authorEmail || "community@studye.edu.vn";
   const subject = `[StudyE - Báo lỗi bài tập] ${testTitle} - ${questionTitle}`;
   const bodyText = `Xin chào tác giả,\n\n` +
@@ -396,6 +401,9 @@ export const resolveQuestionReport = (groupId, reportId) => {
   } catch (e) {
     console.warn("Could not update studye_community_reports:", e);
   }
+
+  // Đồng bộ lên backend Spring Boot
+  resolveGrammarReportInBackend(reportId);
 
   return updatedData;
 };
@@ -486,6 +494,32 @@ export const fetchGrammarQuestions = async () => {
 };
 
 /**
+ * Tạo nhóm bài tập mới trên backend Spring Boot
+ */
+export const createGrammarGroupInBackend = async (group) => {
+  try {
+    const res = await api.post('/grammar/groups', group);
+    return res.data;
+  } catch (err) {
+    console.warn("Failed to create group in backend:", err.message);
+    return null;
+  }
+};
+
+/**
+ * Xóa nhóm bài tập khỏi backend Spring Boot
+ */
+export const deleteGrammarGroupInBackend = async (groupId) => {
+  try {
+    await api.delete(`/grammar/groups/${groupId}`);
+    return true;
+  } catch (err) {
+    console.warn("Failed to delete group in backend:", err.message);
+    return false;
+  }
+};
+
+/**
  * Lưu câu hỏi mới lên backend Spring Boot
  */
 export const createGrammarQuestionInBackend = async (question) => {
@@ -510,3 +544,46 @@ export const deleteGrammarQuestionFromBackend = async (id) => {
     return false;
   }
 };
+
+/**
+ * Gửi báo cáo lỗi câu hỏi lên backend Spring Boot
+ */
+export const submitGrammarReportToBackend = async (report) => {
+  try {
+    const res = await api.post('/grammar/reports', report);
+    return res.data;
+  } catch (err) {
+    console.warn("Failed to send report to backend:", err.message);
+    return null;
+  }
+};
+
+/**
+ * Đánh dấu báo cáo đã giải quyết trên backend Spring Boot
+ */
+export const resolveGrammarReportInBackend = async (reportId) => {
+  try {
+    const res = await api.put(`/grammar/reports/${reportId}/resolve`);
+    return res.data;
+  } catch (err) {
+    console.warn("Failed to resolve report in backend:", err.message);
+    return null;
+  }
+};
+
+/**
+ * Reset dữ liệu ngữ pháp về mặc định trên backend Spring Boot
+ */
+export const resetGrammarQuestionsInBackend = async () => {
+  try {
+    const res = await api.post('/grammar/reset-defaults');
+    if (res.data && Array.isArray(res.data.groups)) {
+      saveStoredQuestions(res.data);
+      return res.data;
+    }
+  } catch (err) {
+    console.warn("Failed to reset grammar questions in backend:", err.message);
+  }
+  return resetStoredQuestions();
+};
+

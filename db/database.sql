@@ -14,6 +14,9 @@ GO
 -- =====================================================
 -- 3. DROP EXISTING TABLES (children before parents)
 -- =====================================================
+IF OBJECT_ID(N'dbo.grammar_question_reports', N'U') IS NOT NULL DROP TABLE dbo.grammar_question_reports;
+IF OBJECT_ID(N'dbo.grammar_questions', N'U') IS NOT NULL DROP TABLE dbo.grammar_questions;
+IF OBJECT_ID(N'dbo.grammar_groups', N'U') IS NOT NULL DROP TABLE dbo.grammar_groups;
 IF OBJECT_ID(N'dbo.weak_practice_attempts', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_attempts;
 IF OBJECT_ID(N'dbo.weak_practice_items', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_items;
 IF OBJECT_ID(N'dbo.weak_practice_sessions', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_sessions;
@@ -67,6 +70,27 @@ CREATE TABLE dbo.weak_practice_attempts (
     correct BIT NOT NULL, attempted_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     CONSTRAINT FK_attempt_session FOREIGN KEY(session_id) REFERENCES dbo.weak_practice_sessions(id), CONSTRAINT FK_attempt_item FOREIGN KEY(item_id) REFERENCES dbo.weak_practice_items(id), CONSTRAINT FK_attempt_weak FOREIGN KEY(user_weak_vocabulary_id) REFERENCES dbo.user_weak_vocabularies(id)
 );
+CREATE TABLE dbo.grammar_groups (
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY, group_key NVARCHAR(100) NOT NULL UNIQUE, title NVARCHAR(255) NOT NULL,
+    description NVARCHAR(MAX) NULL, icon NVARCHAR(50) NULL, author_name NVARCHAR(255) NULL, author_email NVARCHAR(255) NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(), updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME()
+);
+CREATE TABLE dbo.grammar_questions (
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY, question_key NVARCHAR(100) NULL, group_id BIGINT NULL,
+    title NVARCHAR(255) NULL, question_type NVARCHAR(50) NOT NULL, instruction NVARCHAR(MAX) NULL,
+    payload_json NVARCHAR(MAX) NULL, correct_token_id INT NULL, correction NVARCHAR(255) NULL,
+    error_type NVARCHAR(255) NULL, hint NVARCHAR(500) NULL, explanation NVARCHAR(MAX) NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(), updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_questions_group FOREIGN KEY(group_id) REFERENCES dbo.grammar_groups(id) ON DELETE CASCADE
+);
+CREATE TABLE dbo.grammar_question_reports (
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY, report_key NVARCHAR(100) NOT NULL UNIQUE, group_id BIGINT NULL,
+    question_key NVARCHAR(100) NULL, question_title NVARCHAR(255) NULL, error_type NVARCHAR(255) NULL,
+    description NVARCHAR(MAX) NULL, reporter_name NVARCHAR(255) NULL, reporter_email NVARCHAR(255) NULL,
+    author_name NVARCHAR(255) NULL, author_email NVARCHAR(255) NULL, status NVARCHAR(50) NOT NULL DEFAULT N'PENDING',
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_reports_group FOREIGN KEY(group_id) REFERENCES dbo.grammar_groups(id) ON DELETE CASCADE
+);
 GO
 -- =====================================================
 -- 5. CONSTRAINTS / INDEXES
@@ -78,6 +102,9 @@ CREATE INDEX IX_weak_user_active ON dbo.user_weak_vocabularies(user_id, weak_del
 CREATE INDEX IX_weak_flashcard ON dbo.user_weak_vocabularies(flashcard_id);
 CREATE INDEX IX_sessions_user ON dbo.weak_practice_sessions(user_id);
 CREATE INDEX IX_items_session ON dbo.weak_practice_items(session_id, item_order);
+CREATE INDEX IX_grammar_questions_group ON dbo.grammar_questions(group_id);
+CREATE INDEX IX_grammar_reports_group ON dbo.grammar_question_reports(group_id);
+CREATE INDEX IX_grammar_reports_author ON dbo.grammar_question_reports(author_email);
 GO
 -- =====================================================
 -- 6. BASE SEED DATA

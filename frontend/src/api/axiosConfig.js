@@ -19,10 +19,13 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use((response) => {
     return response;
 }, (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-        // Token hết hạn hoặc không hợp lệ -> Xóa token và force logout
+    const isAuthRequest = error.config?.url?.includes('/auth/');
+    if (!isAuthRequest && error.response && (error.response.status === 401 || error.response.status === 403)) {
+        // Token hết hạn hoặc không hợp lệ -> Xóa token và chuyển hướng về /login
         localStorage.removeItem('token');
-        window.location.href = 'http://localhost:8080/api/auth/logout';
+        if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+        }
     }
     return Promise.reject(error);
 });

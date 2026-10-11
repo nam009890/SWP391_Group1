@@ -23,7 +23,7 @@ function Register() {
     setLoading(true);
     
     try {
-      const response = await api.post('http://localhost:8080/api/auth/register', {
+      const response = await api.post('/auth/register', {
         name,
         email,
         password
