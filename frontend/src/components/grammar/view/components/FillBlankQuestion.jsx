@@ -76,6 +76,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
     setSubmitted(false);
     setBlankResults({});
     setShowExplanation(false);
+    if (onAnswerResult) onAnswerResult(false);
   };
 
   const renderSentence = () => {

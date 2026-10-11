@@ -57,8 +57,7 @@ const GrammarAdminCMSPage = ({ user }) => {
     return false;
   });
 
-  // Tab chính trên thanh điều hướng: 'CREATE_STEPPER' (Tạo câu hỏi) | 'QUESTION_BANK' (Ngân hàng câu hỏi)
-  const [mainTab, setMainTab] = useState('CREATE_STEPPER');
+  // Thông báo Toast phản hồi người dùng
 
   // Thông báo Toast phản hồi người dùng
   const [toastMessage, setToastMessage] = useState('');
@@ -105,13 +104,6 @@ const GrammarAdminCMSPage = ({ user }) => {
   const [dropOptions, setDropOptions] = useState("");
   const [dropCorrect, setDropCorrect] = useState("");
   const [dropExplanation, setDropExplanation] = useState("");
-
-  // --- 3.4: Dạng FILL_BLANK_CARDS (Chọn thẻ đáp án) ---
-  const [cardTitle, setCardTitle] = useState("");
-  const [cardTemplate, setCardTemplate] = useState("");
-  const [cardOptions, setCardOptions] = useState("");
-  const [cardCorrect, setCardCorrect] = useState("");
-  const [cardExplanation, setCardExplanation] = useState("");
 
   // --- 3.5: Dạng IMAGE_QUESTION (Câu hỏi hình ảnh) ---
   const [imgTitle, setImgTitle] = useState("");
@@ -383,34 +375,6 @@ const GrammarAdminCMSPage = ({ user }) => {
           }
         },
         explanation: dropExplanation.trim()
-      };
-    } else if (selectedQuestionType === 'FILL_BLANK_CARDS') {
-      if (!cardTemplate.trim()) {
-        showToast("Vui lòng nhập mẫu câu có chứa {1}!");
-        return;
-      }
-      if (!cardOptions.trim()) {
-        showToast("Vui lòng nhập các thẻ từ vựng!");
-        return;
-      }
-      if (!cardCorrect.trim()) {
-        showToast("Vui lòng nhập thẻ đáp án đúng!");
-        return;
-      }
-      const opts = cardOptions.split(',').map(s => s.trim()).filter(Boolean);
-      newQuestion = {
-        id: uniqueId,
-        title: cardTitle.trim() || "Chọn đáp án đúng",
-        type: 'FILL_BLANK_CARDS',
-        instruction: "Bấm chọn thẻ đáp án đúng để hoàn thành câu:",
-        template: cardTemplate.trim(),
-        blanks: {
-          "1": {
-            options: opts,
-            correct_answer: cardCorrect.trim()
-          }
-        },
-        explanation: cardExplanation.trim()
       };
     } else if (selectedQuestionType === 'IMAGE_QUESTION') {
       if (!imgUrl.trim()) {
@@ -844,41 +808,7 @@ const GrammarAdminCMSPage = ({ user }) => {
         </div>
       </div>
 
-      {/* THANH TAB CHÍNH: SOẠN CÂU HỎI, DANH SÁCH BÀI TẬP HOẶC HỘP THƯ BÁO LỖI */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px', flexWrap: 'wrap' }}>
-        <button
-          className={`btn ${mainTab === 'CREATE_STEPPER' ? 'btn-primary' : 'btn-glass'}`}
-          onClick={() => setMainTab('CREATE_STEPPER')}
-          style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
-        >
-          Tạo câu hỏi mới
-        </button>
-        <button
-          className={`btn ${mainTab === 'QUESTION_BANK' ? 'btn-primary' : 'btn-glass'}`}
-          onClick={() => setMainTab('QUESTION_BANK')}
-          style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
-        >
-          Bài tập của tôi ({myGroups.length} bài)
-        </button>
-        <button
-          className={`btn ${mainTab === 'REPORTS_INBOX' ? 'btn-primary' : 'btn-glass'}`}
-          onClick={() => setMainTab('REPORTS_INBOX')}
-          style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
-        >
-          <span>Hộp thư báo lỗi</span>
-          {openReportsCount > 0 && (
-            <span style={{ padding: '2px 6px', borderRadius: '10px', background: '#ef4444', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
-              {openReportsCount}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* =================================================================================== */}
-      {/* TAB 1: SOẠN CÂU HỎI MỚI THEO 3 BƯỚC CHUẨN (Requirement 4)                            */}
-      {/* =================================================================================== */}
-      {mainTab === 'CREATE_STEPPER' && (
-        <div className="animate-fade-in">
+      {/* BƯỚC 1: CHỌN HOẶC TẠO NHÓM BÀI TẬP (Ví dụ: Test 1, Test 2,...) */}
 
           {/* ================================================================================= */}
           {/* ================================================================================= */}
@@ -942,19 +872,28 @@ const GrammarAdminCMSPage = ({ user }) => {
                 <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
                   Chọn bài tập bạn muốn thêm câu hỏi vào:
                 </label>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <select
-                    className="form-input"
-                    value={selectedGroupId}
-                    onChange={(e) => setSelectedGroupId(e.target.value)}
-                    style={{ fontSize: '15px', fontWeight: 600, maxWidth: '400px' }}
-                  >
-                    {groups.map(g => (
-                      <option key={g.id} value={g.id}>
-                        {g.title} ({g.questions?.length || 0} câu hỏi)
-                      </option>
-                    ))}
-                  </select>
+                <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', width: 'fit-content' }}>
+                    <select
+                      className="form-input"
+                      value={selectedGroupId}
+                      onChange={(e) => setSelectedGroupId(e.target.value)}
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        width: 'auto',
+                        minWidth: '240px',
+                        cursor: 'pointer',
+                        padding: '10px 36px 10px 14px'
+                      }}
+                    >
+                      {groups.map(g => (
+                        <option key={g.id} value={g.id}>
+                          {g.title} ({g.questions?.length || 0} câu hỏi)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                     Đang chọn: <strong style={{ color: 'var(--primary)' }}>{selectedGroupObj?.title}</strong>
                   </span>
@@ -964,7 +903,7 @@ const GrammarAdminCMSPage = ({ user }) => {
           </div>
 
           {/* ================================================================================= */}
-          {/* BƯỚC 2: CHỌN DẠNG BÀI                                                              */}
+          {/* BƯỚC 2: CHỌN DẠNG BÀI (DẠNG DROPDOWN THEO YÊU CẦU 2)                               */}
           {/* ================================================================================= */}
           <div className="glass-panel" style={{ padding: '24px', borderRadius: '16px', marginBottom: '20px', border: '1px solid rgba(192, 132, 252, 0.3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
@@ -981,40 +920,32 @@ const GrammarAdminCMSPage = ({ user }) => {
               </div>
             </div>
 
-            {/* DANH SÁCH DẠNG BÀI */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
-              {getAllQuestionTypes().map((typeObj) => {
-                const isSelected = selectedQuestionType === typeObj.id;
-                return (
-                  <div
-                    key={typeObj.id}
-                    onClick={() => setSelectedQuestionType(typeObj.id)}
-                    style={{
-                      padding: '16px',
-                      borderRadius: '12px',
-                      background: isSelected ? typeObj.bg : 'rgba(255, 255, 255, 0.04)',
-                      border: isSelected ? `2px solid ${typeObj.color}` : '1px solid rgba(255, 255, 255, 0.1)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isSelected ? `0 0 15px ${typeObj.color}33` : 'none'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '8px' }}>
-                      {isSelected && (
-                        <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', background: typeObj.color, color: '#000' }}>
-                          Đang chọn
-                        </span>
-                      )}
-                    </div>
-                    <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', color: isSelected ? typeObj.color : 'var(--text-main)' }}>
-                      {typeObj.label}
-                    </h4>
-                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                      {typeObj.description}
-                    </p>
-                  </div>
-                );
-              })}
+            {/* DROPDOWN CHỌN DẠNG BÀI */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ position: 'relative', width: 'fit-content' }}>
+                <select
+                  className="form-input"
+                  value={selectedQuestionType}
+                  onChange={(e) => setSelectedQuestionType(e.target.value)}
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    width: 'auto',
+                    minWidth: '320px',
+                    cursor: 'pointer',
+                    padding: '10px 36px 10px 14px'
+                  }}
+                >
+                  {getAllQuestionTypes().map((typeObj) => (
+                    <option key={typeObj.id} value={typeObj.id}>
+                      {typeObj.label} ({typeObj.badge})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <span style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                {getQuestionTypeInfo(selectedQuestionType)?.description}
+              </span>
             </div>
           </div>
 
@@ -1266,66 +1197,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                 </div>
               )}
 
-              {/* --- FORM 4: CHỌN THẺ ĐÁP ÁN --- */}
-              {selectedQuestionType === 'FILL_BLANK_CARDS' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label className="form-label">Tiêu đề câu hỏi:</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={cardTitle}
-                      onChange={(e) => setCardTitle(e.target.value)}
-                      placeholder="Ví dụ: Câu 4: Chọn thẻ đáp án"
-                    />
-                  </div>
 
-                  <div>
-                    <label className="form-label">Mẫu câu có chỗ trống (Dùng {'{1}'} để đánh dấu vị trí):</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={cardTemplate}
-                      onChange={(e) => setCardTemplate(e.target.value)}
-                      placeholder="Ví dụ: She has been living here {1} 2015."
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
-                    <div>
-                      <label className="form-label">Các thẻ từ vựng hiển thị (ngăn cách bằng dấu phẩy):</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={cardOptions}
-                        onChange={(e) => setCardOptions(e.target.value)}
-                        placeholder="Ví dụ: Since, For, From, During"
-                      />
-                    </div>
-                    <div>
-                      <label className="form-label">Thẻ đáp án đúng:</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={cardCorrect}
-                        onChange={(e) => setCardCorrect(e.target.value)}
-                        placeholder="Ví dụ: Since"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="form-label">Giải thích đáp án (sẽ hiển thị sau khi hoàn thành):</label>
-                    <textarea
-                      className="form-input"
-                      rows={3}
-                      value={cardExplanation}
-                      onChange={(e) => setCardExplanation(e.target.value)}
-                      placeholder="Giải thích lý do chọn đáp án này..."
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* --- FORM 5: CÂU HỎI HÌNH ẢNH --- */}
               {selectedQuestionType === 'IMAGE_QUESTION' && (
@@ -1761,8 +1633,7 @@ const GrammarAdminCMSPage = ({ user }) => {
                   />
                 )}
                 {(previewQuestion.type === 'FILL_BLANK_TEXT' ||
-                  previewQuestion.type === 'FILL_BLANK_DROPDOWN' ||
-                  previewQuestion.type === 'FILL_BLANK_CARDS') && (
+                  previewQuestion.type === 'FILL_BLANK_DROPDOWN') && (
                     <FillBlankQuestion
                       question={previewQuestion}
                       onAnswerResult={() => {}}
@@ -1807,315 +1678,6 @@ const GrammarAdminCMSPage = ({ user }) => {
             </form>
           </div>
         </div>
-      )}
-
-      {/* =================================================================================== */}
-      {/* TAB 2: CÁC BÀI TẬP DO NGƯỜI DÙNG TẠO RA (MY GROUPS)                                 */}
-      {/* =================================================================================== */}
-      {mainTab === 'QUESTION_BANK' && (
-        <div className="animate-fade-in">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-            <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
-                Bài Tập Của Tôi
-              </h3>
-              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                Danh sách các bài tập và câu hỏi do bạn tạo và quản lý trên bảng tin cộng đồng.
-              </p>
-            </div>
-            <button className="btn btn-glass btn-sm" onClick={handleResetToDefaults} style={{ fontSize: '12px' }}>
-              Khôi phục dữ liệu mẫu
-            </button>
-          </div>
-
-          {/* DANH SÁCH BÀI TẬP CỦA TÔI */}
-          {myGroups.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {myGroups.map((group, gIdx) => {
-                const groupQuestions = group.questions || [];
-                const typeBreakdown = countQuestionTypesInGroup(groupQuestions);
-
-                return (
-                  <div key={group.id || gIdx} className="glass-panel" style={{ padding: '20px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                    
-                    {/* Header nhóm */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                      <div>
-                        <h4 style={{ margin: 0, fontSize: '17px', color: 'var(--primary)' }}>
-                          {group.title}
-                        </h4>
-                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-                          {group.description}
-                        </p>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <button
-                          className="btn btn-glass btn-sm"
-                          onClick={() => {
-                            setSelectedGroupId(group.id);
-                            setMainTab('CREATE_STEPPER');
-                          }}
-                          title="Soạn thêm câu hỏi vào nhóm này"
-                        >
-                          Thêm câu hỏi
-                        </button>
-                        <button
-                          className="btn btn-glass btn-sm"
-                          onClick={() => handleDeleteGroup(group.id, group.title)}
-                          style={{ color: '#ef4444' }}
-                          title="Xóa nhóm bài tập này"
-                        >
-                          Xóa bài tập
-                        </button>
-                      </div>
-                    </div>
-
-                  {/* Tóm tắt các dạng câu hỏi có trong nhóm này */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '18px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.03)' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                      Các dạng câu hỏi trong nhóm:
-                    </span>
-                    {typeBreakdown.map((tInfo, tIdx) => (
-                      <span
-                        key={tIdx}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          background: tInfo.bg,
-                          color: tInfo.color,
-                          border: `1px solid ${tInfo.border}`
-                        }}
-                      >
-                        <span>{tInfo.icon}</span>
-                        <span>{tInfo.label}: {tInfo.count} câu</span>
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Danh sách các câu hỏi con */}
-                  {groupQuestions.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-                      {groupQuestions.map((q, qIdx) => {
-                        const qInfo = getQuestionTypeInfo(q.type);
-                        return (
-                          <div
-                            key={q.id || qIdx}
-                            style={{
-                              padding: '14px',
-                              borderRadius: '10px',
-                              background: 'rgba(255, 255, 255, 0.04)',
-                              border: '1px solid rgba(255, 255, 255, 0.08)',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'space-between'
-                            }}
-                          >
-                            <div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <span style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  padding: '2px 8px',
-                                  borderRadius: '6px',
-                                  fontSize: '11px',
-                                  fontWeight: 600,
-                                  background: qInfo.bg,
-                                  color: qInfo.color,
-                                  border: `1px solid ${qInfo.border}`
-                                }}>
-                                  <span>{qInfo.icon}</span>
-                                  <span>{qInfo.label}</span>
-                                </span>
-                                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                                  #{qIdx + 1}
-                                </span>
-                              </div>
-                              <h5 style={{ margin: '0 0 6px 0', fontSize: '14px', color: 'var(--text-main)' }}>
-                                {q.title}
-                              </h5>
-                              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                                {q.type === 'SPOT_ERROR'
-                                  ? q.tokens?.map(t => t.text).join(' ')
-                                  : (q.template || q.question_text || q.passage_title || q.instruction || '')}
-                              </p>
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                              <button
-                                className="btn btn-glass btn-sm"
-                                onClick={() => handleDeleteQuestion(group.id, q.id, q.title)}
-                                style={{ color: '#ef4444', fontSize: '11px', padding: '4px 8px' }}
-                              >
-                                Xóa câu
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                      Nhóm này chưa có câu hỏi nào. Bấm "Thêm câu hỏi" ở trên để soạn bài.
-                    </div>
-                  )}
-
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="glass-panel" style={{ padding: '40px 20px', textAlign: 'center', borderRadius: '14px' }}>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-main)' }}>
-              Chưa có bài tập nào do bạn tạo
-            </h4>
-            <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-              Bạn có thể bắt đầu tạo bài tập đầu tiên để chia sẻ lên bảng tin cộng đồng.
-            </p>
-            <button className="btn btn-primary btn-sm" onClick={() => setMainTab('CREATE_STEPPER')}>
-              Tạo câu hỏi mới
-            </button>
-          </div>
-        )}
-      </div>
-    )}
-
-      {/* =================================================================================== */}
-      {/* TAB 3: HỘP THƯ BÁO LỖI TỪ HỌC VIÊN (REPORTS INBOX)                                   */}
-      {/* =================================================================================== */}
-      {mainTab === 'REPORTS_INBOX' && (
-        <div className="animate-fade-in">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-            <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
-                Hộp Thư Báo Lỗi & Góp Ý
-              </h3>
-              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                Các phản ánh lỗi câu hỏi được gửi trực tiếp từ người làm bài tập của bạn.
-              </p>
-            </div>
-            <div style={{ padding: '4px 12px', borderRadius: '8px', background: openReportsCount > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)', color: openReportsCount > 0 ? '#ef4444' : '#10b981', fontWeight: 600, fontSize: '12px' }}>
-              {openReportsCount > 0 ? `${openReportsCount} báo lỗi đang chờ xử lý` : 'Không có báo lỗi nào chưa xử lý'}
-            </div>
-          </div>
-
-          {allReports.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {allReports.map((rep, rIdx) => {
-                const isOpen = rep.status === 'OPEN';
-                return (
-                  <div
-                    key={rep.id || rIdx}
-                    className="glass-panel"
-                    style={{
-                      padding: '18px',
-                      borderRadius: '12px',
-                      border: `1px solid ${isOpen ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.08)'}`,
-                      background: isOpen ? 'rgba(239, 68, 68, 0.03)' : 'rgba(255, 255, 255, 0.02)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: 700,
-                          background: isOpen ? '#ef4444' : '#10b981',
-                          color: '#fff'
-                        }}>
-                          {isOpen ? 'CHƯA XỬ LÝ' : 'ĐÃ SỬA'}
-                        </span>
-                        <strong style={{ fontSize: '14px', color: 'var(--text-main)' }}>
-                          {rep.errorType}
-                        </strong>
-                      </div>
-
-                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        {rep.createdAt ? new Date(rep.createdAt).toLocaleString('vi-VN') : ''}
-                      </span>
-                    </div>
-
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                      Bài tập: <strong style={{ color: 'var(--primary)' }}>{rep.testTitle || rep.groupTitle}</strong> • Câu: <strong style={{ color: '#38bdf8' }}>{rep.questionTitle}</strong>
-                    </div>
-
-                    <div style={{
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      background: 'rgba(0, 0, 0, 0.2)',
-                      fontSize: '13px',
-                      color: 'var(--text-main)',
-                      lineHeight: '1.5',
-                      marginBottom: '12px',
-                      borderLeft: '3px solid #ef4444'
-                    }}>
-                      "{rep.description}"
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        Người gửi: <strong>{rep.reporterName || 'Người học'}</strong> ({rep.reporterEmail})
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        {rep.reporterEmail && rep.reporterEmail !== 'Học viên ẩn danh' && (
-                          <button
-                            className="btn btn-glass btn-sm"
-                            onClick={() => handleReplyReportViaGmail(rep)}
-                            title="Mở Gmail để gửi lời cảm ơn và thông báo cho người học"
-                            style={{ fontSize: '12px' }}
-                          >
-                            Trả lời qua Gmail
-                          </button>
-                        )}
-
-                        <button
-                          className="btn btn-glass btn-sm"
-                          onClick={() => {
-                            setSelectedGroupId(rep.groupId);
-                            setMainTab('QUESTION_BANK');
-                          }}
-                          style={{ fontSize: '12px' }}
-                        >
-                          Xem câu trong bài
-                        </button>
-
-                        {isOpen && (
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleResolveReport(rep.groupId, rep.id)}
-                            style={{ fontSize: '12px', background: '#10b981', borderColor: '#10b981' }}
-                          >
-                            Đã sửa xong
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="glass-panel" style={{ padding: '40px 20px', textAlign: 'center', borderRadius: '14px' }}>
-              <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-main)' }}>
-                Hộp thư trống
-              </h4>
-              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                Chưa có báo lỗi nào cho các bài tập của bạn. Khi có người báo lỗi, thông báo sẽ hiển thị tại đây.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-    </div>
   );
 };
 

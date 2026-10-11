@@ -36,6 +36,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
     setSubmitted(false);
     setIsCorrect(false);
     setShowExplanation(false);
+    if (onAnswerResult) onAnswerResult(false);
   };
 
   return (

@@ -48,18 +48,6 @@ export const QUESTION_TYPES = [
     category: 'selection'
   },
   {
-    id: 'FILL_BLANK_CARDS',
-    label: 'Chọn Thẻ Đáp Án Tương Tác',
-    shortLabel: 'Chọn Thẻ',
-    icon: '',
-    color: '#38bdf8',
-    bg: 'rgba(56, 189, 248, 0.1)',
-    border: 'rgba(56, 189, 248, 0.25)',
-    description: 'Học viên bấm chọn vào các thẻ từ vựng bên dưới để ghép vào chỗ trống trong câu.',
-    badge: 'Card Selector',
-    category: 'card_interaction'
-  },
-  {
     id: 'IMAGE_QUESTION',
     label: 'Câu Hỏi Kèm Hình Ảnh',
     shortLabel: 'Hình ảnh',

@@ -72,9 +72,9 @@ export const INITIAL_GRAMMAR_DATA = {
         },
         {
           id: "cau_4_chon_the_dap_an",
-          title: "Câu 4: Chọn Thẻ Đáp Án - Hiện Tại Hoàn Thành Tiếp Diễn",
-          type: "FILL_BLANK_CARDS",
-          instruction: "Bấm chọn thẻ đáp án đúng để hoàn thành câu:",
+          title: "Câu 4: Chọn Từ Thả Xuống - Hiện Tại Hoàn Thành Tiếp Diễn",
+          type: "FILL_BLANK_DROPDOWN",
+          instruction: "Chọn từ thích hợp từ danh sách thả xuống:",
           template: "She has been living here {1} 2015.",
           blanks: {
             "1": {
@@ -157,9 +157,9 @@ export const INITIAL_GRAMMAR_DATA = {
       questions: [
         {
           id: "cau_prep_1",
-          title: "Câu 1: Chọn Thẻ - Giới Từ Đi Kèm Tính Từ",
-          type: "FILL_BLANK_CARDS",
-          instruction: "Chọn thẻ đáp án đúng để hoàn thành câu:",
+          title: "Câu 1: Chọn Từ Thả Xuống - Giới Từ Đi Kèm Tính Từ",
+          type: "FILL_BLANK_DROPDOWN",
+          instruction: "Chọn từ thích hợp từ danh sách thả xuống:",
           template: "They are interested {1} learning English online.",
           blanks: {
             "1": {
@@ -186,7 +186,7 @@ export const INITIAL_GRAMMAR_DATA = {
     },
     {
       id: "group_test_04",
-      title: "Test 4 (Đa Phương Tiện & Đọc Hiểu)",
+      title: "Test 4",
       description: "Bài kiểm tra nâng cao: Hình ảnh, Đoạn văn điền từ, Đọc hiểu văn bản & Nghe Audio",
       icon: "",
       author: {
