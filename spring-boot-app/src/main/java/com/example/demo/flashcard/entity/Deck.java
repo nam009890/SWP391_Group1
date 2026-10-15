@@ -1,18 +1,13 @@
 package com.example.demo.flashcard.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "decks")
 public class Deck {
     @Id
@@ -23,4 +18,14 @@ public class Deck {
     private String name;
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    public Deck() {
+    }
+
+    @Builder
+    public Deck(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }

@@ -10,9 +10,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "grammar_groups")
 public class GrammarGroup {
 
@@ -39,12 +36,30 @@ public class GrammarGroup {
     private String authorEmail;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<GrammarQuestion> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<GrammarQuestionReport> reports = new ArrayList<>();
+
+    public GrammarGroup() {
+    }
+
+    @Builder
+    public GrammarGroup(Long id, String groupKey, String title, String description, String icon,
+                        String authorName, String authorEmail, List<GrammarQuestion> questions,
+                        List<GrammarQuestionReport> reports, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.groupKey = groupKey;
+        this.title = title;
+        this.description = description;
+        this.icon = icon;
+        this.authorName = authorName;
+        this.authorEmail = authorEmail;
+        this.questions = questions != null ? questions : new ArrayList<>();
+        this.reports = reports != null ? reports : new ArrayList<>();
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

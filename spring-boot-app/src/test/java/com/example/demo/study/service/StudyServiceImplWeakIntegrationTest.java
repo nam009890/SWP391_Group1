@@ -2,7 +2,6 @@ package com.example.demo.study.service;
 
 import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.FlashcardRepository;
-import com.example.demo.study.entity.UserFlashcardReview;
 import com.example.demo.study.repository.UserFlashcardReviewRepository;
 import com.example.demo.study.service.impl.StudyServiceImpl;
 import com.example.demo.user.entity.User;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class StudyServiceImplWeakIntegrationTest {

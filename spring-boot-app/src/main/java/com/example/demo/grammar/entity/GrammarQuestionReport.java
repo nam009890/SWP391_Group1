@@ -8,9 +8,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "grammar_question_reports")
 public class GrammarQuestionReport {
 
@@ -50,11 +47,33 @@ public class GrammarQuestionReport {
     private String authorEmail;
 
     @Column(name = "status", length = 50)
-    @Builder.Default
     private String status = "PENDING"; // PENDING | RESOLVED
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public GrammarQuestionReport() {
+    }
+
+    @Builder
+    public GrammarQuestionReport(Long id, String reportKey, GrammarGroup group, String questionKey,
+                                 String questionTitle, String errorType, String description,
+                                 String reporterName, String reporterEmail, String authorName,
+                                 String authorEmail, String status, LocalDateTime createdAt) {
+        this.id = id;
+        this.reportKey = reportKey;
+        this.group = group;
+        this.questionKey = questionKey;
+        this.questionTitle = questionTitle;
+        this.errorType = errorType;
+        this.description = description;
+        this.reporterName = reporterName;
+        this.reporterEmail = reporterEmail;
+        this.authorName = authorName;
+        this.authorEmail = authorEmail;
+        this.status = status != null ? status : "PENDING";
+        this.createdAt = createdAt;
+    }
 
     @PrePersist
     public void prePersist() {

@@ -1,18 +1,13 @@
 package com.example.demo.grammar.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GrammarGroupDto {
 
@@ -28,9 +23,22 @@ public class GrammarGroupDto {
 
     private AuthorDto author;
 
-    @Builder.Default
     private List<GrammarQuestionDto> questions = new ArrayList<>();
 
-    @Builder.Default
     private List<GrammarReportDto> reports = new ArrayList<>();
+
+    public GrammarGroupDto() {
+    }
+
+    @Builder
+    public GrammarGroupDto(String id, Long dbId, String title, String description, String icon, AuthorDto author, List<GrammarQuestionDto> questions, List<GrammarReportDto> reports) {
+        this.id = id;
+        this.dbId = dbId;
+        this.title = title;
+        this.description = description;
+        this.icon = icon;
+        this.author = author;
+        this.questions = questions != null ? questions : new ArrayList<>();
+        this.reports = reports != null ? reports : new ArrayList<>();
+    }
 }

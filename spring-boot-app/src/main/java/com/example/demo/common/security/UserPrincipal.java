@@ -1,7 +1,6 @@
 package com.example.demo.common.security;
 
 import com.example.demo.user.entity.User;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,12 +10,18 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Getter
-@AllArgsConstructor
 public class UserPrincipal implements UserDetails {
     private Long id;
     private String email;
     private String password;
     private String role;
+
+    public UserPrincipal(Long id, String email, String password, String role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 
     public static UserPrincipal create(User user) {
         String password = user.getPassword();

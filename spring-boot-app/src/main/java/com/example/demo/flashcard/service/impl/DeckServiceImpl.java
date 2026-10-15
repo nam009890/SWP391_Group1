@@ -7,16 +7,18 @@ import com.example.demo.flashcard.dto.DeckResponse;
 import com.example.demo.flashcard.entity.Deck;
 import com.example.demo.flashcard.repository.DeckRepository;
 import com.example.demo.flashcard.service.DeckService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DeckServiceImpl implements DeckService {
 
     private final DeckRepository deckRepository;
+
+    public DeckServiceImpl(DeckRepository deckRepository) {
+        this.deckRepository = deckRepository;
+    }
 
     @Override
     public List<DeckDto> getAllDecksWithCount() {

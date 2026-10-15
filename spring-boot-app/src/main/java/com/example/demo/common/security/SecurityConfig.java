@@ -1,6 +1,5 @@
 package com.example.demo.common.security;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.ObjectProvider;
@@ -24,7 +23,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -32,6 +30,20 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
     private final ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider;
+
+    public SecurityConfig(
+            CustomOAuth2UserService customOAuth2UserService,
+            OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
+            ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider
+    ) {
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
+        this.clientRegistrationRepositoryProvider = clientRegistrationRepositoryProvider;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

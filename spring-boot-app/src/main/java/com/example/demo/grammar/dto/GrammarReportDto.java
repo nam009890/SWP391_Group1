@@ -1,17 +1,10 @@
 package com.example.demo.grammar.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GrammarReportDto {
     private String id; // e.g. rep_1728...
@@ -30,4 +23,30 @@ public class GrammarReportDto {
     private String authorEmail;
     private String status;
     private String createdAt;
+
+    public GrammarReportDto() {
+    }
+
+    @Builder
+    public GrammarReportDto(String id, Long dbId, String groupId, String testId, String testTitle,
+                            String groupTitle, String questionId, String questionTitle, String errorType,
+                            String description, String reporterName, String reporterEmail, String authorName,
+                            String authorEmail, String status, String createdAt) {
+        this.id = id;
+        this.dbId = dbId;
+        this.groupId = groupId;
+        this.testId = testId;
+        this.testTitle = testTitle;
+        this.groupTitle = groupTitle;
+        this.questionId = questionId;
+        this.questionTitle = questionTitle;
+        this.errorType = errorType;
+        this.description = description;
+        this.reporterName = reporterName;
+        this.reporterEmail = reporterEmail;
+        this.authorName = authorName;
+        this.authorEmail = authorEmail;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
 }

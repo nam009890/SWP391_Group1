@@ -1,10 +1,8 @@
 package com.example.demo.grammar.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -12,9 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "grammar_questions")
 public class GrammarQuestion {
 
@@ -62,6 +57,31 @@ public class GrammarQuestion {
     // Explanation & grammar rule
     @Column(name = "explanation", columnDefinition = "NVARCHAR(MAX)")
     private String explanation;
+
+    public GrammarQuestion() {
+    }
+
+    @Builder
+    public GrammarQuestion(Long id, String questionKey, GrammarGroup group, String title,
+                           String questionType, String instruction, String payloadJson,
+                           Integer correctTokenId, String correction, String errorType,
+                           String hint, String explanation, LocalDateTime createdAt,
+                           LocalDateTime updatedAt) {
+        this.id = id;
+        this.questionKey = questionKey;
+        this.group = group;
+        this.title = title;
+        this.questionType = questionType;
+        this.instruction = instruction;
+        this.payloadJson = payloadJson;
+        this.correctTokenId = correctTokenId;
+        this.correction = correction;
+        this.errorType = errorType;
+        this.hint = hint;
+        this.explanation = explanation;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

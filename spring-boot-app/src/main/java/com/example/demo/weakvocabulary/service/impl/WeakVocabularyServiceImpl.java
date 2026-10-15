@@ -12,7 +12,6 @@ import com.example.demo.weakvocabulary.entity.UserWeakVocabulary;
 import com.example.demo.weakvocabulary.repository.UserWeakVocabularyRepository;
 import com.example.demo.weakvocabulary.service.WeakVocabularyService;
 import jakarta.persistence.criteria.Expression;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,11 +25,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     private final UserWeakVocabularyRepository repo;
     private final UserRepository users;
     private final FlashcardRepository flashcards;
+
+    public WeakVocabularyServiceImpl(
+            UserWeakVocabularyRepository repo,
+            UserRepository users,
+            FlashcardRepository flashcards
+    ) {
+        this.repo = repo;
+        this.users = users;
+        this.flashcards = flashcards;
+    }
 
     @Override
     @Transactional
@@ -140,7 +148,7 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
         if (resolvedSort.equals("ACCURACY_ASC") || resolvedSort.equals("ACCURACY_DESC")) {
             boolean ascending = resolvedSort.equals("ACCURACY_ASC");
             specification = specification.and((root, query, cb) -> {
-                if (!Long.class.equals(query.getResultType())) {
+                if (query != null && !Long.class.equals(query.getResultType())) {
                     query.orderBy(ascending ? cb.asc(accuracyExpression(root, cb)) : cb.desc(accuracyExpression(root, cb)));
                 }
                 return cb.conjunction();

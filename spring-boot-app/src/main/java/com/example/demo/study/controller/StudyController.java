@@ -6,7 +6,6 @@ import com.example.demo.flashcard.dto.FlashcardResponse;
 import com.example.demo.study.dto.ReviewDto;
 import com.example.demo.study.dto.ReviewResponse;
 import com.example.demo.study.service.StudyService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/study")
-@RequiredArgsConstructor
 public class StudyController {
 
     private final StudyService studyService;
+
+    public StudyController(StudyService studyService) {
+        this.studyService = studyService;
+    }
 
     @GetMapping("/decks/{deckId}/due")
     public ResponseEntity<List<FlashcardResponse>> getFlashcardsToStudy(

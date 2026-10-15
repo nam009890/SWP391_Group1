@@ -1,16 +1,11 @@
 package com.example.demo.study.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ReviewResponse {
     private Long id;
     private Long userId;
@@ -19,4 +14,18 @@ public class ReviewResponse {
     private Integer intervalDays;
     private Integer repetitions;
     private LocalDateTime nextReviewDate;
+
+    public ReviewResponse() {
+    }
+
+    @Builder
+    public ReviewResponse(Long id, Long userId, Long flashcardId, Integer easeFactor, Integer intervalDays, Integer repetitions, LocalDateTime nextReviewDate) {
+        this.id = id;
+        this.userId = userId;
+        this.flashcardId = flashcardId;
+        this.easeFactor = easeFactor;
+        this.intervalDays = intervalDays;
+        this.repetitions = repetitions;
+        this.nextReviewDate = nextReviewDate;
+    }
 }

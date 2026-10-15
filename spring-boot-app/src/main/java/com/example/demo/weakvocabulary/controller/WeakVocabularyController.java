@@ -3,16 +3,19 @@ package com.example.demo.weakvocabulary.controller;
 import com.example.demo.common.security.*;
 import com.example.demo.weakvocabulary.dto.WeakDtos.*;
 import com.example.demo.weakvocabulary.service.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/weak-vocabularies")
-@RequiredArgsConstructor
 public class WeakVocabularyController {
     private final WeakVocabularyService weak;
     private final WeakPracticeService practice;
+
+    public WeakVocabularyController(WeakVocabularyService weak, WeakPracticeService practice) {
+        this.weak = weak;
+        this.practice = practice;
+    }
 
     @PostMapping("/flashcards/{id}")
     public ResponseEntity<WeakResponse> add(@CurrentUser UserPrincipal u, @PathVariable Long id) {

@@ -11,7 +11,6 @@ import com.example.demo.study.service.StudyService;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.weakvocabulary.service.WeakVocabularyService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,13 +18,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class StudyServiceImpl implements StudyService {
 
     private final FlashcardRepository flashcardRepository;
     private final UserFlashcardReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final WeakVocabularyService weakVocabularyService;
+
+    public StudyServiceImpl(
+            FlashcardRepository flashcardRepository,
+            UserFlashcardReviewRepository reviewRepository,
+            UserRepository userRepository,
+            WeakVocabularyService weakVocabularyService
+    ) {
+        this.flashcardRepository = flashcardRepository;
+        this.reviewRepository = reviewRepository;
+        this.userRepository = userRepository;
+        this.weakVocabularyService = weakVocabularyService;
+    }
 
     @Override
     public List<FlashcardResponse> getFlashcardsToStudy(Long deckId, Long userId) {

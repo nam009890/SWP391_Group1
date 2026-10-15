@@ -5,7 +5,6 @@ import com.example.demo.grammar.dto.GrammarQuestionDto;
 import com.example.demo.grammar.dto.GrammarReportDto;
 import com.example.demo.grammar.dto.GrammarResponseDto;
 import com.example.demo.grammar.service.GrammarService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +13,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/grammar")
-@RequiredArgsConstructor
 public class GrammarController {
 
     private final GrammarService grammarService;
+
+    public GrammarController(GrammarService grammarService) {
+        this.grammarService = grammarService;
+    }
 
     /**
      * Get root grammar module data with all test groups, questions, and reports

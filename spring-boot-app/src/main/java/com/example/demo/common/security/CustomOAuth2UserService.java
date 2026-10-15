@@ -3,7 +3,6 @@ package com.example.demo.common.security;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.weakvocabulary.service.WeakVocabularyService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -11,11 +10,16 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final WeakVocabularyService weakVocabularyService;
+
+    public CustomOAuth2UserService(UserRepository userRepository, WeakVocabularyService weakVocabularyService) {
+        super();
+        this.userRepository = userRepository;
+        this.weakVocabularyService = weakVocabularyService;
+    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

@@ -2,15 +2,10 @@ package com.example.demo.grammar.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GrammarQuestionDto {
 
@@ -78,4 +73,41 @@ public class GrammarQuestionDto {
     private String audioUrl;
 
     private String transcript;
+
+    public GrammarQuestionDto() {
+    }
+
+    @Builder
+    public GrammarQuestionDto(Object id, Long dbId, String groupId, String title, String type, String instruction,
+                              Object tokens, Integer correctTokenId, String correction, String errorType,
+                              String hint, String explanation, String template, Object blanks, Object validation,
+                              String imageUrl, String imageCaption, String questionText, Object options,
+                              String correctAnswer, String passageTitle, String passageText, Object subQuestions,
+                              String audioUrl, String transcript) {
+        this.id = id;
+        this.dbId = dbId;
+        this.groupId = groupId;
+        this.title = title;
+        this.type = type;
+        this.instruction = instruction;
+        this.tokens = tokens;
+        this.correctTokenId = correctTokenId;
+        this.correction = correction;
+        this.errorType = errorType;
+        this.hint = hint;
+        this.explanation = explanation;
+        this.template = template;
+        this.blanks = blanks;
+        this.validation = validation;
+        this.imageUrl = imageUrl;
+        this.imageCaption = imageCaption;
+        this.questionText = questionText;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+        this.passageTitle = passageTitle;
+        this.passageText = passageText;
+        this.subQuestions = subQuestions;
+        this.audioUrl = audioUrl;
+        this.transcript = transcript;
+    }
 }

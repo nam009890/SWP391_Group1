@@ -105,7 +105,9 @@ class WeakVocabularyServiceImplTest {
     @Test
     void manualAddShouldBeIdempotent() {
         UserWeakVocabulary existing = UserWeakVocabulary.builder().user(user).flashcard(flashcard).totalAttempts(4).build();
-        when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.empty(), Optional.of(existing));
+        when(weakRepository.findByUserIdAndFlashcardId(1L, 2L))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(existing));
         service.addManual(1L, 2L);
         service.addManual(1L, 2L);
         verify(weakRepository, times(2)).save(any(UserWeakVocabulary.class));

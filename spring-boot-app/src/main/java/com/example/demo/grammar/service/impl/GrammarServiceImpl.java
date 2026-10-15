@@ -12,7 +12,6 @@ import com.example.demo.grammar.service.GrammarService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +21,24 @@ import java.util.*;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class GrammarServiceImpl implements GrammarService {
 
     private final GrammarGroupRepository groupRepository;
     private final GrammarQuestionRepository questionRepository;
     private final GrammarQuestionReportRepository reportRepository;
     private final ObjectMapper objectMapper;
+
+    public GrammarServiceImpl(
+            GrammarGroupRepository groupRepository,
+            GrammarQuestionRepository questionRepository,
+            GrammarQuestionReportRepository reportRepository,
+            ObjectMapper objectMapper
+    ) {
+        this.groupRepository = groupRepository;
+        this.questionRepository = questionRepository;
+        this.reportRepository = reportRepository;
+        this.objectMapper = objectMapper;
+    }
 
     @PostConstruct
     public void initDefaultData() {

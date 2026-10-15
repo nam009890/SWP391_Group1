@@ -1,15 +1,21 @@
 package com.example.demo.flashcard.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class DeckDto {
     private Long id;
     private String name;
     private String description;
     private Long flashcardCount;
+
+    public DeckDto() {
+    }
+
+    public DeckDto(Long id, String name, String description, Long flashcardCount) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.flashcardCount = flashcardCount;
+    }
 }
