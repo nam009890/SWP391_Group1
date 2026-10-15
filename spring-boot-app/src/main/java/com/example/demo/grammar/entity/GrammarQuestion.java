@@ -31,7 +31,7 @@ public class GrammarQuestion {
     private GrammarGroup group;
 
     // Readable title in Vietnamese
-    @Column(name = "title", length = 255)
+    @Column(name = "title", length = 255, columnDefinition = "NVARCHAR(255)")
     private String title;
 
     // Question type: SPOT_ERROR | FILL_BLANK_TEXT | FILL_BLANK_DROPDOWN | FILL_BLANK_CARDS | IMAGE_QUESTION | PASSAGE_CLOZE | READING_COMPREHENSION | AUDIO_LISTENING
@@ -39,30 +39,28 @@ public class GrammarQuestion {
     private String questionType;
 
     // Instruction prompt
-    @Column(name = "instruction", columnDefinition = "TEXT")
+    @Column(name = "instruction", columnDefinition = "NVARCHAR(MAX)")
     private String instruction;
 
     // Full JSON content (tokens, template, blanks, options, sub_questions, audio_url, etc.)
-    @Lob
-    @Column(name = "payload_json", columnDefinition = "LONGTEXT")
+    @Column(name = "payload_json", columnDefinition = "NVARCHAR(MAX)")
     private String payloadJson;
 
     // Specific to SPOT_ERROR
     @Column(name = "correct_token_id")
     private Integer correctTokenId;
 
-    @Column(name = "correction", length = 255)
+    @Column(name = "correction", length = 255, columnDefinition = "NVARCHAR(255)")
     private String correction;
 
-    @Column(name = "error_type", length = 255)
+    @Column(name = "error_type", length = 255, columnDefinition = "NVARCHAR(255)")
     private String errorType;
 
-    @Column(name = "hint", length = 500)
+    @Column(name = "hint", length = 500, columnDefinition = "NVARCHAR(500)")
     private String hint;
 
     // Explanation & grammar rule
-    @Lob
-    @Column(name = "explanation", columnDefinition = "LONGTEXT")
+    @Column(name = "explanation", columnDefinition = "NVARCHAR(MAX)")
     private String explanation;
 
     @Column(name = "created_at")

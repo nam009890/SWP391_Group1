@@ -2,6 +2,7 @@ package com.example.demo.common.security;
 
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
+import com.example.demo.weakvocabulary.service.WeakVocabularyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final WeakVocabularyService weakVocabularyService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -38,7 +40,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.setName(name);
         user.setProviderId(providerId);
         user.setAvatarUrl(avatarUrl);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Khởi tạo dữ liệu mẫu từ vựng yếu cho tài khoản Google mới đăng nhập
+        weakVocabularyService.initializeStarterDataForUser(savedUser.getId());
 
         return oAuth2User;
     }

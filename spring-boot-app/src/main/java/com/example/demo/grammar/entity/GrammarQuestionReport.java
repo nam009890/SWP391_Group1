@@ -28,25 +28,25 @@ public class GrammarQuestionReport {
     @Column(name = "question_key", length = 100)
     private String questionKey;
 
-    @Column(name = "question_title", length = 255)
+    @Column(name = "question_title", length = 255, columnDefinition = "NVARCHAR(255)")
     private String questionTitle;
 
-    @Column(name = "error_type", length = 255)
+    @Column(name = "error_type", length = 255, columnDefinition = "NVARCHAR(255)")
     private String errorType;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(name = "reporter_name", length = 255)
+    @Column(name = "reporter_name", length = 255, columnDefinition = "NVARCHAR(255)")
     private String reporterName;
 
-    @Column(name = "reporter_email", length = 255)
+    @Column(name = "reporter_email", length = 255, columnDefinition = "NVARCHAR(255)")
     private String reporterEmail;
 
-    @Column(name = "author_name", length = 255)
+    @Column(name = "author_name", length = 255, columnDefinition = "NVARCHAR(255)")
     private String authorName;
 
-    @Column(name = "author_email", length = 255)
+    @Column(name = "author_email", length = 255, columnDefinition = "NVARCHAR(255)")
     private String authorEmail;
 
     @Column(name = "status", length = 50)

@@ -6,6 +6,7 @@ import com.example.demo.auth.dto.RegisterRequest;
 import com.example.demo.common.security.JwtTokenProvider;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
+import com.example.demo.weakvocabulary.service.WeakVocabularyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+    private final WeakVocabularyService weakVocabularyService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -37,9 +39,8 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = tokenProvider.generateToken(loginRequest.getEmail());
-        
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow();
+        String jwt = tokenProvider.generateToken(user);
         
         return ResponseEntity.ok(new AuthResponse(jwt, user.getName(), user.getEmail()));
     }
@@ -60,7 +61,10 @@ public class AuthController {
 
         User savedUser = userRepository.save(user);
 
-        String jwt = tokenProvider.generateToken(savedUser.getEmail());
+        // Khởi tạo dữ liệu từ vựng mẫu cho người dùng mới đăng ký
+        weakVocabularyService.initializeStarterDataForUser(savedUser.getId());
+
+        String jwt = tokenProvider.generateToken(savedUser);
         return ResponseEntity.ok(new AuthResponse(jwt, savedUser.getName(), savedUser.getEmail()));
     }
 }

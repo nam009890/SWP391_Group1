@@ -23,19 +23,19 @@ public class GrammarGroup {
     @Column(name = "group_key", nullable = false, unique = true, length = 100)
     private String groupKey;
 
-    @Column(name = "title", nullable = false, length = 255)
+    @Column(name = "title", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(name = "icon", length = 50)
     private String icon;
 
-    @Column(name = "author_name", length = 255)
+    @Column(name = "author_name", length = 255, columnDefinition = "NVARCHAR(255)")
     private String authorName;
 
-    @Column(name = "author_email", length = 255)
+    @Column(name = "author_email", length = 255, columnDefinition = "NVARCHAR(255)")
     private String authorEmail;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)

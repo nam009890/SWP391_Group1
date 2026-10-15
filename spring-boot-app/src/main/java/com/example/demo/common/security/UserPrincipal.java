@@ -4,6 +4,7 @@ import com.example.demo.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -15,6 +16,7 @@ public class UserPrincipal implements UserDetails {
     private Long id;
     private String email;
     private String password;
+    private String role;
 
     public static UserPrincipal create(User user) {
         String password = user.getPassword();
@@ -24,12 +26,16 @@ public class UserPrincipal implements UserDetails {
         return new UserPrincipal(
                 user.getId(),
                 user.getEmail(),
-                password
+                password,
+                user.getRole()
         );
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role != null && !role.isBlank()) {
+            return Collections.singletonList(new SimpleGrantedAuthority(role));
+        }
         return Collections.emptyList();
     }
 

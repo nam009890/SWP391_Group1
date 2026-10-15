@@ -7,4 +7,5 @@ import java.util.*;
 
 public interface UserWeakVocabularyRepository extends JpaRepository<UserWeakVocabulary, Long>, JpaSpecificationExecutor<UserWeakVocabulary> {
     Optional<UserWeakVocabulary> findByUserIdAndFlashcardId(Long userId, Long flashcardId);
+    boolean existsByUserId(Long userId);
 }

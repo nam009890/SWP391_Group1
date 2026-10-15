@@ -18,11 +18,11 @@ import AudioListeningQuestion from './components/AudioListeningQuestion';
 import PrintTestModal from './components/PrintTestModal';
 import ReportQuestionModal from './components/ReportQuestionModal';
 import {
-  getStoredQuestions,
   fetchGrammarQuestions,
-  saveStoredQuestions,
   resolveQuestionReport,
-  deleteGrammarQuestionFromBackend
+  deleteGrammarQuestionFromBackend,
+  deleteGrammarGroupInBackend,
+  EMPTY_GRAMMAR_DATA
 } from '../model/grammarQuestionsData';
 import { getQuestionTypeInfo, countQuestionTypesInGroup } from '../model/questionTypesRegistry';
 import '../Grammar.css';
@@ -30,8 +30,9 @@ import '../Grammar.css';
 const GrammarLearnerPage = ({ user }) => {
   const navigate = useNavigate();
 
-  // Danh sách các bài tập
-  const [data, setData] = useState(() => getStoredQuestions());
+  // Dữ liệu danh sách bài tập từ Database
+  const [data, setData] = useState(EMPTY_GRAMMAR_DATA);
+  const [loading, setLoading] = useState(true);
 
   // Chế độ xem: 'GROUPS_LIST' (Xem danh sách bài) hoặc 'TEST_SESSION' (Làm bài)
   const [viewMode, setViewMode] = useState('GROUPS_LIST');
@@ -80,10 +81,12 @@ const GrammarLearnerPage = ({ user }) => {
   const userName = (user?.name || loggedInUser?.name || 'Cộng đồng').trim();
 
   useEffect(() => {
+    setLoading(true);
     fetchGrammarQuestions().then(res => {
-      if (res && Array.isArray(res.groups) && res.groups.length > 0) {
+      if (res && Array.isArray(res.groups)) {
         setData(res);
       }
+      setLoading(false);
     });
   }, []);
 
@@ -125,9 +128,13 @@ const GrammarLearnerPage = ({ user }) => {
     setShowCompletionModal(false);
   };
 
-  // Quay lại danh sách bài tập
+  // Quay lại danh sách bài tập (nạp lại dữ liệu mới nhất từ Database)
   const handleBackToGroupsList = () => {
-    setData(getStoredQuestions());
+    fetchGrammarQuestions().then(res => {
+      if (res && Array.isArray(res.groups)) {
+        setData(res);
+      }
+    });
     setViewMode('GROUPS_LIST');
     setShowCompletionModal(false);
   };
@@ -199,7 +206,7 @@ const GrammarLearnerPage = ({ user }) => {
       const updatedGroups = groups.filter(g => g.id !== groupId);
       const updatedData = { ...data, groups: updatedGroups };
       setData(updatedData);
-      saveStoredQuestions(updatedData);
+      deleteGrammarGroupInBackend(groupId);
       showToast(`Đã xóa bài tập "${groupTitle}".`);
     }
   };
@@ -218,7 +225,6 @@ const GrammarLearnerPage = ({ user }) => {
       });
       const updatedData = { ...data, groups: updatedGroups };
       setData(updatedData);
-      saveStoredQuestions(updatedData);
       deleteGrammarQuestionFromBackend(questionId);
       showToast("Đã xóa câu hỏi khỏi bài tập!");
     }
@@ -314,8 +320,20 @@ const GrammarLearnerPage = ({ user }) => {
           </button>
         </div>
 
-        {/* TAB 1: TẤT CẢ BÀI TẬP HIỆN TẠI */}
+        {/* TAB 1: TẤT CẢ BÀI TẬP HIỆN TẠI (TỪ DATABASE) */}
         {learnerTab === 'ALL_TESTS' && (
+          loading ? (
+            <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              Đang tải danh sách bài tập từ cơ sở dữ liệu...
+            </div>
+          ) : groups.length === 0 ? (
+            <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <p style={{ fontSize: '16px', marginBottom: '16px' }}>Chưa có bài tập ngữ pháp nào trong cơ sở dữ liệu.</p>
+              <button className="btn btn-primary" onClick={() => navigate('/grammar/admin')}>
+                Tạo bài tập đầu tiên
+              </button>
+            </div>
+          ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }} className="animate-fade-in">
             {groups.map((group, idx) => {
               const count = group.questions?.length || 0;
@@ -371,6 +389,7 @@ const GrammarLearnerPage = ({ user }) => {
               );
             })}
           </div>
+          )
         )}
 
         {/* TAB 2: BÀI TẬP CỦA TÔI */}

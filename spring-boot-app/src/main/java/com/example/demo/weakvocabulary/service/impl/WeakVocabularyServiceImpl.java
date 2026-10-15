@@ -18,8 +18,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,48 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     private final UserWeakVocabularyRepository repo;
     private final UserRepository users;
     private final FlashcardRepository flashcards;
+
+    @Override
+    @Transactional
+    public void initializeStarterDataForUser(Long userId) {
+        if (repo.existsByUserId(userId)) {
+            return;
+        }
+        User user = users.findById(userId).orElse(null);
+        if (user == null) return;
+
+        List<Flashcard> demoCards = flashcards.findAll().stream()
+                .filter(f -> f.getDeck() != null && "Weak Vocabulary Demo".equalsIgnoreCase(f.getDeck().getName()))
+                .collect(Collectors.toList());
+
+        if (demoCards.isEmpty()) {
+            demoCards = flashcards.findAll();
+        }
+        if (demoCards.isEmpty()) return;
+
+        List<UserWeakVocabulary> starterItems = new ArrayList<>();
+        for (Flashcard card : demoCards) {
+            long id = card.getId();
+            UserWeakVocabulary weak = UserWeakVocabulary.builder()
+                    .user(user)
+                    .flashcard(card)
+                    .manualMarked(id % 3 == 0 || id % 3 == 2)
+                    .autoDetected(id % 3 == 1 || id % 3 == 2)
+                    .masteryScore((int)((id * 7) % 101))
+                    .totalAttempts((int)(id % 21))
+                    .correctCount((int)((id % 21) - (id % 6)))
+                    .wrongCount((int)(id % 6))
+                    .consecutiveWrong((int)(id % 6))
+                    .lastStudyQuality(id % 2 == 0 ? 1 : 3)
+                    .weakNote(id % 5 == 0 ? "Ôn lại trong tuần này" : null)
+                    .weakDeleted(false)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            starterItems.add(weak);
+        }
+        repo.saveAll(starterItems);
+    }
 
     @Override
     public WeakResponse addManual(Long userId, Long flashcardId) {
@@ -52,6 +98,10 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     @Override
     public PageResponse list(Long userId, String keyword, Long deckId, String source, Integer masteryMin, Integer masteryMax,
                              Double accuracyMin, Double accuracyMax, String sort, int page, int size) {
+        if (!repo.existsByUserId(userId)) {
+            initializeStarterDataForUser(userId);
+        }
+
         Specification<UserWeakVocabulary> specification = (root, query, cb) -> cb.and(
                 cb.equal(root.get("user").get("id"), userId), cb.isFalse(root.get("weakDeleted")));
         if (keyword != null && !keyword.isBlank()) {

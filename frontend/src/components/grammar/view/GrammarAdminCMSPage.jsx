@@ -21,15 +21,15 @@ import PassageClozeQuestion from './components/PassageClozeQuestion';
 import ReadingComprehensionQuestion from './components/ReadingComprehensionQuestion';
 import AudioListeningQuestion from './components/AudioListeningQuestion';
 import {
-  getStoredQuestions,
-  saveStoredQuestions,
-  resetStoredQuestions,
   fetchGrammarQuestions,
   createGrammarGroupInBackend,
+  deleteGrammarGroupInBackend,
   createGrammarQuestionInBackend,
   deleteGrammarQuestionFromBackend,
   resolveQuestionReport,
-  getReportsForUser
+  getReportsForUser,
+  resetGrammarQuestionsInBackend,
+  EMPTY_GRAMMAR_DATA
 } from '../model/grammarQuestionsData';
 import {
   getAllQuestionTypes,
@@ -41,8 +41,9 @@ import '../Grammar.css';
 const GrammarAdminCMSPage = ({ user }) => {
   const navigate = useNavigate();
 
-  // Dữ liệu toàn bộ các nhóm bài tập và câu hỏi
-  const [lessonData, setLessonData] = useState(() => getStoredQuestions());
+  // Dữ liệu toàn bộ các nhóm bài tập và câu hỏi từ Database
+  const [lessonData, setLessonData] = useState(EMPTY_GRAMMAR_DATA);
+  const [loading, setLoading] = useState(true);
   const groups = lessonData.groups || [];
 
   const userEmail = (user?.email || '').toLowerCase().trim();
@@ -152,15 +153,17 @@ const GrammarAdminCMSPage = ({ user }) => {
     setTimeout(() => setToastMessage(''), 3500);
   };
 
-  // Tải dữ liệu ban đầu
+  // Tải dữ liệu ban đầu từ Database
   useEffect(() => {
+    setLoading(true);
     fetchGrammarQuestions().then(data => {
-      if (data && Array.isArray(data.groups) && data.groups.length > 0) {
+      if (data && Array.isArray(data.groups)) {
         setLessonData(data);
         if (!selectedGroupId && data.groups[0]) {
           setSelectedGroupId(data.groups[0].id);
         }
       }
+      setLoading(false);
     });
   }, []);
 
@@ -202,7 +205,6 @@ const GrammarAdminCMSPage = ({ user }) => {
     const updatedGroups = [...groups, newGroup];
     const updatedData = { ...lessonData, groups: updatedGroups };
     setLessonData(updatedData);
-    saveStoredQuestions(updatedData);
 
     // Đồng bộ nhóm bài tập mới lên backend Spring Boot
     createGrammarGroupInBackend(newGroup);
@@ -220,8 +222,18 @@ const GrammarAdminCMSPage = ({ user }) => {
 
   // Đánh dấu đã sửa xong một báo cáo
   const handleResolveReport = (groupId, reportId) => {
-    const updated = resolveQuestionReport(groupId, reportId);
-    setLessonData(updated);
+    resolveQuestionReport(groupId, reportId);
+    // Cập nhật trạng thái hiển thị
+    const updatedGroups = groups.map(g => {
+      if (g.id === groupId && Array.isArray(g.reports)) {
+        return {
+          ...g,
+          reports: g.reports.map(r => r.id === reportId ? { ...r, status: 'RESOLVED' } : r)
+        };
+      }
+      return g;
+    });
+    setLessonData({ ...lessonData, groups: updatedGroups });
     showToast("Đã đánh dấu báo cáo đã được giải quyết!");
   };
 
@@ -243,7 +255,7 @@ const GrammarAdminCMSPage = ({ user }) => {
       const updatedGroups = groups.filter(g => g.id !== groupId);
       const updatedData = { ...lessonData, groups: updatedGroups };
       setLessonData(updatedData);
-      saveStoredQuestions(updatedData);
+      deleteGrammarGroupInBackend(groupId);
       if (selectedGroupId === groupId) {
         setSelectedGroupId(updatedGroups[0]?.id || '');
       }
@@ -265,19 +277,21 @@ const GrammarAdminCMSPage = ({ user }) => {
       });
       const updatedData = { ...lessonData, groups: updatedGroups };
       setLessonData(updatedData);
-      saveStoredQuestions(updatedData);
       deleteGrammarQuestionFromBackend(questionId);
       showToast("Đã xóa câu hỏi khỏi nhóm thành công!");
     }
   };
 
-  // Reset toàn bộ câu hỏi về mặc định
+  // Reset toàn bộ câu hỏi về mặc định trong cơ sở dữ liệu
   const handleResetToDefaults = () => {
-    if (window.confirm("Khôi phục toàn bộ bài tập về mặc định ban đầu (Test 1, Test 2, Test 3)?")) {
-      const defaultData = resetStoredQuestions();
-      setLessonData(defaultData);
-      setSelectedGroupId(defaultData.groups[0]?.id || '');
-      showToast("Đã khôi phục các nhóm bài test mặc định.");
+    if (window.confirm("Khôi phục toàn bộ bài tập về mặc định ban đầu trong cơ sở dữ liệu (MSSQL)?")) {
+      resetGrammarQuestionsInBackend().then(res => {
+        if (res && Array.isArray(res.groups)) {
+          setLessonData(res);
+          setSelectedGroupId(res.groups[0]?.id || '');
+          showToast("Đã khôi phục các nhóm bài test mặc định từ Database.");
+        }
+      });
     }
   };
 
@@ -517,7 +531,6 @@ const GrammarAdminCMSPage = ({ user }) => {
 
     const updatedLessonData = { ...lessonData, groups: updatedGroups };
     setLessonData(updatedLessonData);
-    saveStoredQuestions(updatedLessonData);
 
     // Đồng bộ lên backend Spring Boot nếu kết nối được
     createGrammarQuestionInBackend({

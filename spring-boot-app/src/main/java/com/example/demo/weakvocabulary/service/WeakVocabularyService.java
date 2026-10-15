@@ -12,4 +12,6 @@ public interface WeakVocabularyService {
     WeakResponse patch(Long userId, Long id, PatchRequest request);
 
     void softDelete(Long userId, Long id);
+
+    void initializeStarterDataForUser(Long userId);
 }

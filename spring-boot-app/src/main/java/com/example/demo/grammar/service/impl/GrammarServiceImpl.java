@@ -36,10 +36,183 @@ public class GrammarServiceImpl implements GrammarService {
             if (groupRepository.count() == 0) {
                 log.info("Seeding default grammar test groups and questions into database...");
                 seedDefaultData();
+            } else {
+                fixCorruptedVietnameseData();
             }
         } catch (Exception e) {
             log.warn("Database may not be initialized yet for seeding grammar groups: {}", e.getMessage());
         }
+    }
+
+    private void fixCorruptedVietnameseData() {
+        try {
+            List<GrammarQuestion> allQuestions = questionRepository.findAll();
+            boolean needSaveQuestion = false;
+            for (GrammarQuestion q : allQuestions) {
+                if (q.getQuestionKey() == null) continue;
+                switch (q.getQuestionKey()) {
+                    case "cau_1_tim_loi_sai":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 1: Tìm Lỗi Sai - Thì Quá Khứ Đơn");
+                            q.setInstruction("Chỉ ra từ bị sai trong câu sau:");
+                            q.setErrorType("Thì quá khứ đơn / Tương hợp thời gian");
+                            q.setHint("Hãy chú ý đến trạng từ chỉ thời gian ở cuối câu (yesterday).");
+                            q.setExplanation("Vì có trạng từ 'yesterday' nên động từ 'go' phải chia ở thì quá khứ đơn là 'went'.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_2_hien_tai_don":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 2: Điền Từ - Thì Hiện Tại Đơn");
+                            q.setInstruction("Hoàn thành câu bằng cách điền từ thích hợp:");
+                            q.setExplanation("Thì Hiện tại đơn: Diễn tả thói quen lặp đi lặp lại với chủ ngữ ngôi thứ ba số ít (She).");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_3_chon_gioi_tu":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 3: Chọn Từ Trắc Nghiệm - Hiện Tại Hoàn Thành");
+                            q.setInstruction("Chọn từ thích hợp từ danh sách thả xuống:");
+                            q.setExplanation("Dùng 'for' đi kèm với một khoảng thời gian (3 years) trong thì Hiện tại hoàn thành.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_4_chon_the_dap_an":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 4: Chọn Từ Thả Xuống - Hiện Tại Hoàn Thành Tiếp Diễn");
+                            q.setInstruction("Chọn từ thích hợp từ danh sách thả xuống:");
+                            q.setExplanation("Dùng 'Since' đi kèm với mốc thời gian xác định trong quá khứ (2015) trong thì Hiện tại hoàn thành tiếp diễn.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_cond_1":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 1: Điền Động Từ - Câu Điều Kiện Loại 2");
+                            q.setInstruction("Điền dạng đúng của động từ trong ngoặc:");
+                            q.setExplanation("Câu điều kiện loại 2: Mệnh đề If chia Quá khứ đơn (had), mệnh đề chính dùng Would + V-bare (would buy).");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_cond_2":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 2: Tìm Lỗi Sai - Mệnh Đề If Loại 1");
+                            q.setInstruction("Chỉ ra từ bị sai trong câu điều kiện sau:");
+                            q.setErrorType("Câu điều kiện loại 1 / Mệnh đề If");
+                            q.setHint("Mệnh đề If loại 1 không dùng 'will'.");
+                            q.setExplanation("Trong câu điều kiện loại 1, mệnh đề If chia thì Hiện tại đơn ('rains'), không dùng 'will rain'.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_cond_3":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 3: Chọn Từ Trắc Nghiệm - Câu Điều Kiện Loại 0");
+                            q.setInstruction("Chọn từ đúng diễn tả chân lý hiển nhiên:");
+                            q.setExplanation("Câu điều kiện loại 0 diễn tả sự thật hiển nhiên: Cả 2 vế đều dùng thì Hiện tại đơn (heat / melts).");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_prep_1":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 1: Chọn Từ Thả Xuống - Giới Từ Đi Kèm Tính Từ");
+                            q.setInstruction("Chọn từ thích hợp từ danh sách thả xuống:");
+                            q.setExplanation("Cấu trúc cố định: 'to be interested in something' (thích thú, quan tâm đến điều gì).");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_prep_2":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 2: Điền Giới Từ - Giới Từ Chỉ Thời Gian");
+                            q.setInstruction("Điền giới từ chỉ thời gian thích hợp:");
+                            q.setExplanation("Dùng 'at' trước mốc giờ cụ thể (at 9:00 AM) và 'on' trước ngày/thứ trong tuần (on Monday).");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_img_1":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 1: Quan sát hình ảnh lớp học");
+                            q.setInstruction("Quan sát bức ảnh bên dưới và chọn câu miêu tả chính xác nhất:");
+                            q.setExplanation("Bức ảnh thể hiện không gian lớp học sống động, giáo viên đang trao đổi và học sinh đang chú ý lắng nghe.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_cloze_1":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 2: Đoạn văn điền từ về Lợi ích đọc sách");
+                            q.setInstruction("Đọc đoạn văn sau và chọn từ thích hợp cho mỗi chỗ trống:");
+                            q.setExplanation("[1] 'allows' mang nghĩa tạo điều kiện / cho phép. [2] 'developing a reading habit' là danh động từ số ít nên chia 'has been proven'.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_reading_1":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 3: Đọc hiểu - Trí Tuệ Nhân Tạo (AI)");
+                            q.setInstruction("Đọc kỹ đoạn văn sau và trả lời các câu hỏi bên dưới:");
+                            q.setExplanation("Đoạn văn nhấn mạnh ứng dụng thực tiễn của AI (gợi ý nội dung) và sự cần thiết của quy chuẩn đạo đức nhằm bảo vệ quyền riêng tư người dùng.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                    case "cau_audio_1":
+                        if (isCorrupted(q.getInstruction()) || isCorrupted(q.getTitle())) {
+                            q.setTitle("Câu 4: Nghe thông báo sân bay (Audio Listening)");
+                            q.setInstruction("Nghe thông báo âm thanh và chọn câu trả lời chính xác:");
+                            q.setExplanation("Thông báo ghi rõ: 'Flight VN382 to Da Nang is now boarding at Gate 4'.");
+                            needSaveQuestion = true;
+                        }
+                        break;
+                }
+            }
+            if (needSaveQuestion) {
+                questionRepository.saveAll(allQuestions);
+                log.info("Successfully repaired corrupted Vietnamese grammar question texts in database.");
+            }
+
+            List<GrammarGroup> allGroups = groupRepository.findAll();
+            boolean needSaveGroup = false;
+            for (GrammarGroup g : allGroups) {
+                if (g.getGroupKey() == null) continue;
+                switch (g.getGroupKey()) {
+                    case "group_test_01":
+                        if (isCorrupted(g.getDescription()) || isCorrupted(g.getTitle())) {
+                            g.setTitle("Test 1");
+                            g.setDescription("Bài kiểm tra tổng hợp: Thì Quá khứ, Hiện tại đơn, Menu thả xuống");
+                            needSaveGroup = true;
+                        }
+                        break;
+                    case "group_test_02":
+                        if (isCorrupted(g.getDescription()) || isCorrupted(g.getTitle())) {
+                            g.setTitle("Test 2");
+                            g.setDescription("Bài kiểm tra chuyên đề: Câu điều kiện loại 1 & loại 2");
+                            needSaveGroup = true;
+                        }
+                        break;
+                    case "group_test_03":
+                        if (isCorrupted(g.getDescription()) || isCorrupted(g.getTitle())) {
+                            g.setTitle("Test 3");
+                            g.setDescription("Bài kiểm tra: Giới từ, Cụm tính từ và Cấu trúc thường gặp");
+                            needSaveGroup = true;
+                        }
+                        break;
+                    case "group_test_04":
+                        if (isCorrupted(g.getDescription()) || isCorrupted(g.getTitle())) {
+                            g.setTitle("Test 4");
+                            g.setDescription("Bài kiểm tra nâng cao: Hình ảnh, Đoạn văn điền từ, Đọc hiểu văn bản & Nghe Audio");
+                            needSaveGroup = true;
+                        }
+                        break;
+                }
+            }
+            if (needSaveGroup) {
+                groupRepository.saveAll(allGroups);
+                log.info("Successfully repaired corrupted Vietnamese grammar group descriptions in database.");
+            }
+        } catch (Exception e) {
+            log.warn("Could not check/repair corrupted Vietnamese text: {}", e.getMessage());
+        }
+    }
+
+    private boolean isCorrupted(String text) {
+        if (text == null) return false;
+        return text.contains("?") || text.contains("Ð") || text.contains("d?ng");
     }
 
     @Override
