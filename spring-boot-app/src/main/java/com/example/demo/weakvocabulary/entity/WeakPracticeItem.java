@@ -1,16 +1,15 @@
 package com.example.demo.weakvocabulary.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Table(name = "weak_practice_items")
 public class WeakPracticeItem {
     @Id
@@ -31,7 +30,25 @@ public class WeakPracticeItem {
     private String correctAnswer;
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String optionsJson;
-    @Builder.Default
     private boolean answered = false;
     private LocalDateTime answeredAt;
+
+    public WeakPracticeItem() {
+    }
+
+    @Builder
+    public WeakPracticeItem(Long id, WeakPracticeSession session, UserWeakVocabulary userWeakVocabulary,
+                            int itemOrder, WeakQuestionType questionType, String questionContent,
+                            String correctAnswer, String optionsJson, boolean answered, LocalDateTime answeredAt) {
+        this.id = id;
+        this.session = session;
+        this.userWeakVocabulary = userWeakVocabulary;
+        this.itemOrder = itemOrder;
+        this.questionType = questionType;
+        this.questionContent = questionContent;
+        this.correctAnswer = correctAnswer;
+        this.optionsJson = optionsJson;
+        this.answered = answered;
+        this.answeredAt = answeredAt;
+    }
 }

@@ -8,7 +8,6 @@ import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.DeckRepository;
 import com.example.demo.flashcard.repository.FlashcardRepository;
 import com.example.demo.flashcard.service.FlashcardService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,12 +16,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class FlashcardServiceImpl implements FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
     private final GeminiService geminiService;
+
+    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, GeminiService geminiService) {
+        this.flashcardRepository = flashcardRepository;
+        this.deckRepository = deckRepository;
+        this.geminiService = geminiService;
+    }
 
     @Override
     public List<FlashcardResponse> getFlashcardsByDeckId(Long deckId) {
