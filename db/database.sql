@@ -1,31 +1,26 @@
-﻿-- =====================================================
--- 1. CREATE DATABASE IF NOT EXISTS
 -- =====================================================
-IF DB_ID(N'demo_db') IS NULL
+-- 1. RECREATE DATABASE (Clean Slate)
+-- =====================================================
+USE master;
+GO
+
+IF DB_ID(N'demo_db') IS NOT NULL
 BEGIN
-    CREATE DATABASE demo_db COLLATE Vietnamese_CI_AS;
+    -- Terminate active connections so the DB can be safely dropped
+    ALTER DATABASE demo_db SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE demo_db;
 END;
 GO
+
+CREATE DATABASE demo_db;
+GO
+
 -- =====================================================
 -- 2. USE DATABASE
 -- =====================================================
 USE demo_db;
 GO
--- =====================================================
--- 3. DROP EXISTING TABLES (children before parents)
--- =====================================================
-IF OBJECT_ID(N'dbo.grammar_question_reports', N'U') IS NOT NULL DROP TABLE dbo.grammar_question_reports;
-IF OBJECT_ID(N'dbo.grammar_questions', N'U') IS NOT NULL DROP TABLE dbo.grammar_questions;
-IF OBJECT_ID(N'dbo.grammar_groups', N'U') IS NOT NULL DROP TABLE dbo.grammar_groups;
-IF OBJECT_ID(N'dbo.weak_practice_attempts', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_attempts;
-IF OBJECT_ID(N'dbo.weak_practice_items', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_items;
-IF OBJECT_ID(N'dbo.weak_practice_sessions', N'U') IS NOT NULL DROP TABLE dbo.weak_practice_sessions;
-IF OBJECT_ID(N'dbo.user_weak_vocabularies', N'U') IS NOT NULL DROP TABLE dbo.user_weak_vocabularies;
-IF OBJECT_ID(N'dbo.user_flashcard_reviews', N'U') IS NOT NULL DROP TABLE dbo.user_flashcard_reviews;
-IF OBJECT_ID(N'dbo.flashcards', N'U') IS NOT NULL DROP TABLE dbo.flashcards;
-IF OBJECT_ID(N'dbo.decks', N'U') IS NOT NULL DROP TABLE dbo.decks;
-IF OBJECT_ID(N'dbo.users', N'U') IS NOT NULL DROP TABLE dbo.users;
-GO
+
 -- =====================================================
 -- 4. CREATE TABLES (derived from current JPA entities)
 -- =====================================================

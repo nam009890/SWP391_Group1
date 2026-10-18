@@ -9,6 +9,7 @@ import com.example.demo.weakvocabulary.repository.*;
 import com.example.demo.weakvocabulary.service.WeakPracticeService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class WeakPracticeServiceImpl implements WeakPracticeService {
     private final UserWeakVocabularyRepository weakRepo;
     private final WeakPracticeSessionRepository sessions;
@@ -25,20 +27,6 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
     private final WeakPracticeAttemptRepository attempts;
     private final FlashcardRepository flashcards;
     private final ObjectMapper json = new ObjectMapper();
-
-    public WeakPracticeServiceImpl(
-            UserWeakVocabularyRepository weakRepo,
-            WeakPracticeSessionRepository sessions,
-            WeakPracticeItemRepository items,
-            WeakPracticeAttemptRepository attempts,
-            FlashcardRepository flashcards
-    ) {
-        this.weakRepo = weakRepo;
-        this.sessions = sessions;
-        this.items = items;
-        this.attempts = attempts;
-        this.flashcards = flashcards;
-    }
 
     @Transactional
     public SessionResponse start(Long uid, PracticeStartRequest r) {

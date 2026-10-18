@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface DeckRepository extends JpaRepository<Deck, Long> {
     
-    @Query("SELECT new com.example.demo.flashcard.dto.DeckDto(d.id, d.name, d.description, COUNT(f.id)) " +
-           "FROM Deck d LEFT JOIN Flashcard f ON d.id = f.deck.id " +
-           "GROUP BY d.id, d.name, d.description")
+    @Query("SELECT new com.example.demo.flashcard.dto.DeckDto(d.id, d.name, d.description, " +
+           "(SELECT COUNT(f.id) FROM Flashcard f WHERE f.deck.id = d.id)) " +
+           "FROM Deck d")
     List<DeckDto> findAllDecksWithFlashcardCount();
 }
