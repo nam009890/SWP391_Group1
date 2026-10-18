@@ -8,9 +8,7 @@ import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.DeckRepository;
 import com.example.demo.flashcard.repository.FlashcardRepository;
 import com.example.demo.flashcard.service.FlashcardService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
