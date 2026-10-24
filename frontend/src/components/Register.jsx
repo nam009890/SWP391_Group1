@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
-function Register() {
+function Register({ onAuthenticated }) {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -30,10 +30,8 @@ function Register() {
       });
       
       const { token } = response.data;
-      localStorage.setItem('token', token);
-      
-      // Reload or navigate to trigger App.jsx re-render
-      window.location.href = '/';
+      onAuthenticated(token);
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err.response?.data || 'Có lỗi xảy ra khi đăng ký!');
     } finally {

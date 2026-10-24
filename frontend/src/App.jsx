@@ -11,25 +11,42 @@
 // =========================================================================================
 
 import { Routes, Route, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
-import Dashboard from './components/Dashboard';
-import DeckDetails from './components/DeckDetails';
 import Login from './components/Login';
 import Register from './components/Register';
-import StudyMode from './components/StudyMode';
-import GrammarLearnerPage from './components/grammar/view/GrammarLearnerPage';
-import GrammarAdminCMSPage from './components/grammar/view/GrammarAdminCMSPage';
-import { isCreatorUser } from './components/grammar/model/authHelper';
-import WeakVocabulary from './components/WeakVocabulary';
-import WeakPracticeSetup from './components/WeakPracticeSetup';
-import WeakPracticeSession from './components/WeakPracticeSession';
-import api from './api/axiosConfig';
+
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const DeckDetails = lazy(() => import('./components/DeckDetails'));
+const StudyMode = lazy(() => import('./components/StudyMode'));
+const GrammarLearnerPage = lazy(() => import('./components/grammar/view/GrammarLearnerPage'));
+const GrammarAdminCMSPage = lazy(() => import('./components/grammar/view/GrammarAdminCMSPage'));
+const WeakVocabulary = lazy(() => import('./components/WeakVocabulary'));
+const WeakPracticeSetup = lazy(() => import('./components/WeakPracticeSetup'));
+const WeakPracticeSession = lazy(() => import('./components/WeakPracticeSession'));
+
+const readUserFromToken = (token) => {
+  if (!token) return null;
+  try {
+    const payloadPart = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(payloadPart));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    const email = (payload.email || payload.sub || '').trim();
+    return {
+      name: payload.name || email,
+      email,
+      role: payload.role || 'ROLE_USER',
+      isAdmin: payload.role === 'ROLE_ADMIN',
+    };
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Xử lý callback chuyển hướng sau khi đăng nhập Google OAuth2 thành công
  */
-function OAuth2RedirectHandler() {
+function OAuth2RedirectHandler({ onAuthenticated }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -37,11 +54,12 @@ function OAuth2RedirectHandler() {
     const token = searchParams.get('token');
     if (token) {
       localStorage.setItem('token', token);
-      window.location.href = '/'; // Tải lại toàn bộ ứng dụng để MainApp đọc token mới
+      onAuthenticated(token);
+      navigate('/', { replace: true });
     } else {
       navigate('/login');
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, onAuthenticated]);
 
   return <div style={{ color: 'white', textAlign: 'center', marginTop: '100px' }}>Đang xác thực đăng nhập Google...</div>;
 }
@@ -53,38 +71,30 @@ function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ padding: '100px 20px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }} className="animate-fade-in">
-      <h1 style={{ fontSize: '48px', marginBottom: '20px', background: 'linear-gradient(135deg, var(--primary), var(--secondary), var(--accent))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', animation: 'hueRotate 5s linear infinite' }}>
-        Master Languages with StudyE
-      </h1>
-      <p style={{ fontSize: '18px', color: 'var(--text-muted)', marginBottom: '40px', lineHeight: '1.6' }}>
-        Nền tảng học từ vựng 3D Flashcard và luyện tập ngữ pháp tiếng Anh thế hệ mới.
-      </p>
-      
-      <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-        <button onClick={() => navigate('/login')} className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '18px', borderRadius: '30px' }}>
-          Đăng Nhập
-        </button>
-        <button onClick={() => navigate('/register')} className="btn btn-glass" style={{ padding: '16px 32px', fontSize: '18px', borderRadius: '30px' }}>
-          Đăng Ký
-        </button>
-      </div>
-      
-      <div style={{ marginTop: '80px', display: 'flex', gap: '20px', justifyContent: 'center' }}>
-        <div className="glass-panel" style={{ padding: '24px', flex: 1 }}>
-          <h3 style={{ color: 'var(--primary)', marginBottom: '10px' }}>Create</h3>
-          <p style={{ color: 'var(--text-muted)' }}>Tạo bộ thẻ và soạn câu hỏi dễ dàng</p>
+    <main className="landing-page animate-fade-in">
+      <section className="landing-hero">
+        <div className="landing-copy">
+          <span className="eyebrow">✦ Góc học tập của bạn</span>
+          <h1>Học mỗi ngày,<br/><span>tiến bộ thật vui.</span></h1>
+          <p>Flashcard, ngữ pháp và lộ trình ôn tập được sắp xếp gọn gàng trong một không gian học tập nhẹ nhàng, dễ tập trung.</p>
+          <div className="landing-actions">
+            <button onClick={() => navigate('/register')} className="btn btn-primary">Bắt đầu học miễn phí <span>→</span></button>
+            <button onClick={() => navigate('/login')} className="btn btn-glass">Tôi đã có tài khoản</button>
+          </div>
         </div>
-        <div className="glass-panel" style={{ padding: '24px', flex: 1 }}>
-          <h3 style={{ color: 'var(--secondary)', marginBottom: '10px' }}>Study</h3>
-          <p style={{ color: 'var(--text-muted)' }}>Luyện tập ngữ pháp & Flashcard 3D</p>
+        <div className="study-board" aria-hidden="true">
+          <span className="board-sticker">🐱</span>
+          <div className="board-title">Kế hoạch tuần này</div>
+          <div className="board-tabs"><i className="board-tab"/><i className="board-tab"/><i className="board-tab"/><i className="board-tab"/></div>
+          <div className="board-sheet"><div className="board-line"/><div className="board-line"/><div className="board-line"/><div className="board-line"/></div>
         </div>
-        <div className="glass-panel" style={{ padding: '24px', flex: 1 }}>
-          <h3 style={{ color: '#f43f5e', marginBottom: '10px' }}>Master</h3>
-          <p style={{ color: 'var(--text-muted)' }}>Ghi nhớ lâu dài với Spaced Repetition</p>
-        </div>
-      </div>
-    </div>
+      </section>
+      <section className="feature-strip" aria-label="Tính năng nổi bật">
+        <article className="feature-card"><div className="feature-icon">✎</div><h3>Tạo bộ thẻ</h3><p>Tự xây dựng học liệu theo chủ đề và mục tiêu của riêng bạn.</p></article>
+        <article className="feature-card"><div className="feature-icon">☕</div><h3>Ôn tập thông minh</h3><p>Học đúng nội dung cần nhớ với lịch ôn tập khoa học.</p></article>
+        <article className="feature-card"><div className="feature-icon">✓</div><h3>Theo dõi tiến bộ</h3><p>Nhìn thấy từng bước tiến nhỏ để duy trì thói quen mỗi ngày.</p></article>
+      </section>
+    </main>
   );
 }
 
@@ -110,13 +120,20 @@ function GrammarModuleDispatcher({ user, token }) {
 }
 
 function MainApp() {
-  const [user, setUser] = useState(null);
-  const token = localStorage.getItem('token');
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [user, setUser] = useState(() => readUserFromToken(localStorage.getItem('token')));
+
+  const handleAuthenticated = (nextToken) => {
+    localStorage.setItem('token', nextToken);
+    setToken(nextToken);
+    setUser(readUserFromToken(nextToken));
+  };
 
   useEffect(() => {
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payloadPart = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(payloadPart));
         const currentTime = Math.floor(Date.now() / 1000);
         
         // Kiểm tra token hết hạn
@@ -151,10 +168,11 @@ function MainApp() {
     <>
       <Navbar user={user} onLogout={handleLogout} />
       
+      <Suspense fallback={<div className="route-loader"><span>Đang mở trang học tập...</span></div>}>
       <Routes>
         <Route path="/" element={token ? <Dashboard user={user} /> : <LandingPage />} />
-        <Route path="/login" element={token ? <Dashboard user={user} /> : <Login />} />
-        <Route path="/register" element={token ? <Dashboard user={user} /> : <Register />} />
+        <Route path="/login" element={token ? <Dashboard user={user} /> : <Login onAuthenticated={handleAuthenticated} />} />
+        <Route path="/register" element={token ? <Dashboard user={user} /> : <Register onAuthenticated={handleAuthenticated} />} />
         <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
         <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
         {/* Module Bài Tập Ngữ Pháp — Điều phối thông minh theo trạng thái đăng nhập và email */}
@@ -179,8 +197,9 @@ function MainApp() {
         <Route path="/weak-vocabulary" element={token ? <WeakVocabulary /> : <LandingPage />} />
         <Route path="/weak-vocabulary/practice" element={token ? <WeakPracticeSetup /> : <LandingPage />} />
         <Route path="/weak-vocabulary/practice/:id" element={token ? <WeakPracticeSession /> : <LandingPage />} />
-        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler onAuthenticated={handleAuthenticated} />} />
       </Routes>
+      </Suspense>
     </>
   );
 }

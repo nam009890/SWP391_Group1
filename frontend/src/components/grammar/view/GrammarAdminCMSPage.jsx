@@ -105,6 +105,13 @@ const GrammarAdminCMSPage = ({ user }) => {
   const [dropCorrect, setDropCorrect] = useState("");
   const [dropExplanation, setDropExplanation] = useState("");
 
+  // --- 3.4: Dạng FILL_BLANK_CARDS (Chọn thẻ đáp án) ---
+  const [cardTitle, setCardTitle] = useState("");
+  const [cardTemplate, setCardTemplate] = useState("");
+  const [cardOptions, setCardOptions] = useState("");
+  const [cardCorrect, setCardCorrect] = useState("");
+  const [cardExplanation, setCardExplanation] = useState("");
+
   // --- 3.5: Dạng IMAGE_QUESTION (Câu hỏi hình ảnh) ---
   const [imgTitle, setImgTitle] = useState("");
   const [imgUrl, setImgUrl] = useState("");

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
-function Login() {
+function Login({ onAuthenticated }) {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -22,10 +22,8 @@ function Login() {
       });
       
       const { token } = response.data;
-      localStorage.setItem('token', token);
-      
-      // Reload or navigate to trigger App.jsx re-render and decode token
-      window.location.href = '/';
+      onAuthenticated(token);
+      navigate('/', { replace: true });
     } catch (err) {
       setError('Sai email hoặc mật khẩu!');
     } finally {

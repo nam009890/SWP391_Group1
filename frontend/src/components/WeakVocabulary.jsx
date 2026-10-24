@@ -15,8 +15,7 @@ export default function WeakVocabulary() {
   const [data, setData] = useState(null);
   const [input, setInput] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [pendingFilters, setPendingFilters] = useState(defaultWeakFilters);
-  const [appliedFilters, setAppliedFilters] = useState(defaultWeakFilters);
+  const [filters, setFilters] = useState(defaultWeakFilters);
   const [page, setPage] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,7 @@ export default function WeakVocabulary() {
     try {
       setError("");
       const response = await getWeakVocabularies({
-        ...appliedFilters,
+        ...filters,
         keyword,
         page: nextPage,
         size: 10,
@@ -40,12 +39,11 @@ export default function WeakVocabulary() {
   };
   useEffect(() => {
     load(0);
-  }, [keyword, appliedFilters]);
+  }, [keyword, filters]);
   const reset = () => {
     setInput("");
     setKeyword("");
-    setPendingFilters(defaultWeakFilters);
-    setAppliedFilters(defaultWeakFilters);
+    setFilters(defaultWeakFilters);
     setPage(0);
   };
   const editNote = async (word) => {
@@ -57,7 +55,7 @@ export default function WeakVocabulary() {
   };
   const filtered =
     keyword ||
-    JSON.stringify(appliedFilters) !== JSON.stringify(defaultWeakFilters);
+    JSON.stringify(filters) !== JSON.stringify(defaultWeakFilters);
   return (
     <main className="weak-page animate-fade-in">
       <section className="weak-head">
@@ -76,10 +74,9 @@ export default function WeakVocabulary() {
         input={input}
         onInputChange={setInput}
         onSearch={() => setKeyword(input)}
-        pending={pendingFilters}
-        onPendingChange={setPendingFilters}
-        onApply={() => {
-          setAppliedFilters({ ...pendingFilters });
+        filters={filters}
+        onFiltersChange={(nextFilters) => {
+          setFilters(nextFilters);
           setPage(0);
         }}
         onReset={reset}

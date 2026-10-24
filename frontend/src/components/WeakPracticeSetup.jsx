@@ -9,10 +9,10 @@ import WeakVocabularyFilters, {
 } from "./WeakVocabularyFilters";
 import "./WeakVocabulary.css";
 const methods = [
-  ["FILL_BLANK", "Điền từ theo ngữ cảnh"],
-  ["MULTIPLE_CHOICE", "Chọn từ đúng"],
-  ["WORD_TO_MEANING", "Từ → Nghĩa"],
-  ["MEANING_TO_WORD", "Nghĩa → Từ"],
+  ["FILL_BLANK", "✎", "Điền từ theo ngữ cảnh", "Tự nhớ và hoàn thành câu"],
+  ["MULTIPLE_CHOICE", "A", "Chọn từ đúng", "Chọn đáp án phù hợp nhất"],
+  ["WORD_TO_MEANING", "→", "Từ → Nghĩa", "Nhìn từ và chọn nghĩa"],
+  ["MEANING_TO_WORD", "←", "Nghĩa → Từ", "Nhìn nghĩa và chọn từ"],
 ];
 
 export default function WeakPracticeSetup() {
@@ -22,15 +22,14 @@ export default function WeakPracticeSetup() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [input, setInput] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [pending, setPending] = useState(defaultWeakFilters);
-  const [applied, setApplied] = useState(defaultWeakFilters);
+  const [filters, setFilters] = useState(defaultWeakFilters);
   const [page, setPage] = useState(0);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
   const load = async (nextPage = page) => {
     try {
       const response = await getWeakVocabularies({
-        ...applied,
+        ...filters,
         keyword,
         page: nextPage,
         size: 10,
@@ -44,7 +43,7 @@ export default function WeakPracticeSetup() {
   };
   useEffect(() => {
     load(0);
-  }, [keyword, applied]);
+  }, [keyword, filters]);
   const toggle = (id) =>
     setSelectedIds((current) => {
       const next = new Set(current);
@@ -64,8 +63,7 @@ export default function WeakPracticeSetup() {
   const reset = () => {
     setInput("");
     setKeyword("");
-    setPending(defaultWeakFilters);
-    setApplied(defaultWeakFilters);
+    setFilters(defaultWeakFilters);
     setPage(0);
   };
   const start = async () => {
@@ -94,16 +92,15 @@ export default function WeakPracticeSetup() {
         <span className="selected-count">Đã chọn {selectedIds.size} từ</span>
       </section>
       <section className="weak-grid setup">
-        {methods.map(([value, label]) => (
+        {methods.map(([value, icon, label, description]) => (
           <button
             key={value}
             className={`glass-panel method ${questionType === value ? "selected" : ""}`}
+            aria-pressed={questionType === value}
             onClick={() => setQuestionType(value)}
           >
-            <b>
-              {questionType === value ? "✓ " : ""}
-              {label}
-            </b>
+            <span className="method-icon" aria-hidden="true">{questionType === value ? "✓" : icon}</span>
+            <span><b>{label}</b><small>{description}</small></span>
           </button>
         ))}
       </section>
@@ -111,10 +108,9 @@ export default function WeakPracticeSetup() {
         input={input}
         onInputChange={setInput}
         onSearch={() => setKeyword(input)}
-        pending={pending}
-        onPendingChange={setPending}
-        onApply={() => {
-          setApplied({ ...pending });
+        filters={filters}
+        onFiltersChange={(nextFilters) => {
+          setFilters(nextFilters);
           setPage(0);
         }}
         onReset={reset}
@@ -124,7 +120,7 @@ export default function WeakPracticeSetup() {
         <div className="choice-head">
           <h2>Chọn từ yếu</h2>
           <div>
-            <button className="btn btn-glass" onClick={toggleCurrentPage}>
+            <button className="btn btn-glass" onClick={toggleCurrentPage} disabled={!currentIds.length}>
               {allCurrentSelected
                 ? "Bỏ chọn trang này"
                 : "Chọn tất cả trang này"}
@@ -142,12 +138,13 @@ export default function WeakPracticeSetup() {
           <p>Đang tải...</p>
         ) : (
           data.items.map((word) => (
-            <label className="choice-row" key={word.weakVocabularyId}>
+            <label className={`choice-row ${selectedIds.has(word.weakVocabularyId) ? "is-selected" : ""}`} key={word.weakVocabularyId}>
               <input
                 type="checkbox"
                 checked={selectedIds.has(word.weakVocabularyId)}
                 onChange={() => toggle(word.weakVocabularyId)}
               />
+              <span className="choice-check" aria-hidden="true">✓</span>
               <span>
                 <b>{word.vocabulary}</b> — {word.meaning}
               </span>

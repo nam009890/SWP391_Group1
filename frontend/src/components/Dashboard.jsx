@@ -11,7 +11,7 @@ const Dashboard = ({ user }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // UI colors for decks
-  const colors = ['var(--primary)', 'var(--secondary)', '#f43f5e', '#10b981', '#f59e0b'];
+  const colors = ['#d9b394', '#efb4ca', '#efd38d', '#a9c5aa', '#c9b2d9'];
 
   const fetchDecks = async () => {
     try {
@@ -37,19 +37,20 @@ const Dashboard = ({ user }) => {
     <div className="dashboard-container animate-fade-in">
       <header className="dashboard-header">
         <div>
-          <h1>Welcome back, <span className="highlight">{user?.name || 'Student'}</span></h1>
-          <p className="subtitle">Ready to conquer some new words today?</p>
+          <span className="dashboard-kicker">✦ Không gian học tập</span>
+          <h1>Chào bạn, <span className="highlight">{user?.name || 'học viên'}</span>!</h1>
+          <p className="subtitle">Hôm nay mình cùng học thêm một chút nhé.</p>
         </div>
         <button className="btn btn-primary create-btn" onClick={() => setIsModalOpen(true)}>
-          <span className="plus-icon">+</span> Create Deck
+          <span className="plus-icon">+</span> Tạo bộ thẻ
         </button>
       </header>
 
       <section className="decks-section">
-        <h2>Your Flashcard Decks</h2>
+        <div className="section-heading"><div><span>Bộ sưu tập của bạn</span><h2>Flashcard đang học</h2></div><span className="deck-total">{decks.length} bộ thẻ</span></div>
         
         {loading ? (
-          <p>Loading decks...</p>
+          <div className="loading-note">Đang mở sổ học tập...</div>
         ) : (
           <div className="decks-grid">
             {decks.map((deck, index) => {
@@ -62,10 +63,11 @@ const Dashboard = ({ user }) => {
                 >
                   <div className="deck-card-top" style={{ background: `linear-gradient(135deg, ${deckColor}80, transparent)` }}></div>
                   <div className="deck-card-content">
+                    <span className="deck-label">Bộ thẻ {String(index + 1).padStart(2, '0')}</span>
                     <h3>{deck.name}</h3>
                     <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '10px' }}>{deck.description}</p>
                     <div className="deck-meta">
-                      <span className="card-count">{deck.flashcardCount || 0} terms</span>
+                      <span className="card-count">{deck.flashcardCount || 0} từ</span>
                       <button 
                         className="btn btn-glass study-btn"
                         onClick={(e) => {
@@ -73,7 +75,7 @@ const Dashboard = ({ user }) => {
                           navigate(`/study/${deck.id}`);
                         }}
                       >
-                        Study Now
+                        Học ngay →
                       </button>
                     </div>
                   </div>
@@ -83,7 +85,7 @@ const Dashboard = ({ user }) => {
             
             <div className="deck-card glass-panel add-deck-card" onClick={() => setIsModalOpen(true)}>
               <div className="add-icon">+</div>
-              <h3>Create new deck</h3>
+              <h3>Tạo bộ thẻ mới</h3>
             </div>
           </div>
         )}
