@@ -28,11 +28,12 @@ class StudyServiceImplWeakIntegrationTest {
         UserRepository users = mock(UserRepository.class);
         weakVocabulary = mock(WeakVocabularyService.class);
         User user = User.builder().id(1L).build();
-        Flashcard flashcard = Flashcard.builder().id(2L).build();
+        Flashcard flashcard = Flashcard.builder().id(2L).deck(com.example.demo.flashcard.entity.Deck.builder().id(1L).build()).build();
         when(users.findById(1L)).thenReturn(Optional.of(user));
         when(flashcards.findById(2L)).thenReturn(Optional.of(flashcard));
         when(reviews.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        service = new StudyServiceImpl(flashcards, reviews, users, weakVocabulary);
+        service = new StudyServiceImpl(flashcards, reviews, users, weakVocabulary,
+                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)));
     }
 
     @Test void qualityOneShouldUpdateSm2AndRecordWeakDifficulty() { service.processReview(1L, 2L, 1); verify(weakVocabulary).recordStudyDifficulty(1L, 2L, 1); verify(reviews).save(argThat(review -> review.getRepetitionCount() == 0 && review.getIntervalDays() == 1 && review.getNextReviewDate() != null)); }

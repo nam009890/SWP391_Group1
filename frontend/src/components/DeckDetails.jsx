@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { getDeck, getDeckCards } from '../api/deckApi';
+import { setDeckVisibility } from '../api/deckApi';
+import CreateDeckModal from './CreateDeckModal';
 import api from '../api/axiosConfig';
 import { addWeakVocabulary, getWeakVocabularies } from '../api/weakVocabularyApi';
 import './DeckDetails.css';
+import './DeckExplorer.css';
 
-const DeckDetails = () => {
+const DeckDetails = ({ user }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -27,30 +31,40 @@ const DeckDetails = () => {
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiError, setAiError] = useState('');
   const [weakAdded, setWeakAdded] = useState({});
+  const [editing, setEditing] = useState(false);
+  const [managing, setManaging] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true); setDeck(null); setFlashcards([]); setWeakAdded({});
+    setLoadError('');
+    setIsAdding(false); setIsAiMode(false);
     const fetchDeckData = async () => {
       try {
         const [deckRes, cardsRes, weakRes] = await Promise.all([
-          api.get(`/decks/${id}`),
-          api.get(`/decks/${id}/flashcards`),
-          getWeakVocabularies({ deckId: id, page: 0, size: 100 })
-            .catch(() => ({ data: { items: [] } }))
+          getDeck(id, Boolean(user), controller.signal),
+          getDeckCards(id, Boolean(user), controller.signal),
+          user ? getWeakVocabularies({ deckId: id, page: 0, size: 100 })
+            .catch(() => ({ data: { items: [] } })) : Promise.resolve({ data: { items: [] } })
         ]);
+        if (controller.signal.aborted) return;
         setDeck(deckRes.data);
         setFlashcards(cardsRes.data);
         setWeakAdded(Object.fromEntries(
           weakRes.data.items.map((item) => [item.flashcardId, true])
         ));
       } catch (error) {
-        console.error("Failed to fetch deck details:", error);
+        if (!controller.signal.aborted) setLoadError(error.response?.status === 404 ? 'Deck not found or unavailable.' : 'Could not load this deck. Please try again.');
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     
     fetchDeckData();
-  }, [id]);
+    return () => controller.abort();
+  }, [id, user, revision]);
 
   const handleAddCard = async (e) => {
     e.preventDefault();
@@ -63,7 +77,7 @@ const DeckDetails = () => {
     setFormError('');
     
     try {
-      const response = await api.post(`http://localhost:8080/api/decks/${id}/flashcards`, {
+      const response = await api.post(`/decks/${id}/flashcards`, {
         vocabulary: term,
         meaning: definition,
         phonetic: phonetic,
@@ -89,7 +103,7 @@ const DeckDetails = () => {
   const handleGenerateAi = async (e) => {
     e.preventDefault();
     if (!aiPrompt.trim()) {
-      setAiError('Vui lòng nhập chủ đề bạn muốn tạo.');
+      setAiError('Please enter a topic to generate flashcards.');
       return;
     }
 
@@ -97,7 +111,7 @@ const DeckDetails = () => {
     setAiError('');
 
     try {
-      const response = await api.post(`http://localhost:8080/api/decks/${id}/generate-ai`, {
+      const response = await api.post(`/decks/${id}/generate-ai`, {
         prompt: aiPrompt
       });
       
@@ -107,7 +121,7 @@ const DeckDetails = () => {
       setIsAiMode(false);
     } catch (err) {
       console.error('Failed to generate cards with AI:', err);
-      setAiError('Có lỗi xảy ra khi gọi AI. Vui lòng kiểm tra lại cấu hình API Key.');
+      setAiError('Could not generate flashcards. Please try again.');
     } finally {
       setIsAiGenerating(false);
     }
@@ -124,7 +138,8 @@ const DeckDetails = () => {
   if (!deck) {
     return (
       <div className="details-container animate-fade-in" style={{ justifyContent: 'center' }}>
-        <h2>Deck not found</h2>
+        <h2>{loadError || 'Deck not found'}</h2>
+        <button className="btn btn-glass" onClick={() => setRevision(r => r + 1)}>Retry</button>
         <button className="btn btn-primary" onClick={() => navigate('/')} style={{ marginTop: '20px' }}>
           Back to Dashboard
         </button>
@@ -142,6 +157,7 @@ const DeckDetails = () => {
           <h1>{deck.name}</h1>
           {deck.description && <p className="deck-desc">{deck.description}</p>}
           <span className="card-count-badge">{flashcards.length} terms</span>
+          <p className="deck-desc">{deck.visibility} · By {deck.ownerName || 'Community'}</p>
         </div>
         <button 
           className="btn btn-primary study-btn-large" 
@@ -152,10 +168,21 @@ const DeckDetails = () => {
         </button>
       </div>
 
+      {!user && <p className="deck-guest-note"><Link to="/login" state={{ from: `/deck/${id}` }}>Log in</Link> to save your learning progress and create your own flashcards.</p>}
+      {deck.isOwner && <div className="explorer-manage"><button disabled={managing} onClick={() => setEditing(true)}>Edit Deck</button><button disabled={managing} onClick={async () => {
+        const visibility = deck.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
+        if (!window.confirm(visibility === 'PRIVATE' ? 'Unpublish this deck? Other learners will lose access.' : 'Publish this deck for everyone to learn?')) return;
+        setManaging(true);
+        try { const response = await setDeckVisibility(id, visibility); setDeck(response.data); setFormError(''); }
+        catch { setFormError('Could not update visibility. Please try again.'); }
+        finally { setManaging(false); }
+      }}>{deck.visibility === 'PUBLIC' ? 'Unpublish Deck' : 'Publish Deck'}</button></div>}
+      {editing && <CreateDeckModal isOpen deck={deck} onClose={() => setEditing(false)} onDeckCreated={setDeck} />}
+      {formError && <p className="form-error" role="alert">{formError}</p>}
       <div className="cards-section">
         <div className="section-header">
           <h2>Terms in this set</h2>
-          <div className="header-actions">
+          {deck.isOwner && <div className="header-actions">
             <button 
               className={`btn ${isAiMode ? 'btn-glass' : 'btn-ai'}`} 
               onClick={() => {
@@ -163,7 +190,7 @@ const DeckDetails = () => {
                 setIsAdding(false);
               }}
             >
-              {isAiMode ? 'Cancel' : 'Tạo bằng AI 🪄'}
+              {isAiMode ? 'Cancel' : 'Generate with AI'}
             </button>
             <button 
               className="btn btn-glass" 
@@ -174,16 +201,16 @@ const DeckDetails = () => {
             >
               {isAdding ? 'Cancel' : '+ Add Card'}
             </button>
-          </div>
+          </div>}
         </div>
         
-        {isAiMode && (
+        {deck.isOwner && isAiMode && (
           <form onSubmit={handleGenerateAi} className="add-card-form ai-form glass-panel animate-fade-in">
             <h3 style={{ background: 'linear-gradient(90deg, #a855f7, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Tạo thẻ tự động bằng AI
+              Generate flashcards with AI
             </h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
-              Nhập chủ đề bạn muốn học (VD: "Từ vựng tiếng Anh về các loài hoa", "10 từ chuyên ngành IT"). AI sẽ tự động sinh ra thẻ bài cho bạn!
+              Choose a topic, such as travel vocabulary or 10 useful words for work.
             </p>
             {aiError && <div className="form-error">{aiError}</div>}
             
@@ -194,21 +221,21 @@ const DeckDetails = () => {
                   value={aiPrompt} 
                   onChange={(e) => setAiPrompt(e.target.value)} 
                   className="glass-input" 
-                  placeholder="Nhập chủ đề bạn muốn học vào đây..."
+                  placeholder="What would you like to learn?"
                   autoFocus
                   disabled={isAiGenerating}
                 />
               </div>
               <button type="submit" className="btn btn-ai" disabled={isAiGenerating}>
                 {isAiGenerating ? (
-                  <span className="loading-dots">Đang suy nghĩ...</span>
-                ) : 'Tạo thẻ ngay'}
+                  <span className="loading-dots">Generating...</span>
+                ) : 'Generate Cards'}
               </button>
             </div>
           </form>
         )}
 
-        {isAdding && (
+        {deck.isOwner && isAdding && (
           <form onSubmit={handleAddCard} className="add-card-form glass-panel animate-fade-in">
             <h3>Add a New Card</h3>
             {formError && <div className="form-error">{formError}</div>}
@@ -272,7 +299,7 @@ const DeckDetails = () => {
           {flashcards.length === 0 && !isAdding ? (
             <div className="empty-state glass-panel">
               <p>This deck has no cards yet.</p>
-              <button className="btn btn-primary" onClick={() => setIsAdding(true)}>Add your first card</button>
+              {deck.isOwner && <button className="btn btn-primary" onClick={() => setIsAdding(true)}>Add your first card</button>}
             </div>
           ) : (
             flashcards.map((card, index) => (
@@ -287,12 +314,15 @@ const DeckDetails = () => {
                   <p>{card.meaning}</p>
                   {card.exampleSentence && <p className="example">"{card.exampleSentence}"</p>}
                 </div>
-                {!weakAdded[card.id] && (
+                {user && !weakAdded[card.id] && (
                   <button className="btn btn-glass" onClick={async () => {
-                    await addWeakVocabulary(card.id);
-                    setWeakAdded((current) => ({ ...current, [card.id]: true }));
+                    try {
+                      await addWeakVocabulary(card.id);
+                      setWeakAdded((current) => ({ ...current, [card.id]: true }));
+                      setFormError('');
+                    } catch { setFormError('Could not add weak vocabulary. Please try again.'); }
                   }}>
-                    Thêm vào từ yếu
+                    Add to weak vocabulary
                   </button>
                 )}
               </div>

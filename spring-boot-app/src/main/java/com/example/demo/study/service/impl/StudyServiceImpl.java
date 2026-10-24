@@ -4,6 +4,7 @@ import com.example.demo.common.exception.ResourceNotFoundException;
 import com.example.demo.flashcard.dto.FlashcardResponse;
 import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.FlashcardRepository;
+import com.example.demo.flashcard.service.DeckAccessPolicy;
 import com.example.demo.study.dto.ReviewResponse;
 import com.example.demo.study.entity.UserFlashcardReview;
 import com.example.demo.study.repository.UserFlashcardReviewRepository;
@@ -11,24 +12,33 @@ import com.example.demo.study.service.StudyService;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.weakvocabulary.service.WeakVocabularyService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class StudyServiceImpl implements StudyService {
 
     private final FlashcardRepository flashcardRepository;
     private final UserFlashcardReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final WeakVocabularyService weakVocabularyService;
+    private final DeckAccessPolicy access;
+
+    public StudyServiceImpl(FlashcardRepository flashcardRepository, UserFlashcardReviewRepository reviewRepository,
+            UserRepository userRepository, WeakVocabularyService weakVocabularyService,
+            DeckAccessPolicy access) {
+        this.flashcardRepository = flashcardRepository;
+        this.reviewRepository = reviewRepository;
+        this.userRepository = userRepository;
+        this.weakVocabularyService = weakVocabularyService;
+        this.access = access;
+    }
 
     @Override
     public List<FlashcardResponse> getFlashcardsToStudy(Long deckId, Long userId) {
+        access.requireViewAccess(deckId, userId);
         return flashcardRepository.findFlashcardsToStudy(deckId, userId).stream()
                 .map(this::mapToFlashcardResponse)
                 .collect(Collectors.toList());
@@ -36,6 +46,11 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public ReviewResponse processReview(Long userId, Long flashcardId, int quality) {
+        Flashcard accessibleCard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Flashcard not found"));
+        access.requireViewAccess(accessibleCard.getDeck(), userId);
+        if (quality != 1 && quality != 3 && quality != 4 && quality != 5)
+            throw new IllegalArgumentException("Invalid review quality");
         // Find existing review or create a new one
         UserFlashcardReview review = reviewRepository.findByUserIdAndFlashcardId(userId, flashcardId)
                 .orElseGet(() -> {

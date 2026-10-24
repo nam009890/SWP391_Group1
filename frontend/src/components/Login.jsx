@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 function Login({ onAuthenticated }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +24,8 @@ function Login({ onAuthenticated }) {
       
       const { token } = response.data;
       onAuthenticated(token);
-      navigate('/', { replace: true });
+      const from = location.state?.from;
+      navigate(typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !from.startsWith('/login') ? from : '/', { replace: true });
     } catch (err) {
       setError('Sai email hoặc mật khẩu!');
     } finally {
@@ -32,6 +34,7 @@ function Login({ onAuthenticated }) {
   };
 
   const handleGoogleLogin = () => {
+    if (location.state?.from) sessionStorage.setItem('authReturnTo', location.state.from);
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   };
 

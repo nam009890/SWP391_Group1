@@ -2,6 +2,7 @@ package com.example.demo.weakvocabulary.service.impl;
 
 import com.example.demo.common.exception.ResourceNotFoundException;
 import com.example.demo.flashcard.repository.FlashcardRepository;
+import com.example.demo.flashcard.service.DeckAccessPolicy;
 import com.example.demo.weakvocabulary.dto.WeakDtos.*;
 import com.example.demo.weakvocabulary.entity.*;
 import com.example.demo.weakvocabulary.exception.InvalidWeakPracticeException;
@@ -9,24 +10,33 @@ import com.example.demo.weakvocabulary.repository.*;
 import com.example.demo.weakvocabulary.service.WeakPracticeService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Pattern;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.regex.Pattern;
-
 @Service
-@RequiredArgsConstructor
 public class WeakPracticeServiceImpl implements WeakPracticeService {
     private final UserWeakVocabularyRepository weakRepo;
     private final WeakPracticeSessionRepository sessions;
     private final WeakPracticeItemRepository items;
     private final WeakPracticeAttemptRepository attempts;
     private final FlashcardRepository flashcards;
+    private final DeckAccessPolicy access;
     private final ObjectMapper json = new ObjectMapper();
+
+    public WeakPracticeServiceImpl(UserWeakVocabularyRepository weakRepo, WeakPracticeSessionRepository sessions,
+            WeakPracticeItemRepository items, WeakPracticeAttemptRepository attempts, FlashcardRepository flashcards,
+            DeckAccessPolicy access) {
+        this.weakRepo = weakRepo;
+        this.sessions = sessions;
+        this.items = items;
+        this.attempts = attempts;
+        this.flashcards = flashcards;
+        this.access = access;
+    }
 
     @Transactional
     public SessionResponse start(Long uid, PracticeStartRequest r) {
@@ -40,6 +50,7 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
         WeakPracticeSession s = sessions.save(WeakPracticeSession.builder().user(words.get(0).getUser()).questionType(r.getQuestionType()).totalQuestions(words.size()).build());
         int n = 1;
         for (UserWeakVocabulary w : words) {
+            access.requireViewAccess(w.getFlashcard().getDeck(), uid);
             WeakPracticeItem i = question(s, w, n++, r.getQuestionType());
             items.save(i);
         }
@@ -55,11 +66,11 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
                 throw new InvalidWeakPracticeException("Flashcard '" + word + "' has no usable example sentence");
             q = Pattern.compile("(?i)\\b" + Pattern.quote(word) + "\\b").matcher(example).replaceAll("_____");
             answer = word;
-            if (t == WeakQuestionType.MULTIPLE_CHOICE) opts = options(word, true);
+            if (t == WeakQuestionType.MULTIPLE_CHOICE) opts = options(word, true, w.getUser().getId());
         } else if (t == WeakQuestionType.WORD_TO_MEANING) {
             q = word;
             answer = meaning;
-            opts = options(meaning, false);
+            opts = options(meaning, false, w.getUser().getId());
         } else {
             q = meaning;
             answer = word;
@@ -67,10 +78,10 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
         return WeakPracticeItem.builder().session(s).userWeakVocabulary(w).itemOrder(order).questionType(t).questionContent(q).correctAnswer(answer).optionsJson(opts == null ? null : write(opts)).build();
     }
 
-    private List<String> options(String correct, boolean words) {
+    private List<String> options(String correct, boolean words, Long uid) {
         LinkedHashSet<String> set = new LinkedHashSet<>();
         set.add(correct);
-        for (var f : flashcards.findAll(PageRequest.of(0, 40)).getContent()) {
+        for (var f : flashcards.findVisible(uid, PageRequest.of(0, 40)).getContent()) {
             String v = words ? f.getVocabulary() : f.getMeaning();
             if (v != null && !v.isBlank()) set.add(v);
             if (set.size() == 4) break;
@@ -128,7 +139,11 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
     }
 
     private WeakPracticeSession owned(Long u, Long id) {
-        return sessions.findByIdAndUserId(id, u).orElseThrow(() -> new ResourceNotFoundException("Practice session not found"));
+        WeakPracticeSession session = sessions.findByIdAndUserId(id, u).orElseThrow(() -> new ResourceNotFoundException("Practice session not found"));
+        // Nội dung snapshot của phiên cũ cũng phải bị chặn khi owner unpublish deck.
+        items.findBySessionIdOrderByItemOrder(id).forEach(item ->
+                access.requireViewAccess(item.getUserWeakVocabulary().getFlashcard().getDeck(), u));
+        return session;
     }
 
     private String normalize(String s) {

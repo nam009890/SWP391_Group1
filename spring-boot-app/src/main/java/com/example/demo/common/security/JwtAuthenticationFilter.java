@@ -35,12 +35,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String jwt = getJwtFromRequest(request);
-            System.out.println("JWT Filter - Path: " + request.getRequestURI());
-            System.out.println("JWT Filter - Token present: " + (jwt != null));
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String email = tokenProvider.getEmailFromToken(jwt);
-                System.out.println("JWT Filter - Email extracted: " + email);
 
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -48,13 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                System.out.println("JWT Filter - Authentication set for: " + email);
-            } else {
-                System.out.println("JWT Filter - Token invalid or missing");
             }
         } catch (Exception ex) {
-            System.err.println("Could not set user authentication in security context: ");
-            ex.printStackTrace();
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

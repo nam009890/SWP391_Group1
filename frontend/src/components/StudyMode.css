@@ -225,3 +225,24 @@
     50% { opacity: 1; }
     100% { opacity: 0.6; }
 }
+
+/* Đồng bộ độ tương phản với nền sáng; bỏ style chữ trắng/gradient của theme cũ. */
+.study-container .back-btn { color: var(--primary); background: #fff9f2; border: 1px solid var(--glass-border); }
+.study-container .progress-indicator,
+.study-container .study-example,
+.study-container .review-question,
+.study-container .finished-panel p { color: var(--text-muted); }
+.study-container .study-vocab { background: none; -webkit-text-fill-color: currentColor; font-size: clamp(28px, 5vw, 56px); overflow-wrap: anywhere; }
+.study-container .study-meaning { font-size: clamp(24px, 4vw, 40px); overflow-wrap: anywhere; }
+.study-container .study-example-box { width: 100%; padding: 16px; }
+.study-container .study-example { font-size: 16px; }
+.study-container .progress { width: 100%; max-width: 600px; }
+.study-container .deck-guest-note { width: 100%; max-width: 600px; margin: 0; }
+.study-container .finished-panel .btn { padding: 12px 20px; margin: 6px; }
+@media (max-width: 600px) {
+    .study-container .flashcard-face { padding: 22px; border-width: 6px !important; }
+    .study-container .study-header { gap: 12px; padding: 16px !important; margin-bottom: 20px; }
+    .study-container .progress-indicator { font-size: 13px; }
+    .study-container .review-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .study-container .flashcard-3d-wrapper { height: 350px; }
+}

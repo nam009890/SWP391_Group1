@@ -32,7 +32,8 @@ class WeakVocabularyRepositoryIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        service = new WeakVocabularyServiceImpl(weakRepo, users, flashcards);
+        service = new WeakVocabularyServiceImpl(weakRepo, users, flashcards,
+                new com.example.demo.flashcard.service.DeckAccessPolicy(org.mockito.Mockito.mock(com.example.demo.flashcard.repository.DeckRepository.class)));
         user = users.save(User.builder().email("u" + System.nanoTime() + "@test").build());
         deckA = Deck.builder().name("A").build(); deckB = Deck.builder().name("B").build();
         // Cascading is intentionally not assumed in production mappings.

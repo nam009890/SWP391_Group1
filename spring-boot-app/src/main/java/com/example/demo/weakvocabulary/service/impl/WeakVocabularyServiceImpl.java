@@ -1,8 +1,10 @@
 package com.example.demo.weakvocabulary.service.impl;
 
 import com.example.demo.common.exception.ResourceNotFoundException;
+import com.example.demo.flashcard.entity.DeckVisibility;
 import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.FlashcardRepository;
+import com.example.demo.flashcard.service.DeckAccessPolicy;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.weakvocabulary.dto.WeakDtos.PageResponse;
@@ -12,24 +14,32 @@ import com.example.demo.weakvocabulary.entity.UserWeakVocabulary;
 import com.example.demo.weakvocabulary.repository.UserWeakVocabularyRepository;
 import com.example.demo.weakvocabulary.service.WeakVocabularyService;
 import jakarta.persistence.criteria.Expression;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
-@RequiredArgsConstructor
 public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     private final UserWeakVocabularyRepository repo;
     private final UserRepository users;
     private final FlashcardRepository flashcards;
+    private final DeckAccessPolicy access;
+
+    public WeakVocabularyServiceImpl(UserWeakVocabularyRepository repo, UserRepository users,
+            FlashcardRepository flashcards, DeckAccessPolicy access) {
+        this.repo = repo;
+        this.users = users;
+        this.flashcards = flashcards;
+        this.access = access;
+    }
 
     @Override
     public WeakResponse addManual(Long userId, Long flashcardId) {
+        // Public deck cho phép lưu từ yếu cá nhân mà không thay đổi bộ thẻ gốc.
+        access.requireViewAccess(card(flashcardId).getDeck(), userId);
         UserWeakVocabulary weak = repo.findByUserIdAndFlashcardId(userId, flashcardId)
                 .orElseGet(() -> UserWeakVocabulary.builder().user(user(userId)).flashcard(card(flashcardId)).build());
         weak.setManualMarked(true);
@@ -41,6 +51,7 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     @Override
     public void recordStudyDifficulty(Long userId, Long flashcardId, int quality) {
         if (quality > 3) return;
+        access.requireViewAccess(card(flashcardId).getDeck(), userId);
         UserWeakVocabulary weak = repo.findByUserIdAndFlashcardId(userId, flashcardId)
                 .orElseGet(() -> UserWeakVocabulary.builder().user(user(userId)).flashcard(card(flashcardId)).build());
         if (weak.isWeakDeleted()) return;
@@ -53,7 +64,10 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     public PageResponse list(Long userId, String keyword, Long deckId, String source, Integer masteryMin, Integer masteryMax,
                              Double accuracyMin, Double accuracyMax, String sort, int page, int size) {
         Specification<UserWeakVocabulary> specification = (root, query, cb) -> cb.and(
-                cb.equal(root.get("user").get("id"), userId), cb.isFalse(root.get("weakDeleted")));
+                cb.equal(root.get("user").get("id"), userId), cb.isFalse(root.get("weakDeleted")),
+                cb.isFalse(root.get("flashcard").get("deck").get("deleted")), cb.or(
+                        cb.equal(root.get("flashcard").get("deck").get("visibility"), DeckVisibility.PUBLIC),
+                        cb.equal(root.get("flashcard").get("deck").get("owner").get("id"), userId)));
         if (keyword != null && !keyword.isBlank()) {
             String term = "%" + keyword.toLowerCase() + "%";
             specification = specification.and((root, query, cb) -> cb.or(
@@ -128,7 +142,9 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     }
 
     private UserWeakVocabulary owned(Long userId, Long id) {
-        return repo.findById(id).filter(w -> w.getUser().getId().equals(userId) && !w.isWeakDeleted()).orElseThrow(() -> new ResourceNotFoundException("Weak vocabulary not found"));
+        UserWeakVocabulary weak = repo.findById(id).filter(w -> w.getUser().getId().equals(userId) && !w.isWeakDeleted()).orElseThrow(() -> new ResourceNotFoundException("Weak vocabulary not found"));
+        access.requireViewAccess(weak.getFlashcard().getDeck(), userId);
+        return weak;
     }
 
     private User user(Long id) {

@@ -32,11 +32,12 @@ class WeakVocabularyServiceImplTest {
         UserRepository users = mock(UserRepository.class);
         FlashcardRepository flashcards = mock(FlashcardRepository.class);
         user = User.builder().id(1L).build();
-        flashcard = Flashcard.builder().id(2L).build();
+        flashcard = Flashcard.builder().id(2L).deck(com.example.demo.flashcard.entity.Deck.builder().id(1L).build()).build();
         when(users.findById(1L)).thenReturn(Optional.of(user));
         when(flashcards.findById(2L)).thenReturn(Optional.of(flashcard));
         when(weakRepository.save(any(UserWeakVocabulary.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        service = new WeakVocabularyServiceImpl(weakRepository, users, flashcards);
+        service = new WeakVocabularyServiceImpl(weakRepository, users, flashcards,
+                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)));
     }
 
     @Test

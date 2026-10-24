@@ -37,14 +37,15 @@ class WeakPracticeServiceImplTest {
         items = mock(WeakPracticeItemRepository.class); attempts = mock(WeakPracticeAttemptRepository.class);
         FlashcardRepository cards = mock(FlashcardRepository.class);
         user = User.builder().id(1L).build();
-        Flashcard card = Flashcard.builder().id(2L).vocabulary("maintain").meaning("duy trì").exampleSentence("It is difficult to maintain habits.").build();
+        Flashcard card = Flashcard.builder().id(2L).deck(com.example.demo.flashcard.entity.Deck.builder().id(1L).build()).vocabulary("maintain").meaning("duy trì").exampleSentence("It is difficult to maintain habits.").build();
         weak = UserWeakVocabulary.builder().id(3L).user(user).flashcard(card).masteryScore(80).build();
         session = WeakPracticeSession.builder().id(4L).user(user).questionType(WeakQuestionType.MEANING_TO_WORD).totalQuestions(1).build();
         item = WeakPracticeItem.builder().id(5L).session(session).userWeakVocabulary(weak).questionType(WeakQuestionType.MEANING_TO_WORD).questionContent("duy trì").correctAnswer("maintain").build();
         when(sessions.findByIdAndUserId(4L, 1L)).thenReturn(Optional.of(session));
         when(items.findByIdAndSessionId(5L, 4L)).thenReturn(Optional.of(item));
         when(weakRepo.save(any())).thenAnswer(i -> i.getArgument(0));
-        service = new WeakPracticeServiceImpl(weakRepo, sessions, items, attempts, cards);
+        service = new WeakPracticeServiceImpl(weakRepo, sessions, items, attempts, cards,
+                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)));
     }
 
     private AnswerRequest answer(String value) { AnswerRequest request = new AnswerRequest(); request.setAnswer(value); return request; }

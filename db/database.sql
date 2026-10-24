@@ -29,7 +29,15 @@ CREATE TABLE dbo.users (
     avatar_url NVARCHAR(255) NULL, password NVARCHAR(255) NULL, provider NVARCHAR(255) NULL,
     provider_id NVARCHAR(255) NULL, role NVARCHAR(255) NULL
 );
-CREATE TABLE dbo.decks (id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY, name NVARCHAR(255) NULL, description NVARCHAR(MAX) NULL);
+CREATE TABLE dbo.decks (
+    id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY, name NVARCHAR(255) NULL, description NVARCHAR(MAX) NULL,
+    owner_id BIGINT NULL, visibility VARCHAR(7) NOT NULL DEFAULT 'PUBLIC', deleted BIT NOT NULL DEFAULT 0,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(), updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT FK_decks_owner FOREIGN KEY(owner_id) REFERENCES dbo.users(id),
+    CONSTRAINT CK_decks_visibility CHECK(visibility IN ('PUBLIC', 'PRIVATE'))
+);
+CREATE INDEX IX_decks_public ON dbo.decks(visibility, deleted, created_at DESC);
+CREATE INDEX IX_decks_owner ON dbo.decks(owner_id, deleted, created_at DESC);
 CREATE TABLE dbo.flashcards (
     id BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY, deck_id BIGINT NULL, vocabulary NVARCHAR(255) NULL,
     meaning NVARCHAR(255) NULL, phonetic NVARCHAR(255) NULL, example_sentence NVARCHAR(MAX) NULL,

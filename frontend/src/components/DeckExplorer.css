@@ -1,0 +1,27 @@
+.explorer-welcome { color: #ead9cd; font-size: 14px; margin-top: 12px; }
+.dashboard-header > .btn { position: relative; z-index: 1; flex-shrink: 0; color: var(--primary); background: #fff0c6; padding: 12px 20px; text-decoration: none; text-align: center; }
+.dashboard-header::after { pointer-events: none; }
+.explorer-toolbar { display: flex; gap: 14px; align-items: end; margin: 26px 0; padding: 20px; }
+.explorer-toolbar label { display: grid; gap: 6px; color: var(--text-muted); font-size: 12px; font-weight: 700; }
+.explorer-toolbar select { min-height: 44px; padding: 8px 12px; max-width: 180px; }
+.explorer-search { display: flex; flex: 1; gap: 8px; min-width: 0; }
+.explorer-search input { min-width: 0; width: 100%; padding: 10px 14px; }
+.explorer-toolbar .btn,.explorer-actions .btn,.explorer-pagination .btn { padding: 10px 16px; white-space: nowrap; font-size: 14px; }
+.explorer-card { cursor: default; border-top: 5px solid #d9b394; height: 100%; }
+.explorer-card:nth-child(3n+2) { border-top-color: #efb4ca; }.explorer-card:nth-child(3n) { border-top-color: #efd38d; }
+.explorer-card .deck-card-content { display: flex; flex-direction: column; height: 100%; }
+.explorer-card h3 { margin: 18px 0 10px; overflow-wrap: anywhere; }.explorer-card h3 a { color: inherit; text-decoration: none; }.explorer-card h3 a:hover { text-decoration: underline; }
+.explorer-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--text-muted); }
+.visibility-badge { display: inline-block; border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 800; letter-spacing: .04em; }.visibility-badge.public { background: #e4eee0; color: #486548; }.visibility-badge.private { background: #f7e4ed; color: #82516d; }
+.explorer-description { color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 65px; font-size: 14px; }
+.explorer-author { color: var(--text-muted); margin: 16px 0; overflow-wrap: anywhere; }.explorer-actions { margin-top: auto; display: flex; gap: 8px; }.explorer-actions .btn { flex: 1; text-decoration: none; text-align: center; }
+.explorer-manage { display: flex; gap: 16px; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--glass-border); }.explorer-manage button { background: none; border: 0; color: var(--primary); cursor: pointer; font-size: 13px; }.explorer-manage .delete-link { margin-left: auto; color: #a65048; }
+.explorer-result { color: var(--text-muted); margin: 0 0 16px; font-size: 14px; }.explorer-notice,.explorer-error { padding: 16px; border-radius: 12px; margin: 16px 0; }.explorer-notice { background: #e4eee0; color: #486548; }.explorer-error { background: #f7e2dc; color: #934944; }.explorer-error .btn { margin-left: 12px; }
+.explorer-empty { text-align: center; padding: 48px 24px; }.explorer-empty p { margin: 12px 0 20px; color: var(--text-muted); }.explorer-pagination { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 28px 0; }
+.deck-skeleton { padding: 28px; min-height: 260px; }.deck-skeleton i { display: block; height: 22px; background: #efe4da; border-radius: 8px; margin: 16px 0; }.deck-skeleton i:last-child { width: 65%; }
+.deck-guest-note { padding: 16px 20px; margin: 20px 0; border: 1px solid #ead19a; background: #fff4d6; border-radius: 14px; color: #745b31; }.deck-guest-note a { color: var(--primary); font-weight: 700; }
+.study-error { padding: 24px; text-align: center; }.study-error p { margin-bottom: 20px; }.study-guest-controls { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }.study-guest-controls .btn { padding: 12px 22px; }
+.study-container .progress { height: 6px; border-radius: 8px; margin: 22px 0; overflow: hidden; }.study-container .progress i { display: block; height: 100%; border-radius: inherit; transition: width .2s ease; }
+button:disabled,.btn[aria-disabled='true'] { cursor: not-allowed; opacity: .5; }.explorer-toolbar button:focus-visible,.explorer-card a:focus-visible,.explorer-card button:focus-visible { outline: 3px solid #c88b6a; outline-offset: 3px; }
+@media(max-width:900px) { .explorer-toolbar { flex-wrap: wrap; }.explorer-search { flex-basis: 100%; }.explorer-toolbar label { flex: 1; }.explorer-toolbar select { max-width: 100%; } }
+@media(max-width:600px) { .explorer-toolbar { padding: 16px; gap: 10px; }.explorer-toolbar label { min-width: 90px; }.explorer-pagination { gap: 10px; font-size: 12px; }.dashboard-header > .btn { white-space: normal; }.explorer-actions { flex-wrap: wrap; } }

@@ -7,25 +7,33 @@ import com.example.demo.flashcard.entity.Deck;
 import com.example.demo.flashcard.entity.Flashcard;
 import com.example.demo.flashcard.repository.DeckRepository;
 import com.example.demo.flashcard.repository.FlashcardRepository;
+import com.example.demo.flashcard.service.DeckAccessPolicy;
 import com.example.demo.flashcard.service.FlashcardService;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
-@RequiredArgsConstructor
 public class FlashcardServiceImpl implements FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
     private final GeminiService geminiService;
+    private final DeckAccessPolicy access;
+
+    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository,
+            GeminiService geminiService, DeckAccessPolicy access) {
+        this.flashcardRepository = flashcardRepository;
+        this.deckRepository = deckRepository;
+        this.geminiService = geminiService;
+        this.access = access;
+    }
 
     @Override
     public List<FlashcardResponse> getFlashcardsByDeckId(Long deckId) {
+        access.requireViewAccess(deckId, access.currentUserId());
         return flashcardRepository.findByDeckId(deckId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -33,8 +41,11 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     @Override
     public FlashcardResponse addFlashcardToDeck(Long deckId, FlashcardRequest request) {
-        Deck deck = deckRepository.findById(deckId)
-                .orElseThrow(() -> new ResourceNotFoundException("Deck not found with id: " + deckId));
+        Deck deck = access.requireOwner(deckId);
+
+        if (request.getVocabulary() == null || request.getVocabulary().isBlank() || request.getVocabulary().length() > 255
+                || request.getMeaning() == null || request.getMeaning().isBlank() || request.getMeaning().length() > 255)
+            throw new IllegalArgumentException("Vocabulary and meaning must contain 1 to 255 characters");
 
         Flashcard flashcard = Flashcard.builder()
                 .vocabulary(request.getVocabulary())
@@ -50,8 +61,9 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     @Override
     public List<FlashcardResponse> generateAiFlashcards(Long deckId, String prompt) {
-        Deck deck = deckRepository.findById(deckId)
-                .orElseThrow(() -> new ResourceNotFoundException("Deck not found with id: " + deckId));
+        Deck deck = access.requireOwner(deckId);
+        if (prompt == null || prompt.isBlank() || prompt.length() > 2000)
+            throw new IllegalArgumentException("AI prompt must contain 1 to 2000 characters");
 
         List<Flashcard> generatedCards = geminiService.generateFlashcards(prompt);
 

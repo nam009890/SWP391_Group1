@@ -19,14 +19,16 @@ const Navbar = ({ user, onLogout }) => {
         <div className="navbar-menu">
           {user ? (
             <div className="user-profile">
-              <button className={`nav-link ${isActive('/') ? 'active' : ''}`} onClick={() => navigate('/')}>Trang chủ</button>
-              <button className={`nav-link ${isActive('/grammar') ? 'active' : ''}`} onClick={() => navigate('/grammar')}>Ngữ pháp</button>
-              <button className={`nav-link ${isActive('/weak-vocabulary') ? 'active' : ''}`} onClick={() => navigate('/weak-vocabulary')}>Từ cần ôn</button>
+              <button className={`nav-link ${isActive('/') ? 'active' : ''}`} onClick={() => navigate('/')}>Explore Decks</button>
+              <button className={`nav-link ${isActive('/my-decks') ? 'active' : ''}`} onClick={() => navigate('/my-decks')}>My Decks</button>
+              <button className={`nav-link ${isActive('/grammar') ? 'active' : ''}`} onClick={() => navigate('/grammar')}>Grammar</button>
+              <button className={`nav-link ${location.pathname === '/weak-vocabulary' ? 'active' : ''}`} onClick={() => navigate('/weak-vocabulary')}>Weak Vocabulary</button>
+              <button className={`nav-link ${location.pathname.startsWith('/weak-vocabulary/practice') ? 'active' : ''}`} onClick={() => navigate('/weak-vocabulary/practice')}>Practice</button>
               <button className="nav-avatar" title={user.name}>{(user.name || 'U').charAt(0).toUpperCase()}</button>
-              <button className="logout-btn" onClick={onLogout}>Đăng xuất</button>
+              <button className="logout-btn" onClick={onLogout}>Logout</button>
             </div>
           ) : (
-            <button className="btn btn-primary" onClick={() => navigate('/login')}>Đăng nhập</button>
+            <div className="user-profile"><button className={`nav-link ${isActive('/') ? 'active' : ''}`} onClick={() => navigate('/')}>Explore Decks</button><button className="btn btn-glass" onClick={() => navigate('/login')}>Login</button><button className="btn btn-primary" onClick={() => navigate('/register')}>Register</button></div>
           )}
         </div>
       </div>

@@ -44,7 +44,7 @@ public class GrammarQuestion {
 
     // Full JSON content (tokens, template, blanks, options, sub_questions, audio_url, etc.)
     @Lob
-    @Column(name = "payload_json", columnDefinition = "LONGTEXT")
+    @Column(name = "payload_json", columnDefinition = "NVARCHAR(MAX)")
     private String payloadJson;
 
     // Specific to SPOT_ERROR
@@ -62,7 +62,7 @@ public class GrammarQuestion {
 
     // Explanation & grammar rule
     @Lob
-    @Column(name = "explanation", columnDefinition = "LONGTEXT")
+    @Column(name = "explanation", columnDefinition = "NVARCHAR(MAX)")
     private String explanation;
 
     @Column(name = "created_at")

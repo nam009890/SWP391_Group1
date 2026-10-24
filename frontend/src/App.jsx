@@ -11,10 +11,12 @@
 // =========================================================================================
 
 import { Routes, Route, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
+import ProtectedRoute from './components/ProtectedRoute';
+import api from './api/axiosConfig';
 
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const DeckDetails = lazy(() => import('./components/DeckDetails'));
@@ -55,7 +57,9 @@ function OAuth2RedirectHandler({ onAuthenticated }) {
     if (token) {
       localStorage.setItem('token', token);
       onAuthenticated(token);
-      navigate('/', { replace: true });
+      const from = sessionStorage.getItem('authReturnTo');
+      sessionStorage.removeItem('authReturnTo');
+      navigate(from?.startsWith('/') && !from.startsWith('//') && !from.startsWith('/login') ? from : '/', { replace: true });
     } else {
       navigate('/login');
     }
@@ -120,61 +124,60 @@ function GrammarModuleDispatcher({ user, token }) {
 }
 
 function MainApp() {
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [token, setToken] = useState(() => readUserFromToken(localStorage.getItem('token')) ? localStorage.getItem('token') : null);
   const [user, setUser] = useState(() => readUserFromToken(localStorage.getItem('token')));
+  const [checkingAuth, setCheckingAuth] = useState(() => Boolean(readUserFromToken(localStorage.getItem('token'))));
 
-  const handleAuthenticated = (nextToken) => {
+  const handleAuthenticated = useCallback((nextToken) => {
     localStorage.setItem('token', nextToken);
     setToken(nextToken);
     setUser(readUserFromToken(nextToken));
-  };
+    setCheckingAuth(true);
+  }, []);
 
   useEffect(() => {
-    if (token) {
-      try {
-        const payloadPart = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(atob(payloadPart));
-        const currentTime = Math.floor(Date.now() / 1000);
-        
-        // Kiểm tra token hết hạn
-        if (payload.exp && payload.exp < currentTime) {
-          console.warn("Token expired on load");
-          handleLogout();
-        } else {
-          // Trích xuất thông tin người dùng từ token
-          const email = (payload.email || payload.sub || '').trim();
-          
-          setUser({
-            name: payload.name || email,
-            email: email,
-            role: payload.role || 'ROLE_USER',
-            isAdmin: payload.role === 'ROLE_ADMIN'
-          });
+    if (!token) { setCheckingAuth(false); return; }
+    const controller = new AbortController();
+    api.get('/auth/me', { signal: controller.signal }).then(({ data }) => setUser(data))
+      .catch(err => {
+        if (err.code !== 'ERR_CANCELED') {
+          setUser(null);
+          if (err.response?.status === 401) { localStorage.removeItem('token'); setToken(null); }
         }
-      } catch (e) {
-        console.error("Invalid token format:", e);
-        handleLogout();
-      }
-    }
+      }).finally(() => { if (!controller.signal.aborted) setCheckingAuth(false); });
+    return () => controller.abort();
   }, [token]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
-    window.location.href = 'http://localhost:8080/api/auth/logout';
   };
+
+  useEffect(() => {
+    const expire = () => { localStorage.removeItem('token'); setToken(null); setUser(null); };
+    window.addEventListener('auth-expired', expire);
+    let timer;
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (payload.exp) timer = setTimeout(expire, Math.max(0, payload.exp * 1000 - Date.now()));
+    }
+    return () => { window.removeEventListener('auth-expired', expire); clearTimeout(timer); };
+  }, [token]);
 
   return (
     <>
       <Navbar user={user} onLogout={handleLogout} />
       
-      <Suspense fallback={<div className="route-loader"><span>Đang mở trang học tập...</span></div>}>
+      {checkingAuth ? <div className="route-loader"><span>Checking your session…</span></div> : <Suspense fallback={<div className="route-loader"><span>Đang mở trang học tập...</span></div>}>
       <Routes>
-        <Route path="/" element={token ? <Dashboard user={user} /> : <LandingPage />} />
-        <Route path="/login" element={token ? <Dashboard user={user} /> : <Login onAuthenticated={handleAuthenticated} />} />
-        <Route path="/register" element={token ? <Dashboard user={user} /> : <Register onAuthenticated={handleAuthenticated} />} />
-        <Route path="/deck/:id" element={token ? <DeckDetails /> : <LandingPage />} />
-        <Route path="/study/:id" element={token ? <StudyMode /> : <LandingPage />} />
+        <Route path="/" element={<Dashboard key="public" user={user} />} />
+        <Route path="/welcome" element={<LandingPage />} />
+        <Route path="/my-decks" element={<ProtectedRoute user={user}><Dashboard key="my" user={user} mine /></ProtectedRoute>} />
+        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login onAuthenticated={handleAuthenticated} />} />
+        <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register onAuthenticated={handleAuthenticated} />} />
+        <Route path="/deck/:id" element={<DeckDetails user={user} />} />
+        <Route path="/study/:id" element={<StudyMode user={user} />} />
         {/* Module Bài Tập Ngữ Pháp — Điều phối thông minh theo trạng thái đăng nhập và email */}
         <Route path="/grammar" element={<GrammarModuleDispatcher user={user} token={token} />} />
         
@@ -194,12 +197,13 @@ function MainApp() {
           element={token ? <GrammarAdminCMSPage user={user} /> : <Navigate to="/login" replace />}
         />
 
-        <Route path="/weak-vocabulary" element={token ? <WeakVocabulary /> : <LandingPage />} />
-        <Route path="/weak-vocabulary/practice" element={token ? <WeakPracticeSetup /> : <LandingPage />} />
-        <Route path="/weak-vocabulary/practice/:id" element={token ? <WeakPracticeSession /> : <LandingPage />} />
+        <Route path="/weak-vocabulary" element={<ProtectedRoute user={user}><WeakVocabulary /></ProtectedRoute>} />
+        <Route path="/weak-vocabulary/practice" element={<ProtectedRoute user={user}><WeakPracticeSetup /></ProtectedRoute>} />
+        <Route path="/weak-vocabulary/practice/:id" element={<ProtectedRoute user={user}><WeakPracticeSession /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler onAuthenticated={handleAuthenticated} />} />
       </Routes>
-      </Suspense>
+      </Suspense>}
     </>
   );
 }
