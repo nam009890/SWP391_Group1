@@ -11,6 +11,62 @@ async function login(page, email = 'learner1@studye.test') {
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page).not.toHaveURL(/\/login$/);
 }
+
+test('add-card form and language controls keep readable dimensions before and after visiting Grammar', async ({ page }) => {
+  await login(page);
+  await page.goto('/my-decks');
+  await page.getByRole('link', { name: 'View Deck', exact: true }).first().click();
+  await page.getByRole('button', { name: '+ Add Card', exact: true }).click();
+  const deckUrl = page.url();
+  for (const width of [320, 375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const form = page.locator('.add-card-form');
+    await expect(form).toBeVisible();
+    for (const input of await form.locator('input').all()) {
+      const box = await input.boundingBox();
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.width).toBeGreaterThan(160);
+      const label = form.locator(`label[for="${await input.getAttribute('id')}"]`);
+      const labelBox = await label.boundingBox();
+      expect(labelBox.y + labelBox.height).toBeLessThanOrEqual(box.y + 1);
+    }
+    const vi = await page.locator('.navbar .language-switcher button').first().boundingBox();
+    expect(vi.width).toBeGreaterThanOrEqual(38);
+    expect(vi.height).toBeGreaterThanOrEqual(36);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    await form.screenshot({ path: `test-results/add-card-${width}.png`, animations: 'disabled' });
+  }
+  await page.goto('/grammar');
+  await expect(page.getByRole('heading', { name: 'Grammar exercises', exact: true })).toBeVisible();
+  await page.goto(deckUrl);
+  await page.getByRole('button', { name: '+ Add Card', exact: true }).click();
+  await expect(page.getByLabel('Term (Vocabulary) *')).toBeVisible();
+  const input = await page.locator('#card-term').boundingBox();
+  expect(input.height).toBeGreaterThanOrEqual(44);
+});
+
+test('Grammar print and report dialogs use the shared light surface on mobile', async ({ page }) => {
+  await login(page);
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.goto('/grammar');
+  await page.getByRole('button', { name: 'Start exercise', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Report issue', exact: true }).first().click();
+  const report = page.locator('.report-modal-box');
+  await expect(report).toBeVisible();
+  await expect(report).toHaveCSS('background-color', 'rgb(255, 250, 244)');
+  expect(await report.evaluate(el => el.parentElement.parentElement === document.body)).toBe(true);
+  await report.screenshot({ path: 'test-results/grammar-report-mobile.png', animations: 'disabled' });
+  await report.getByRole('button', { name: '✕', exact: true }).click();
+  await page.locator('button[title]').filter({ hasText: 'Download' }).click();
+  const print = page.locator('.print-modal-container');
+  await expect(print).toBeVisible();
+  await expect(print).toHaveCSS('background-color', 'rgb(255, 253, 249)');
+  expect(await print.evaluate(el => el.parentElement.parentElement === document.body)).toBe(true);
+  const printHeader = await print.locator('.print-modal-header').boundingBox();
+  expect(printHeader.y).toBeGreaterThanOrEqual(0);
+  expect(await print.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  await print.screenshot({ path: 'test-results/grammar-print-mobile.png', animations: 'disabled' });
+});
 test('learner login, create deck/card, study, refresh, language and multi-tab logout', async ({ page, context }) => {
   await login(page);
   await page.goto('/my-decks');

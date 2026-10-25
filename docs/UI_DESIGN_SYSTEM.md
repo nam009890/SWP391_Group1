@@ -23,3 +23,12 @@ Grammar CMS có select inline minWidth 320/240px và wrapper fit-content gây tr
 - QA tối thiểu 320/375/768/1024/1440; kiểm tra cả tiếng Việt và Anh, không chỉ screenshot ở desktop.
 
 Playwright chạy Chrome thật với local H2 và lưu screenshot trong frontend/test-results (ignored). Đây không phải test SQL Server hoặc Google live. Chỉ báo browser pass sau khi suite thực sự hoàn tất; kết quả mới nhất ở FINAL_SYSTEM_QA.md.
+
+## Rà soát UI bổ sung theo ảnh người dùng — 25/10/2026
+
+- Form thêm thẻ: thiếu layout/size riêng sau khi CSS modal được scope. Đã dùng grid hai cột desktop, một cột dưới 768px; label ở trên input, input đầy cột, cao tối thiểu 46px, focus ring và nút lưu đầy chiều ngang mobile. Bổ sung htmlFor/id, required/maxlength, disabled khi lưu và role=alert. Style form-row/form-actions được scope trong add-card-form để tránh ảnh hưởng màn khác.
+- VI/EN: chuyển CSS từ Navbar vào LanguageSwitcher.css, dùng font kế thừa, line-height cố định, cùng kích thước nút và khoảng đệm. Dùng được độc lập cả Navbar/modal, giữ aria-pressed.
+- Deck: wrap nhóm action/header, nội dung dài không đẩy tràn; sửa màu số thứ tự và vạch chia từ theme tối sang token hiện tại.
+- Grammar: đổi nền live preview và loại bỏ màu nền tối hardcode của hộp in/báo lỗi. Hai modal dùng React portal vào document.body để thoát stacking context do animation của trang, không còn bị Navbar che. Bố cục phần đầu đề thi và options chuyển dọc trên màn hình nhỏ bằng media screen; không đổi bố cục A4 khi in/export.
+- Đã kiểm tra Chrome các route Deck/Profile/Weak/Practice/Grammar/CMS/Admin cả VI/EN, modal/dropdown trên năm viewport, form thêm thẻ tại 320/375/768/1440 và sau khi mở Grammar. Bộ 7 kịch bản E2E pass; modal portal và form được kiểm tra lại riêng sau bản sửa cuối. React 9 tests pass; production build/i18n pass; lint 0 errors, 39 warnings có sẵn.
+- QA dùng H2 riêng, không tác động SQL Server thật, không gửi report/email hoặc gọi AI trả phí. Ảnh test nằm frontend/test-results (ignored, được tạo lại mỗi lần chạy); bản ảnh đối chiếu cuối trong .qa-local/ui-review (ignored).

@@ -3,6 +3,7 @@ import { t } from '../../../../i18n/index.js';
 // VIEW LAYER — REPORT QUESTION MODAL (MODAL BÁO LỖI CÂU HỎI CHO TÁC GIẢ QUA GMAIL)
 // =========================================================================================
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { submitQuestionReport } from '../../model/grammarQuestionsData';
 
 const ERROR_TYPES = () => ([
@@ -78,7 +79,7 @@ const ReportQuestionModal = ({
     }
   };
 
-  return (
+  return createPortal(
     <div className="report-modal-backdrop animate-fade-in" style={{
       position: 'fixed',
       top: 0,
@@ -102,7 +103,7 @@ const ReportQuestionModal = ({
         overflowY: 'visible',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.15)',
-        background: '#172033',
+        background: 'var(--surface)',
         padding: '24px 28px',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
       }}>
@@ -274,7 +275,7 @@ const ReportQuestionModal = ({
         )}
 
       </div>
-    </div>
+    </div>, document.body
   );
 };
 

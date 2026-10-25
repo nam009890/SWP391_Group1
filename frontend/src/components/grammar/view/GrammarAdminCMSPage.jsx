@@ -1600,7 +1600,7 @@ const GrammarAdminCMSPage = ({ user }) => {
               )}
 
               {/* KHUNG XEM TRƯỚC TRỰC QUAN (LIVE INTERACTIVE PREVIEW) */}
-              <div style={{ marginTop: '24px', padding: '20px', borderRadius: '14px', background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <div style={{ marginTop: '24px', padding: '20px', borderRadius: '14px', background: 'var(--surface-elevated)', border: '1px solid var(--border-default)' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '12px' }}> {t('grammar:xem_truoc_giao_dien_hoc_vien_live_previe_6ae892')} </span>
                 {previewQuestion.type === 'SPOT_ERROR' && (
                   <SpotTheErrorQuestion

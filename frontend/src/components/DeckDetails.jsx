@@ -185,12 +185,13 @@ const DeckDetails = ({ user }) => {
         {deck.isOwner && isAdding && (
           <form onSubmit={handleAddCard} className="add-card-form glass-panel animate-fade-in">
             <h3> {t('decks:add_a_new_card_b67041')} </h3>
-            {formError && <div className="form-error">{formError}</div>}
+            {formError && <div className="form-error" role="alert">{formError}</div>}
             
             <div className="form-row">
               <div className="form-group flex-1">
-                <label> {t('decks:term_vocabulary_851fcf')} </label>
+                <label htmlFor="card-term"> {t('decks:term_vocabulary_851fcf')} </label>
                 <input 
+                  id="card-term" required maxLength={255} disabled={submitting}
                   type="text" 
                   value={term} 
                   onChange={(e) => setTerm(e.target.value)} 
@@ -200,8 +201,9 @@ const DeckDetails = ({ user }) => {
                 />
               </div>
               <div className="form-group flex-1">
-                <label> {t('decks:definition_meaning_6d2ad9')} </label>
+                <label htmlFor="card-meaning"> {t('decks:definition_meaning_6d2ad9')} </label>
                 <input 
+                  id="card-meaning" required maxLength={255} disabled={submitting}
                   type="text" 
                   value={definition} 
                   onChange={(e) => setDefinition(e.target.value)} 
@@ -213,8 +215,9 @@ const DeckDetails = ({ user }) => {
             
             <div className="form-row">
               <div className="form-group flex-1">
-                <label> {t('decks:phonetic_optional_c93df1')} </label>
+                <label htmlFor="card-phonetic"> {t('decks:phonetic_optional_c93df1')} </label>
                 <input 
+                  id="card-phonetic" maxLength={255} disabled={submitting}
                   type="text" 
                   value={phonetic} 
                   onChange={(e) => setPhonetic(e.target.value)} 
@@ -223,8 +226,9 @@ const DeckDetails = ({ user }) => {
                 />
               </div>
               <div className="form-group flex-2">
-                <label> {t('decks:example_sentence_optional_8a350a')} </label>
+                <label htmlFor="card-example"> {t('decks:example_sentence_optional_8a350a')} </label>
                 <input 
+                  id="card-example" maxLength={2000} disabled={submitting}
                   type="text" 
                   value={example} 
                   onChange={(e) => setExample(e.target.value)} 

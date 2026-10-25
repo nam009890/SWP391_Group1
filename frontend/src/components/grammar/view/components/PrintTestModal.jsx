@@ -1,5 +1,6 @@
 import { t } from '../../../../i18n/index.js';
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
   const [selectedGroupId, setSelectedGroupId] = useState(currentGroupId || groups[0]?.id || '');
@@ -61,7 +62,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
     window.print();
   };
 
-  return (
+  return createPortal(
     <div className="print-modal-backdrop animate-fade-in" style={{
       position: 'fixed',
       top: 0,
@@ -85,7 +86,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
         overflowY: 'visible',
         borderRadius: '16px',
         border: '1px solid rgba(255, 255, 255, 0.15)',
-        background: '#0f172a',
+        background: 'var(--surface)',
         padding: '24px 28px',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
       }}>
@@ -449,7 +450,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
         </div>
 
       </div>
-    </div>
+    </div>, document.body
   );
 };
 

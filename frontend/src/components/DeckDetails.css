@@ -86,15 +86,38 @@
   color: var(--primary);
 }
 
-.form-row {
-  display: flex;
+.add-card-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
-.flex-1 { flex: 1; }
-.flex-2 { flex: 2; }
+.add-card-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
 
-.form-actions {
+.add-card-form label { font-size: 14px; font-weight: 600; line-height: 1.5; }
+.add-card-form .glass-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 12px 14px;
+  font: inherit;
+  line-height: 1.5;
+  color: var(--input-text);
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+}
+.add-card-form .glass-input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--focus-ring); }
+.add-card-form .form-error { color: var(--error); overflow-wrap: anywhere; }
+
+.add-card-form .form-actions {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
@@ -193,8 +216,8 @@
     flex-direction: column;
   }
   
-  .form-row {
-    flex-direction: column;
+  .add-card-form .form-row {
+    grid-template-columns: minmax(0, 1fr);
   }
   
   .list-card {
@@ -210,6 +233,16 @@
 }
 
 .header-actions { display: flex; gap: 12px; }
+.details-container .header-actions { flex-wrap: wrap; }
+.details-container .section-header { flex-wrap: wrap; gap: 16px; }
+.details-container .deck-info, .list-card-term, .list-card-def { min-width: 0; overflow-wrap: anywhere; }
+.details-container .list-card-number { color: var(--text-muted); flex-shrink: 0; }
+.details-container .list-card-divider { background: var(--border-default); }
+@media (max-width: 480px) {
+  .add-card-form { padding: 18px; gap: 18px; }
+  .add-card-form .form-actions .btn { width: 100%; }
+  .details-container .header-actions { width: 100%; }
+}
 .btn-ai { background: linear-gradient(135deg, #a855f7, #ec4899); color: white; border: none; font-weight: bold; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); }
 .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236, 72, 153, 0.6); }
 .ai-form { border-left: 4px solid #ec4899; }
