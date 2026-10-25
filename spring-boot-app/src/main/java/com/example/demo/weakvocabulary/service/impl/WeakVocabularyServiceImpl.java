@@ -14,6 +14,16 @@ import com.example.demo.weakvocabulary.entity.UserWeakVocabulary;
 import com.example.demo.weakvocabulary.repository.UserWeakVocabularyRepository;
 import com.example.demo.weakvocabulary.service.WeakVocabularyService;
 import jakarta.persistence.criteria.Expression;
+import com.example.demo.study.dto.ReviewResponse.WeakDetection;
+import com.example.demo.study.dto.ReviewResponse.DetectionStatus;
+import com.example.demo.study.repository.FlashcardStudyEventRepository;
+import com.example.demo.study.service.LearningActivityLock;
+import com.example.demo.weakvocabulary.entity.WeakDetectionReason;
+import com.example.demo.weakvocabulary.service.WeaknessRules;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,42 +32,74 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional(readOnly = true)
 public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     private final UserWeakVocabularyRepository repo;
     private final UserRepository users;
     private final FlashcardRepository flashcards;
     private final DeckAccessPolicy access;
+    private final LearningActivityLock activityLock;
+    private final FlashcardStudyEventRepository events;
 
     public WeakVocabularyServiceImpl(UserWeakVocabularyRepository repo, UserRepository users,
-            FlashcardRepository flashcards, DeckAccessPolicy access) {
+            FlashcardRepository flashcards, DeckAccessPolicy access,
+            LearningActivityLock activityLock, FlashcardStudyEventRepository events) {
         this.repo = repo;
         this.users = users;
         this.flashcards = flashcards;
         this.access = access;
+        this.activityLock = activityLock;
+        this.events = events;
     }
 
     @Override
+    public java.util.List<com.example.demo.weakvocabulary.dto.WeakDtos.DeckOption> deckOptions(Long userId) {
+        return repo.findActiveDeckOptions(userId).stream()
+                .map(option -> new com.example.demo.weakvocabulary.dto.WeakDtos.DeckOption(option.getId(), option.getName()))
+                .toList();
+    }
+
+    @Override
+    @Transactional
     public WeakResponse addManual(Long userId, Long flashcardId) {
+        activityLock.acquire(userId);
         // Public deck cho phép lưu từ yếu cá nhân mà không thay đổi bộ thẻ gốc.
         access.requireViewAccess(card(flashcardId).getDeck(), userId);
         UserWeakVocabulary weak = repo.findByUserIdAndFlashcardId(userId, flashcardId)
                 .orElseGet(() -> UserWeakVocabulary.builder().user(user(userId)).flashcard(card(flashcardId)).build());
         weak.setManualMarked(true);
+        if (!weak.isAutoDetected()) {
+            weak.setDetectionReason(WeakDetectionReason.MANUAL_MARK);
+        }
         weak.setWeakDeleted(false);
         weak.setWeakDeletedAt(null);
         return map(repo.save(weak));
     }
 
     @Override
-    public void recordStudyDifficulty(Long userId, Long flashcardId, int quality) {
-        if (quality > 3) return;
+    @Transactional
+    public WeakDetection registerStudyDetection(Long userId, Long flashcardId, int quality, WeakDetectionReason reason) {
+        activityLock.acquire(userId);
         access.requireViewAccess(card(flashcardId).getDeck(), userId);
-        UserWeakVocabulary weak = repo.findByUserIdAndFlashcardId(userId, flashcardId)
-                .orElseGet(() -> UserWeakVocabulary.builder().user(user(userId)).flashcard(card(flashcardId)).build());
-        if (weak.isWeakDeleted()) return;
-        weak.setAutoDetected(true);
+        UserWeakVocabulary weak = repo.findByUserIdAndFlashcardId(userId, flashcardId).orElse(null);
+        if (weak != null) {
+            weak.setLastStudyQuality(quality);
+        }
+        if (reason == null) {
+            return new WeakDetection(DetectionStatus.NOT_DETECTED, null, weak == null ? null : weak.getId());
+        }
+        if (weak != null && weak.isWeakDeleted()) {
+            // Chỉ manual Add được khôi phục từ đã xóa; không thay lý do hoặc ngày phát hiện.
+            return new WeakDetection(DetectionStatus.SUPPRESSED, reason, weak.getId());
+        }
+        boolean existed = weak != null;
+        if (!existed) {
+            weak = UserWeakVocabulary.builder().user(user(userId)).flashcard(card(flashcardId)).build();
+        }
         weak.setLastStudyQuality(quality);
-        repo.save(weak);
+        WeaknessRules.detected(weak, reason);
+        repo.saveAndFlush(weak);
+        return new WeakDetection(existed ? DetectionStatus.ALREADY_WEAK : DetectionStatus.AUTO_ADDED, reason, weak.getId());
     }
 
     @Override
@@ -111,7 +153,14 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
             });
         }
         Page<UserWeakVocabulary> result = repo.findAll(specification, PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100), pageableSort));
-        return PageResponse.builder().items(result.map(this::map).getContent()).page(result.getNumber()).size(result.getSize())
+        // Gom thống kê cho cả trang trong một truy vấn, không query history theo từng từ.
+        Map<Long, FlashcardStudyEventRepository.Counts> counts = result.isEmpty() ? Map.of() : events.countsForCards(
+                userId, result.getContent().stream().map(w -> w.getFlashcard().getId()).toList()).stream()
+                .collect(Collectors.toMap(FlashcardStudyEventRepository.Counts::getFlashcardId, Function.identity()));
+        return PageResponse.builder().items(result.getContent().stream().map(w -> {
+            var count = counts.get(w.getFlashcard().getId());
+            return map(w, count == null ? 0 : count.getReviewCount(), count == null ? 0 : count.getConfidentCount());
+        }).toList()).page(result.getNumber()).size(result.getSize())
                 .totalElements(result.getTotalElements()).totalPages(result.getTotalPages()).first(result.isFirst()).last(result.isLast()).build();
     }
 
@@ -126,15 +175,24 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
     }
 
     @Override
+    @Transactional
     public WeakResponse patch(Long userId, Long id, PatchRequest request) {
+        activityLock.acquire(userId);
         UserWeakVocabulary weak = owned(userId, id);
         if (request.getWeakNote() != null) weak.setWeakNote(request.getWeakNote());
-        if (request.getManualMarked() != null) weak.setManualMarked(request.getManualMarked());
+        if (request.getManualMarked() != null) {
+            if (!request.getManualMarked() && !weak.isAutoDetected()) {
+                throw new IllegalArgumentException("Dùng thao tác xóa để bỏ từ thủ công khỏi danh sách");
+            }
+            weak.setManualMarked(request.getManualMarked());
+        }
         return map(repo.save(weak));
     }
 
     @Override
+    @Transactional
     public void softDelete(Long userId, Long id) {
+        activityLock.acquire(userId);
         UserWeakVocabulary weak = owned(userId, id);
         weak.setWeakDeleted(true);
         weak.setWeakDeletedAt(LocalDateTime.now());
@@ -155,10 +213,46 @@ public class WeakVocabularyServiceImpl implements WeakVocabularyService {
         return flashcards.findById(id).orElseThrow(() -> new ResourceNotFoundException("Flashcard not found"));
     }
 
-    private WeakResponse map(UserWeakVocabulary w) {
-        Flashcard f = w.getFlashcard();
-        double accuracy = w.getTotalAttempts() == 0 ? 0 : Math.round(w.getCorrectCount() * 10000d / w.getTotalAttempts()) / 100d;
-        String reason = w.isManualMarked() ? "MANUAL_MARK" : w.getConsecutiveWrong() >= 2 ? "CONSECUTIVE_WRONG" : w.getLastStudyQuality() != null && w.getLastStudyQuality() <= 1 ? "STUDY_FORGOT" : w.getLastStudyQuality() != null && w.getLastStudyQuality() <= 3 ? "STUDY_HARD" : w.getTotalAttempts() >= 3 && accuracy < 60 ? "LOW_PRACTICE_ACCURACY" : "STUDY_HARD";
-        return WeakResponse.builder().weakVocabularyId(w.getId()).flashcardId(f.getId()).deckId(f.getDeck() == null ? null : f.getDeck().getId()).deckName(f.getDeck() == null ? null : f.getDeck().getName()).vocabulary(f.getVocabulary()).meaning(f.getMeaning()).phonetic(f.getPhonetic()).exampleSentence(f.getExampleSentence()).manualMarked(w.isManualMarked()).autoDetected(w.isAutoDetected()).masteryScore(w.getMasteryScore()).totalAttempts(w.getTotalAttempts()).correctCount(w.getCorrectCount()).wrongCount(w.getWrongCount()).consecutiveWrong(w.getConsecutiveWrong()).accuracy(accuracy).weakReason(reason).weakNote(w.getWeakNote()).lastStudyQuality(w.getLastStudyQuality()).lastPracticedAt(w.getLastPracticedAt()).createdAt(w.getCreatedAt()).updatedAt(w.getUpdatedAt()).build();
+    private WeakResponse map(UserWeakVocabulary weak) {
+        Long uid = weak.getUser().getId();
+        Long fid = weak.getFlashcard().getId();
+        return map(weak, events.countByUserIdAndFlashcardId(uid, fid),
+                events.countByUserIdAndFlashcardIdAndConfidentRecallTrue(uid, fid));
+    }
+
+    private WeakResponse map(UserWeakVocabulary weak, long totalReviews, long confidentReviews) {
+        Flashcard card = weak.getFlashcard();
+        Double practiceAccuracy = WeaknessRules.accuracy(weak.getCorrectCount(), weak.getTotalAttempts());
+        WeakDetectionReason reason = WeaknessRules.reason(weak);
+        return WeakResponse.builder()
+                .weakVocabularyId(weak.getId())
+                .flashcardId(card.getId())
+                .deckId(card.getDeck().getId())
+                .deckName(card.getDeck().getName())
+                .vocabulary(card.getVocabulary())
+                .meaning(card.getMeaning())
+                .phonetic(card.getPhonetic())
+                .exampleSentence(card.getExampleSentence())
+                .manualMarked(weak.isManualMarked())
+                .autoDetected(weak.isAutoDetected())
+                .masteryScore(weak.getMasteryScore())
+                .totalAttempts(weak.getTotalAttempts())
+                .correctCount(weak.getCorrectCount())
+                .wrongCount(weak.getWrongCount())
+                .consecutiveWrong(weak.getConsecutiveWrong())
+                // Giữ accuracy=0 khi chưa luyện để tương thích filter cũ; UI đọc thêm totalAttempts.
+                .accuracy(practiceAccuracy == null ? 0 : practiceAccuracy)
+                .weakReason(reason.name())
+                .detectionReason(reason)
+                .firstDetectedAt(weak.getFirstDetectedAt())
+                .lastDetectedAt(weak.getLastDetectedAt())
+                .studyReviewCount(totalReviews)
+                .studyAccuracy(WeaknessRules.accuracy(confidentReviews, totalReviews))
+                .weakNote(weak.getWeakNote())
+                .lastStudyQuality(weak.getLastStudyQuality())
+                .lastPracticedAt(weak.getLastPracticedAt())
+                .createdAt(weak.getCreatedAt())
+                .updatedAt(weak.getUpdatedAt())
+                .build();
     }
 }

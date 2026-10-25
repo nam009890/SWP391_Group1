@@ -32,12 +32,16 @@ class StudyServiceImplWeakIntegrationTest {
         when(users.findById(1L)).thenReturn(Optional.of(user));
         when(flashcards.findById(2L)).thenReturn(Optional.of(flashcard));
         when(reviews.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        service = new StudyServiceImpl(flashcards, reviews, users, weakVocabulary,
-                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)));
+        var events = mock(com.example.demo.study.repository.FlashcardStudyEventRepository.class);
+        var activityLock = mock(com.example.demo.study.service.LearningActivityLock.class);
+        when(activityLock.acquire(1L)).thenReturn(user);
+        service = new StudyServiceImpl(flashcards, reviews, weakVocabulary,
+                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)),
+                events, activityLock, new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules());
     }
 
-    @Test void qualityOneShouldUpdateSm2AndRecordWeakDifficulty() { service.processReview(1L, 2L, 1); verify(weakVocabulary).recordStudyDifficulty(1L, 2L, 1); verify(reviews).save(argThat(review -> review.getRepetitionCount() == 0 && review.getIntervalDays() == 1 && review.getNextReviewDate() != null)); }
-    @Test void qualityThreeShouldRecordWeakDifficulty() { service.processReview(1L, 2L, 3); verify(weakVocabulary).recordStudyDifficulty(1L, 2L, 3); }
-    @Test void qualityFourShouldKeepSm2AndNotRecordWeakDifficulty() { service.processReview(1L, 2L, 4); verify(weakVocabulary, never()).recordStudyDifficulty(anyLong(), anyLong(), anyInt()); verify(reviews).save(argThat(review -> review.getRepetitionCount() == 1 && review.getIntervalDays() == 1)); }
-    @Test void qualityFiveShouldNotRecordWeakDifficulty() { service.processReview(1L, 2L, 5); verify(weakVocabulary, never()).recordStudyDifficulty(anyLong(), anyLong(), anyInt()); }
+    @Test void qualityOneShouldUpdateSm2AndRecordWeakDifficulty() { service.processReview(1L, 2L, 1); verify(weakVocabulary).registerStudyDetection(1L, 2L, 1, com.example.demo.weakvocabulary.entity.WeakDetectionReason.STUDY_FORGOT); verify(reviews).save(argThat(review -> review.getRepetitionCount() == 0 && review.getIntervalDays() == 1 && review.getNextReviewDate() != null)); }
+    @Test void qualityThreeShouldNotImmediatelyDetectWeakness() { service.processReview(1L, 2L, 3); verify(weakVocabulary).registerStudyDetection(1L, 2L, 3, null); }
+    @Test void qualityFourShouldKeepSm2AndNotRecordWeakDifficulty() { service.processReview(1L, 2L, 4); verify(weakVocabulary).registerStudyDetection(1L, 2L, 4, null); verify(reviews).save(argThat(review -> review.getRepetitionCount() == 1 && review.getIntervalDays() == 1)); }
+    @Test void qualityFiveShouldNotRecordWeakDifficulty() { service.processReview(1L, 2L, 5); verify(weakVocabulary).registerStudyDetection(1L, 2L, 5, null); }
 }

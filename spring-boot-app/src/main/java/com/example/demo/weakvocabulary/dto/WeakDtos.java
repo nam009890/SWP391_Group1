@@ -10,6 +10,9 @@ public final class WeakDtos {
     private WeakDtos() {
     }
 
+    public record DeckOption(Long id, String name) {
+    }
+
     @Getter
     @Setter
     public static class PatchRequest {
@@ -37,6 +40,10 @@ public final class WeakDtos {
         private String deckName, vocabulary, meaning, phonetic, exampleSentence, weakReason, weakNote;
         private boolean manualMarked, autoDetected;
         private int masteryScore, totalAttempts, correctCount, wrongCount, consecutiveWrong;
+        private WeakDetectionReason detectionReason;
+        private LocalDateTime firstDetectedAt, lastDetectedAt;
+        private long studyReviewCount;
+        private Double studyAccuracy;
         private double accuracy;
         private Integer lastStudyQuality;
         private LocalDateTime lastPracticedAt, createdAt, updatedAt;

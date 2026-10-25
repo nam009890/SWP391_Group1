@@ -34,7 +34,7 @@ public class GrammarQuestionReport {
     @Column(name = "error_type", length = 255)
     private String errorType;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(name = "reporter_name", length = 255)

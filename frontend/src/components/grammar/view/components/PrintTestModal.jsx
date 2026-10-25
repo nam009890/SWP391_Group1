@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 import React, { useState } from 'react';
 
 const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
@@ -92,12 +93,8 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
         {/* HEADER MODAL (ẨN KHI IN) */}
         <div className="print-modal-header no-print">
           <div>
-            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
-              Tải Xuống Đề Kiểm Tra
-            </h3>
-            <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-              Định dạng chuẩn khổ giấy A4, có thể tải file về máy hoặc lưu thành PDF.
-            </p>
+            <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}> {t('grammar:tai_xuong_e_kiem_tra_edf9f0')} </h3>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}> {t('grammar:inh_dang_chuan_kho_giay_a4_co_the_tai_fi_8535eb')} </p>
           </div>
           <button className="btn btn-glass btn-sm" onClick={onClose} style={{ fontSize: '16px' }}>
             ✕
@@ -119,7 +116,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
         }}>
           {/* Chọn bài test */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}>Bài kiểm tra:</label>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}> {t('grammar:bai_kiem_tra_611dab')} </label>
             <select
               className="form-input"
               value={selectedGroupId}
@@ -128,32 +125,27 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
             >
               {groups.map(g => (
                 <option key={g.id} value={g.id}>
-                  {g.title} ({g.questions?.length || 0} câu)
-                </option>
+                  {g.title} ({g.questions?.length || 0} {t('grammar:cau_c3c473')} </option>
               ))}
             </select>
           </div>
 
           {/* Chọn chế độ: Học sinh vs Giáo viên */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}>Chế độ:</label>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}> {t('grammar:che_do_157f35')} </label>
             <div style={{ display: 'flex', gap: '6px' }}>
               <button
                 type="button"
                 className={`btn btn-sm ${printMode === 'STUDENT' ? 'btn-primary' : 'btn-glass'}`}
                 onClick={() => setPrintMode('STUDENT')}
                 style={{ fontSize: '12px' }}
-              >
-                Bản học sinh (Đề thi)
-              </button>
+              > {t('grammar:ban_hoc_sinh_e_thi_7a16d3')} </button>
               <button
                 type="button"
                 className={`btn btn-sm ${printMode === 'TEACHER' ? 'btn-primary' : 'btn-glass'}`}
                 onClick={() => setPrintMode('TEACHER')}
                 style={{ fontSize: '12px' }}
-              >
-                Bản có đáp án
-              </button>
+              > {t('grammar:ban_co_dap_an_0d945a')} </button>
             </div>
           </div>
 
@@ -164,19 +156,15 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
               className="btn btn-primary btn-sm"
               onClick={handleDownloadFile}
               style={{ fontWeight: 600 }}
-              title="Tải trực tiếp file đề thi về máy"
-            >
-              Tải file về máy
-            </button>
+              title={t('grammar:tai_truc_tiep_file_de_thi_ve_may_eb820d')}
+            > {t('grammar:tai_file_ve_may_2e736a')} </button>
             <button
               type="button"
               className="btn btn-glass btn-sm"
               onClick={handlePrintPdf}
               style={{ fontWeight: 600 }}
-              title="Mở hộp thoại in / lưu thành PDF"
-            >
-              In / Lưu PDF
-            </button>
+              title={t('grammar:mo_hop_thoai_in_luu_thanh_pdf_a7e933')}
+            > {t('grammar:in_luu_pdf_c3e2d2')} </button>
           </div>
         </div>
 
@@ -188,17 +176,17 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
           {/* 1. HEADER CHUẨN ĐỀ THI */}
           <div className="print-header-section">
             <div className="print-header-left">
-              <div className="print-school-title">HỆ THỐNG HỌC NGỮ PHÁP TIẾNG ANH STUDY-E</div>
-              <div className="print-exam-type">BÀI KIỂM TRA ĐÁNH GIÁ NĂNG LỰC ĐỊNH KỲ</div>
-              <div className="print-subject">Môn: Tiếng Anh • Thời gian: 45 phút</div>
+              <div className="print-school-title"> {t('grammar:he_thong_hoc_ngu_phap_tieng_anh_study_e_62deab')} </div>
+              <div className="print-exam-type"> {t('grammar:bai_kiem_tra_anh_gia_nang_luc_inh_ky_37a320')} </div>
+              <div className="print-subject"> {t('grammar:mon_tieng_anh_thoi_gian_45_phut_13a446')} </div>
             </div>
             <div className="print-header-right">
-              <div className="print-meta-field"><strong>Họ và tên:</strong> ..............................................................</div>
-              <div className="print-meta-field"><strong>Lớp / Khóa học:</strong> ................... <strong>Ngày:</strong> ....../....../2026</div>
+              <div className="print-meta-field"><strong> {t('grammar:ho_va_ten_e51e34')} </strong> ..............................................................</div>
+              <div className="print-meta-field"><strong> {t('grammar:lop_khoa_hoc_39bdbf')} </strong> ................... <strong> {t('grammar:ngay_312fb1')} </strong> ....../....../2026</div>
               <div className="print-score-box">
-                <div className="score-box-title">ĐIỂM SỐ</div>
+                <div className="score-box-title"> {t('grammar:iem_so_fd2fce')} </div>
                 <div className="score-box-content">
-                  {printMode === 'TEACHER' ? "ĐÁP ÁN GỐC" : "/ 10"}
+                  {printMode === 'TEACHER' ? t('grammar:ap_an_goc_b65a0a') : "/ 10"}
                 </div>
               </div>
             </div>
@@ -206,10 +194,9 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
 
           <div className="print-test-title-divider">
             <h2 className="print-test-main-title">
-              {activeGroup?.title?.toUpperCase() || "BÀI KIỂM TRA TỔNG HỢP"}
+              {activeGroup?.title?.toUpperCase() || t('grammar:bai_kiem_tra_tong_hop_db8348')}
             </h2>
-            <div className="print-test-subdesc">
-              (Đề thi gồm {questions.length} câu hỏi • {printMode === 'STUDENT' ? "Học sinh làm bài trực tiếp trên giấy thi này" : "Tài liệu hướng dẫn chấm điểm & đáp án chi tiết"})
+            <div className="print-test-subdesc"> {t('grammar:e_thi_gom_8c9ca7')} {questions.length} {t('grammar:cau_hoi_35562e')} {printMode === 'STUDENT' ? t('grammar:hoc_sinh_lam_bai_truc_tiep_tren_giay_thi_7d904c') : t('grammar:tai_lieu_huong_dan_cham_diem_dap_an_chi__8e06c8')})
             </div>
           </div>
 
@@ -223,7 +210,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
 
                   {/* Tiêu đề & Yêu cầu câu hỏi */}
                   <div className="print-question-header">
-                    <span className="print-q-number">Câu {qNum}:</span>
+                    <span className="print-q-number"> {t('grammar:cau_c99b5e')} {qNum}:</span>
                     <span className="print-q-instruction">
                       {q.instruction || q.title}
                     </span>
@@ -250,13 +237,11 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
 
                       {printMode === 'TEACHER' ? (
                         <div className="print-teacher-inline-ans">
-                          ➔ <strong>Lỗi sai:</strong> ( {String.fromCharCode(64 + (q.correct_token_id || 1))} ) • <strong>Sửa thành:</strong> "{q.correction}"
+                          ➔ <strong> {t('grammar:loi_sai_76d948')} </strong> ( {String.fromCharCode(64 + (q.correct_token_id || 1))} ) • <strong> {t('grammar:sua_thanh_b15e0f')} </strong> "{q.correction}"
                           {q.explanation && <span> — {q.explanation}</span>}
                         </div>
                       ) : (
-                        <div className="print-student-answer-line">
-                          Từ sai là: ( ......... ) Sửa lại thành: ..............................................................
-                        </div>
+                        <div className="print-student-answer-line"> {t('grammar:tu_sai_la_sua_lai_thanh_3ee527')} </div>
                       )}
                     </div>
                   )}
@@ -270,12 +255,11 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
 
                       {printMode === 'TEACHER' ? (
                         <div className="print-teacher-inline-ans">
-                          ➔ <strong>Đáp án đúng:</strong> {Object.keys(q.blanks || {}).map(k => `[${k}]: ${q.blanks[k]?.accepted_answers?.join(' / ') || ''}`).join(' | ')}
+                          ➔ <strong> {t('grammar:ap_an_dung_43609c')} </strong> {Object.keys(q.blanks || {}).map(k => `[${k}]: ${q.blanks[k]?.accepted_answers?.join(' / ') || ''}`).join(' | ')}
                           {q.explanation && <span> — {q.explanation}</span>}
                         </div>
                       ) : (
-                        <div className="print-student-answer-line">
-                          Đáp án điền: {Object.keys(q.blanks || {}).map(k => `[${k}] ..................................... `).join('   ')}
+                        <div className="print-student-answer-line"> {t('grammar:ap_an_dien_387bef')} {Object.keys(q.blanks || {}).map(k => `[${k}] ..................................... `).join('   ')}
                         </div>
                       )}
                     </div>
@@ -293,7 +277,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                           const isCorrect = opt.trim().toLowerCase() === (q.blanks?.["1"]?.correct_answer || '').trim().toLowerCase();
                           return (
                             <div key={oIdx} className={`print-option-row ${printMode === 'TEACHER' && isCorrect ? 'teacher-correct-choice' : ''}`}>
-                              <strong>({letter})</strong> {opt} {printMode === 'TEACHER' && isCorrect && "✓ (Đúng)"}
+                              <strong>({letter})</strong> {opt} {printMode === 'TEACHER' && isCorrect && t('grammar:ung_d4a28c')}
                             </div>
                           );
                         })}
@@ -301,7 +285,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
 
                       {printMode === 'TEACHER' && q.explanation && (
                         <div className="print-teacher-inline-ans">
-                          ➔ <strong>Giải thích:</strong> {q.explanation}
+                          ➔ <strong> {t('grammar:giai_thich_8dda13')} </strong> {q.explanation}
                         </div>
                       )}
                     </div>
@@ -312,7 +296,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                     <div className="print-question-body">
                       {q.image_url && (
                         <div className="print-image-wrap">
-                          <img src={q.image_url} alt="Minh họa" className="print-inline-img" />
+                          <img src={q.image_url} alt={t('grammar:minh_hoa_30e551')} className="print-inline-img" />
                           {q.image_caption && <div className="print-caption">({q.image_caption})</div>}
                         </div>
                       )}
@@ -342,7 +326,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                       <div className="print-cloze-options-block">
                         {Object.keys(q.blanks || {}).map(bKey => (
                           <div key={bKey} className="print-cloze-row">
-                            <strong>Chỗ trống [{bKey}]:</strong>
+                            <strong> {t('grammar:cho_trong_bade65')} {bKey}]:</strong>
                             {(q.blanks[bKey]?.options || []).map((opt, oIdx) => {
                               const letter = String.fromCharCode(65 + oIdx);
                               const isCorrect = opt.trim().toLowerCase() === (q.blanks[bKey]?.correct_answer || '').trim().toLowerCase();
@@ -395,9 +379,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                   {/* 7. Dạng Nghe audio AUDIO_LISTENING */}
                   {q.type === 'AUDIO_LISTENING' && (
                     <div className="print-question-body">
-                      <div className="print-audio-notice">
-                        [PHẦN THI NGHE HIỂU • AUDIO LISTENING]
-                      </div>
+                      <div className="print-audio-notice"> {t('grammar:phan_thi_nghe_hieu_audio_listening_ca8461')} </div>
                       <div className="print-q-lead">{q.question_text}</div>
                       <div className="print-options-grid">
                         {(q.options || []).map((opt, oIdx) => {
@@ -412,8 +394,8 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                       </div>
                       {printMode === 'TEACHER' && (
                         <div className="print-teacher-inline-ans">
-                          {q.transcript && <div><strong>Lời thoại (Transcript):</strong> "{q.transcript}"</div>}
-                          {q.explanation && <div><strong>Giải thích:</strong> {q.explanation}</div>}
+                          {q.transcript && <div><strong> {t('grammar:loi_thoai_transcript_345f81')} </strong> "{q.transcript}"</div>}
+                          {q.explanation && <div><strong> {t('grammar:giai_thich_8dda13')} </strong> {q.explanation}</div>}
                         </div>
                       )}
                     </div>
@@ -427,20 +409,20 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
           {/* 3. BẢNG TỔNG HỢP ĐÁP ÁN (DÀNH CHO BẢN GIÁO VIÊN HOẶC TRANG CUỐI) */}
           {printMode === 'TEACHER' && (
             <div className="print-answer-key-appendix">
-              <h3 className="print-appendix-title">BẢNG TỔNG HỢP ĐÁP ÁN & THANG ĐIỂM CHI TIẾT</h3>
+              <h3 className="print-appendix-title"> {t('grammar:bang_tong_hop_ap_an_thang_iem_chi_tiet_d3ec47')} </h3>
               <table className="print-answer-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '60px' }}>Câu</th>
-                    <th style={{ width: '160px' }}>Dạng bài</th>
-                    <th>Đáp án chuẩn</th>
-                    <th style={{ width: '80px' }}>Thang điểm</th>
+                    <th style={{ width: '60px' }}> {t('grammar:cau_c99b5e')} </th>
+                    <th style={{ width: '160px' }}> {t('grammar:dang_bai_223731')} </th>
+                    <th> {t('grammar:ap_an_chuan_44334b')} </th>
+                    <th style={{ width: '80px' }}> {t('grammar:thang_diem_96c111')} </th>
                   </tr>
                 </thead>
                 <tbody>
                   {questions.map((q, idx) => {
                     let ansText = "-";
-                    if (q.type === 'SPOT_ERROR') ansText = `Lỗi (${String.fromCharCode(64 + (q.correct_token_id || 1))}) ➔ ${q.correction}`;
+                    if (q.type === 'SPOT_ERROR') ansText = t('common:feedback_1', { v0: String.fromCharCode(64 + (q.correct_token_id || 1)), v1: q.correction });
                     else if (q.type === 'FILL_BLANK_TEXT') ansText = Object.keys(q.blanks || {}).map(k => q.blanks[k]?.accepted_answers?.[0]).join(', ');
                     else if (q.type === 'FILL_BLANK_DROPDOWN' || q.type === 'FILL_BLANK_CARDS') ansText = q.blanks?.["1"]?.correct_answer || '';
                     else if (q.type === 'IMAGE_QUESTION' || q.type === 'AUDIO_LISTENING') ansText = q.correct_answer || '';
@@ -452,7 +434,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
                         <td style={{ textAlign: 'center', fontWeight: 700 }}>{idx + 1}</td>
                         <td>{q.type}</td>
                         <td style={{ fontWeight: 600 }}>{ansText}</td>
-                        <td style={{ textAlign: 'center' }}>{(10 / questions.length).toFixed(1)} đ</td>
+                        <td style={{ textAlign: 'center' }}>{(10 / questions.length).toFixed(1)} {t('grammar:d_c5f958')} </td>
                       </tr>
                     );
                   })}
@@ -462,9 +444,7 @@ const PrintTestModal = ({ groups = [], currentGroupId, onClose }) => {
           )}
 
           {/* FOOTER BÀI KIỂM TRA */}
-          <div className="print-test-footer">
-            ---------- HẾT BÀI THI ({activeGroup?.title}) • STUDY-E EDUCATION PLATFORM ----------
-          </div>
+          <div className="print-test-footer"> {t('grammar:het_bai_thi_a56566')} {activeGroup?.title} {t('grammar:study_e_education_platform_efbc85')} </div>
 
         </div>
 

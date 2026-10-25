@@ -463,7 +463,7 @@ export const getStoredQuestions = () => {
  */
 export const saveStoredQuestions = (lessonData) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessonData, null, 2));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessonData));
   } catch (e) {
     console.error("Failed to save grammar groups to localStorage:", e);
   }

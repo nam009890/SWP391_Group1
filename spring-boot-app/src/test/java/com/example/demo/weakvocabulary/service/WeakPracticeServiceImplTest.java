@@ -45,7 +45,8 @@ class WeakPracticeServiceImplTest {
         when(items.findByIdAndSessionId(5L, 4L)).thenReturn(Optional.of(item));
         when(weakRepo.save(any())).thenAnswer(i -> i.getArgument(0));
         service = new WeakPracticeServiceImpl(weakRepo, sessions, items, attempts, cards,
-                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)));
+                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)),
+                mock(com.example.demo.study.service.LearningActivityLock.class));
     }
 
     private AnswerRequest answer(String value) { AnswerRequest request = new AnswerRequest(); request.setAnswer(value); return request; }

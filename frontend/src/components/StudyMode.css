@@ -246,3 +246,25 @@
     .study-container .review-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .study-container .flashcard-3d-wrapper { height: 350px; }
 }
+
+.study-detection-notice {
+  position: relative;
+  width: min(720px, 100%);
+  padding: 16px 44px 16px 18px;
+  margin: 16px auto;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background: #e6efdf;
+  color: var(--text-main);
+}
+.study-detection-notice p { margin: 0 0 6px; }
+.study-detection-notice a { color: var(--primary); font-weight: 700; }
+.study-detection-notice button {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  cursor: pointer;
+}

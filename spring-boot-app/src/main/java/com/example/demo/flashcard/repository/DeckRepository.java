@@ -14,6 +14,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DeckRepository extends JpaRepository<Deck, Long>, JpaSpecificationExecutor<Deck> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select d from Deck d where d.id = :id")
+    java.util.Optional<Deck> findForUpdate(@org.springframework.data.repository.query.Param("id") Long id);
+
+    long countByDeletedFalse();
+    long countByDeletedFalseAndVisibility(com.example.demo.flashcard.entity.DeckVisibility visibility);
+    long countByDeletedFalseAndOwnerId(Long ownerId);
     @Override
     @EntityGraph(attributePaths = "owner")
     Page<Deck> findAll(Specification<Deck> specification,

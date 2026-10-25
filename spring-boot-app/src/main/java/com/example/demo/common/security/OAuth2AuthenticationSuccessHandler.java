@@ -14,8 +14,17 @@ import java.io.IOException;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend-url:http://localhost:5173}")
+    private String frontend;
+
+    public String frontendUrl() {
+        var uri=java.net.URI.create(frontend);
+        if(!java.util.Set.of("http","https").contains(uri.getScheme()) || uri.getHost()==null || uri.getRawQuery()!=null || uri.getRawFragment()!=null)
+            throw new IllegalStateException("Invalid frontend origin configuration");
+        return frontend.replaceAll("/+$", "");
+    }
     @Autowired
-    private JwtTokenProvider tokenProvider;
+    private OAuthAccountService accounts;
 
     @Autowired
     private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
@@ -25,13 +34,20 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         
-        String token = tokenProvider.generateToken(email);
+        String token;
+        try {
+            token = accounts.complete(email);
+        } catch (org.springframework.security.authentication.LockedException e) {
+            clearAuthenticationAttributes(request, response);
+            getRedirectStrategy().sendRedirect(request, response, frontendUrl()+"/login?error=ACCOUNT_LOCKED");
+            return;
+        }
         
         clearAuthenticationAttributes(request, response);
         
         // Redirect to React Frontend with token in query param
-        String frontendUrl = "http://localhost:5173/oauth2/redirect";
-        getRedirectStrategy().sendRedirect(request, response, frontendUrl + "?token=" + token);
+        String frontendUrl = frontendUrl()+"/oauth2/redirect";
+        getRedirectStrategy().sendRedirect(request, response, frontendUrl + "#token=" + token);
     }
 
     protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {

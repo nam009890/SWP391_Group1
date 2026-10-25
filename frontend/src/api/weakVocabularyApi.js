@@ -1,6 +1,7 @@
 import api from "./axiosConfig";
-export const getWeakVocabularies = (params) =>
-  api.get("/weak-vocabularies", { params });
+export const getWeakVocabularyDecks = () => api.get("/weak-vocabularies/decks");
+export const getWeakVocabularies = (params, signal) =>
+  api.get("/weak-vocabularies", { params, signal });
 export const addWeakVocabulary = (flashcardId) =>
   api.post(`/weak-vocabularies/flashcards/${flashcardId}`);
 export const updateWeakVocabulary = (id, data) =>

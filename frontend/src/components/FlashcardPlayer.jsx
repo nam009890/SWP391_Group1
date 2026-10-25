@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
@@ -50,7 +51,7 @@ const FlashcardPlayer = () => {
   if (loading) {
     return (
       <div className="study-container animate-fade-in" style={{ justifyContent: 'center' }}>
-        <h2>Loading flashcards...</h2>
+        <h2> {t('study:loading_flashcards_0db44d')} </h2>
       </div>
     );
   }
@@ -58,10 +59,8 @@ const FlashcardPlayer = () => {
   if (flashcards.length === 0) {
     return (
       <div className="study-container animate-fade-in" style={{ justifyContent: 'center' }}>
-        <h2>This deck is empty!</h2>
-        <button className="btn btn-primary" onClick={() => navigate('/')} style={{ marginTop: '20px' }}>
-          Back to Dashboard
-        </button>
+        <h2> {t('study:this_deck_is_empty_103fe4')} </h2>
+        <button className="btn btn-primary" onClick={() => navigate('/')} style={{ marginTop: '20px' }}> {t('study:back_to_dashboard_8fb719')} </button>
       </div>
     );
   }
@@ -71,9 +70,7 @@ const FlashcardPlayer = () => {
   return (
     <div className="study-container animate-fade-in">
       <div className="study-header">
-        <button className="btn btn-glass" onClick={() => navigate('/')}>
-          ← Back to Dashboard
-        </button>
+        <button className="btn btn-glass" onClick={() => navigate('/')}> {t('study:back_to_dashboard_84996a')} </button>
         <div className="progress-text">
           {currentIndex + 1} / {flashcards.length}
         </div>
@@ -86,15 +83,15 @@ const FlashcardPlayer = () => {
         >
           {/* Front of card */}
           <div className="flashcard-face flashcard-front glass-panel backface-hidden">
-            <span className="face-label">TERM</span>
+            <span className="face-label"> {t('study:term_b3db3a')} </span>
             <h2 className="card-text">{currentCard.vocabulary}</h2>
             {currentCard.phonetic && <p style={{ color: 'var(--text-muted)', marginTop: '10px' }}>{currentCard.phonetic}</p>}
-            <p className="flip-hint">Click to flip</p>
+            <p className="flip-hint"> {t('study:click_to_flip_8ab133')} </p>
           </div>
 
           {/* Back of card */}
           <div className="flashcard-face flashcard-back glass-panel backface-hidden rotate-y-180">
-            <span className="face-label">DEFINITION</span>
+            <span className="face-label"> {t('study:definition_9c2968')} </span>
             <p className="card-text">{currentCard.meaning}</p>
             {currentCard.exampleSentence && (
               <p style={{ color: 'var(--primary)', marginTop: '20px', fontStyle: 'italic', fontSize: '18px' }}>
@@ -110,16 +107,12 @@ const FlashcardPlayer = () => {
           className="btn btn-glass control-btn" 
           onClick={handlePrev}
           disabled={currentIndex === 0}
-        >
-          Previous
-        </button>
+        > {t('study:previous_50f942')} </button>
         <button 
           className="btn btn-primary control-btn" 
           onClick={handleNext}
           disabled={currentIndex === flashcards.length - 1}
-        >
-          Next
-        </button>
+        > {t('study:next_bc9819')} </button>
       </div>
       
       {/* Progress Bar */}

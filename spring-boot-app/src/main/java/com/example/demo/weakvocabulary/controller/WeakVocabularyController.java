@@ -14,6 +14,11 @@ public class WeakVocabularyController {
     private final WeakVocabularyService weak;
     private final WeakPracticeService practice;
 
+    @GetMapping("/decks")
+    public java.util.List<DeckOption> deckOptions(@CurrentUser UserPrincipal user) {
+        return weak.deckOptions(user.getId());
+    }
+
     @PostMapping("/flashcards/{id}")
     public ResponseEntity<WeakResponse> add(@CurrentUser UserPrincipal u, @PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.CREATED).body(weak.addManual(u.getId(), id));

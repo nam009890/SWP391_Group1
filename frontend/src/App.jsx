@@ -1,15 +1,6 @@
-// =========================================================================================
-// APPLICATION ROUTER & ROOT COMPONENT (APP.JSX)
-// =========================================================================================
-// Thực hiện các quy tắc điều hướng và phân quyền theo yêu cầu:
-// 1. Phải đăng nhập (Google Auth hoặc tài khoản có sẵn) mới được truy cập module bài tập
-//    -> Nếu chưa đăng nhập (!token), tự động chuyển hướng về trang /login kèm thông báo.
-// 2. Nếu đăng nhập bằng Google hoặc tài khoản email buiquangviet032@gmail.com:
-//    -> Khi truy cập module bài tập (/grammar), giao diện hiển thị mặc định là màn hình
-//       Soạn Câu Hỏi (GrammarAdminCMSPage) thay vì màn hình làm bài bình thường.
-//    -> Các tài khoản khác sẽ hiển thị giao diện Làm Bài Tập (GrammarLearnerPage).
-// =========================================================================================
-
+import { t, apiError } from './i18n/index.js';
+import { useTranslation } from 'react-i18next';
+// Điều hướng dùng hồ sơ đã xác thực từ backend.
 import { Routes, Route, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
@@ -18,6 +9,13 @@ import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import api from './api/axiosConfig';
 
+const ProfilePage = lazy(() => import('./components/account/ProfilePage'));
+const AdminRoute = lazy(() => import('./components/admin/AdminRoute'));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const AdminUsersPage = lazy(() => import('./components/admin/AdminUsersPage'));
+const AdminUserDetailsPage = lazy(() => import('./components/admin/AdminUserDetailsPage'));
+const AdminAuditLogsPage = lazy(() => import('./components/admin/AdminAuditLogsPage'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const DeckDetails = lazy(() => import('./components/DeckDetails'));
 const StudyMode = lazy(() => import('./components/StudyMode'));
@@ -32,28 +30,21 @@ const readUserFromToken = (token) => {
   try {
     const payloadPart = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(atob(payloadPart));
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
-    const email = (payload.email || payload.sub || '').trim();
-    return {
-      name: payload.name || email,
-      email,
-      role: payload.role || 'ROLE_USER',
-      isAdmin: payload.role === 'ROLE_ADMIN',
-    };
+    if (!Number.isFinite(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+    return { exp: payload.exp };
   } catch {
     return null;
   }
 };
 
-/**
- * Xử lý callback chuyển hướng sau khi đăng nhập Google OAuth2 thành công
- */
+
 function OAuth2RedirectHandler({ onAuthenticated }) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    const token = new URLSearchParams(window.location.hash.slice(1)).get('token');
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
     if (token) {
       localStorage.setItem('token', token);
       onAuthenticated(token);
@@ -65,12 +56,10 @@ function OAuth2RedirectHandler({ onAuthenticated }) {
     }
   }, [searchParams, navigate, onAuthenticated]);
 
-  return <div style={{ color: 'white', textAlign: 'center', marginTop: '100px' }}>Đang xác thực đăng nhập Google...</div>;
+  return <div style={{ color: 'var(--text-main)', textAlign: 'center', marginTop: '100px' }}> {t('common:ang_xac_thuc_dang_nhap_google_9da697')} </div>;
 }
 
-/**
- * Landing Page dành cho khách truy cập chưa đăng nhập
- */
+
 function LandingPage() {
   const navigate = useNavigate();
 
@@ -78,44 +67,34 @@ function LandingPage() {
     <main className="landing-page animate-fade-in">
       <section className="landing-hero">
         <div className="landing-copy">
-          <span className="eyebrow">✦ Góc học tập của bạn</span>
-          <h1>Học mỗi ngày,<br/><span>tiến bộ thật vui.</span></h1>
-          <p>Flashcard, ngữ pháp và lộ trình ôn tập được sắp xếp gọn gàng trong một không gian học tập nhẹ nhàng, dễ tập trung.</p>
+          <span className="eyebrow"> {t('common:goc_hoc_tap_cua_ban_e1a1bb')} </span>
+          <h1> {t('common:hoc_moi_ngay_a51842')} <br/><span> {t('common:tien_bo_that_vui_dd3f42')} </span></h1>
+          <p> {t('common:flashcard_ngu_phap_va_lo_trinh_on_tap_du_cdf420')} </p>
           <div className="landing-actions">
-            <button onClick={() => navigate('/register')} className="btn btn-primary">Bắt đầu học miễn phí <span>→</span></button>
-            <button onClick={() => navigate('/login')} className="btn btn-glass">Tôi đã có tài khoản</button>
+            <button onClick={() => navigate('/register')} className="btn btn-primary"> {t('common:bat_dau_hoc_mien_phi_83341e')} <span>→</span></button>
+            <button onClick={() => navigate('/login')} className="btn btn-glass"> {t('common:toi_da_co_tai_khoan_bc8984')} </button>
           </div>
         </div>
         <div className="study-board" aria-hidden="true">
           <span className="board-sticker">🐱</span>
-          <div className="board-title">Kế hoạch tuần này</div>
+          <div className="board-title"> {t('common:ke_hoach_tuan_nay_9c13ac')} </div>
           <div className="board-tabs"><i className="board-tab"/><i className="board-tab"/><i className="board-tab"/><i className="board-tab"/></div>
           <div className="board-sheet"><div className="board-line"/><div className="board-line"/><div className="board-line"/><div className="board-line"/></div>
         </div>
       </section>
-      <section className="feature-strip" aria-label="Tính năng nổi bật">
-        <article className="feature-card"><div className="feature-icon">✎</div><h3>Tạo bộ thẻ</h3><p>Tự xây dựng học liệu theo chủ đề và mục tiêu của riêng bạn.</p></article>
-        <article className="feature-card"><div className="feature-icon">☕</div><h3>Ôn tập thông minh</h3><p>Học đúng nội dung cần nhớ với lịch ôn tập khoa học.</p></article>
-        <article className="feature-card"><div className="feature-icon">✓</div><h3>Theo dõi tiến bộ</h3><p>Nhìn thấy từng bước tiến nhỏ để duy trì thói quen mỗi ngày.</p></article>
+      <section className="feature-strip" aria-label={t('common:tinh_nang_noi_bat_5bc853')}>
+        <article className="feature-card"><div className="feature-icon">✎</div><h3> {t('common:tao_bo_the_9e3015')} </h3><p> {t('common:tu_xay_dung_hoc_lieu_theo_chu_de_va_muc__a22116')} </p></article>
+        <article className="feature-card"><div className="feature-icon">☕</div><h3> {t('common:on_tap_thong_minh_fa7b91')} </h3><p> {t('common:hoc_dung_noi_dung_can_nho_voi_lich_on_ta_5ae70f')} </p></article>
+        <article className="feature-card"><div className="feature-icon">✓</div><h3> {t('common:theo_doi_tien_bo_438dec')} </h3><p> {t('common:nhin_thay_tung_buoc_tien_nho_de_duy_tri__0da1dc')} </p></article>
       </section>
     </main>
   );
 }
 
-/**
- * =========================================================================================
- * BỘ ĐIỀU PHỐI MODULE BÀI TẬP NGỮ PHÁP (GRAMMAR MODULE DISPATCHER)
- * =========================================================================================
- * Yêu cầu 1: Bắt buộc phải đăng nhập (Google OAuth hoặc tài khoản hệ thống) mới được vào.
- * Yêu cầu 2: Nếu là tài khoản tác giả (buiquangviet032@gmail.com):
- *            -> Tự động hiển thị màn hình Soạn Câu Hỏi (GrammarAdminCMSPage).
- *            Ngược lại (học viên bình thường):
- *            -> Hiển thị màn hình Làm Bài Tập (GrammarLearnerPage).
- * =========================================================================================
- */
-function GrammarModuleDispatcher({ user, token }) {
+
+function GrammarModuleDispatcher({ user }) {
   // 1. Kiểm tra trạng thái đăng nhập
-  if (!token) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
@@ -124,15 +103,31 @@ function GrammarModuleDispatcher({ user, token }) {
 }
 
 function MainApp() {
-  const [token, setToken] = useState(() => readUserFromToken(localStorage.getItem('token')) ? localStorage.getItem('token') : null);
-  const [user, setUser] = useState(() => readUserFromToken(localStorage.getItem('token')));
+  useTranslation(); // Re-render UI labels without remounting forms or changing auth.
+  const [token, setToken] = useState(() => {
+    const stored = localStorage.getItem('token');
+    if (readUserFromToken(stored)) return stored;
+    if (stored) {
+      localStorage.removeItem('token');
+      sessionStorage.setItem('authNotice', t('common:phien_dang_nhap_da_het_han_vui_long_dang_dfcb52'));
+    }
+    return null;
+  });
+  const [user, setUser] = useState(null);
+  const [authError, setAuthError] = useState(false);
+  const [authAttempt, setAuthAttempt] = useState(0);
   const [checkingAuth, setCheckingAuth] = useState(() => Boolean(readUserFromToken(localStorage.getItem('token'))));
 
   const handleAuthenticated = useCallback((nextToken) => {
     localStorage.setItem('token', nextToken);
     setToken(nextToken);
-    setUser(readUserFromToken(nextToken));
+    setUser(null);
     setCheckingAuth(true);
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const { data } = await api.get('/auth/me');
+    setUser(data);
   }, []);
 
   useEffect(() => {
@@ -143,19 +138,35 @@ function MainApp() {
         if (err.code !== 'ERR_CANCELED') {
           setUser(null);
           if (err.response?.status === 401) { localStorage.removeItem('token'); setToken(null); }
+          else setAuthError(true);
         }
       }).finally(() => { if (!controller.signal.aborted) setCheckingAuth(false); });
     return () => controller.abort();
-  }, [token]);
+  }, [token, authAttempt]);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    if (!token || !user) return;
+    const synchronizeProfile = () => refreshUser().catch(() => {});
+    window.addEventListener('focus', synchronizeProfile);
+    return () => window.removeEventListener('focus', synchronizeProfile);
+  }, [token, user, refreshUser]);
+
+  const handleLogout = async () => {
+    const currentToken = localStorage.getItem('token');
+    const revocation = api.post('/auth/logout', {}, { timeout: 5000, headers: { Authorization: `Bearer ${currentToken}` } });
+    revocation.catch(() => {}); // Server revocation may fail offline; always clear this browser immediately.
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
   };
 
   useEffect(() => {
-    const expire = () => { localStorage.removeItem('token'); setToken(null); setUser(null); };
+    const expire = () => {
+      if (!sessionStorage.getItem('authNotice')) sessionStorage.setItem('authNotice', t('common:phien_dang_nhap_da_het_han_vui_long_dang_dfcb52'));
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+    };
     window.addEventListener('auth-expired', expire);
     let timer;
     if (token) {
@@ -167,30 +178,37 @@ function MainApp() {
 
   return (
     <>
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} onLogout={handleLogout} authLoading={checkingAuth} />
       
-      {checkingAuth ? <div className="route-loader"><span>Checking your session…</span></div> : <Suspense fallback={<div className="route-loader"><span>Đang mở trang học tập...</span></div>}>
+      {checkingAuth ? <div className="route-loader"><span> {t('common:ang_xac_minh_phien_dang_nhap_3c1cf3')} </span></div> : authError ? <div className="route-loader" role="alert"><p>{apiError("REQUEST_FAILED")}</p><button className="btn btn-primary" onClick={() => { setAuthError(false); setCheckingAuth(true); setAuthAttempt(value => value + 1); }}>{t("common:auth_retry")}</button></div> : <Suspense fallback={<div className="route-loader"><span> {t('common:ang_mo_trang_hoc_tap_a40048')} </span></div>}>
       <Routes>
         <Route path="/" element={<Dashboard key="public" user={user} />} />
         <Route path="/welcome" element={<LandingPage />} />
+        <Route path="/profile" element={<ProtectedRoute user={user}><ProfilePage onProfileUpdated={refreshUser} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute user={user}><AdminLayout /></AdminRoute>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsersPage user={user} />} />
+          <Route path="users/:id" element={<AdminUserDetailsPage user={user} />} />
+          <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+        </Route>
         <Route path="/my-decks" element={<ProtectedRoute user={user}><Dashboard key="my" user={user} mine /></ProtectedRoute>} />
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login onAuthenticated={handleAuthenticated} />} />
         <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register onAuthenticated={handleAuthenticated} />} />
         <Route path="/deck/:id" element={<DeckDetails user={user} />} />
         <Route path="/study/:id" element={<StudyMode user={user} />} />
-        {/* Module Bài Tập Ngữ Pháp — Điều phối thông minh theo trạng thái đăng nhập và email */}
+        {/* Module Bài Tập Ngữ Pháp — Điều phối thông minh theo trạng thái đăng nhập */}
         <Route path="/grammar" element={<GrammarModuleDispatcher user={user} token={token} />} />
         
         {/* Đường dẫn xem trực tiếp giao diện người học (dành cho Admin muốn test thử) */}
         <Route
           path="/grammar/practice"
-          element={token ? <GrammarLearnerPage user={user} /> : <Navigate to="/login" replace />}
+          element={user ? <GrammarLearnerPage user={user} /> : <Navigate to="/login" replace />}
         />
 
         {/* Đường dẫn trang quản trị & soạn bài (dành cho mọi người dùng) */}
         <Route
           path="/grammar/admin"
-          element={token ? <GrammarAdminCMSPage user={user} /> : <Navigate to="/login" replace />}
+          element={user ? <GrammarAdminCMSPage user={user} /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/grammar/create"

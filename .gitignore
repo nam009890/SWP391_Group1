@@ -26,3 +26,10 @@ yarn-error.log*
 ### OS Files ###
 .DS_Store
 Thumbs.db
+# Private runtime configuration
+.env
+**/application-local.properties
+
+.qa-local/
+frontend/test-results/
+frontend/playwright-report/

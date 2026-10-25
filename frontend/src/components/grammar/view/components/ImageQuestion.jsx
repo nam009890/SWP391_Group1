@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 import React, { useState } from 'react';
 
 const ImageQuestion = ({ question, onAnswerResult }) => {
@@ -37,12 +38,10 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag">
-        Dạng bài: Câu hỏi kèm hình ảnh
-      </div>
+      <div className="exercise-meta-tag"> {t('grammar:dang_bai_cau_hoi_kem_hinh_anh_231e45')} </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '18px', color: 'var(--text-main)', fontWeight: 600 }}>
-        {question.instruction || "Quan sát hình ảnh bên dưới và chọn đáp án chính xác nhất:"}
+        {question.instruction || t('grammar:quan_sat_hinh_anh_ben_duoi_va_chon_dap_a_7fd856')}
       </div>
 
       {/* KHUNG HIỂN THỊ HÌNH ẢNH */}
@@ -60,11 +59,11 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               cursor: 'zoom-in'
             }}
             onClick={() => setIsZoomed(!isZoomed)}
-            title="Nhấp để phóng to / thu nhỏ ảnh"
+            title={t('grammar:nhap_de_phong_to_thu_nho_anh_dd773c')}
           >
             <img
               src={question.image_url}
-              alt={question.image_caption || "Hình ảnh câu hỏi"}
+              alt={question.image_caption || t('grammar:hinh_anh_cau_hoi_44132b')}
               style={{
                 maxWidth: '100%',
                 maxHeight: isZoomed ? '600px' : '360px',
@@ -84,7 +83,7 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               fontSize: '11px',
               backdropFilter: 'blur(4px)'
             }}>
-              {isZoomed ? "Thu nhỏ" : "Phóng to"}
+              {isZoomed ? t('grammar:thu_nho_a2b1f3') : t('grammar:phong_to_affed1')}
             </span>
           </div>
           {question.image_caption && (
@@ -95,7 +94,7 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
         </div>
       ) : (
         <div style={{ padding: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '20px', border: '1px dashed rgba(255,255,255,0.2)' }}>
-          <p style={{ margin: '8px 0 0', color: 'var(--text-muted)', fontSize: '13px' }}>Chưa có đường dẫn ảnh cho câu hỏi này.</p>
+          <p style={{ margin: '8px 0 0', color: 'var(--text-muted)', fontSize: '13px' }}> {t('grammar:chua_co_duong_dan_anh_cho_cau_hoi_nay_67430d')} </p>
         </div>
       )}
 
@@ -204,17 +203,13 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               onClick={handleCheck}
               disabled={!selectedOption}
               style={{ opacity: !selectedOption ? 0.6 : 1, padding: '10px 24px' }}
-            >
-              Kiểm Tra
-            </button>
+            > {t('grammar:kiem_tra_99c4b0')} </button>
           ) : (
             <button
               className="btn btn-glass"
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
-            >
-              Làm lại
-            </button>
+            > {t('grammar:lam_lai_535fca')} </button>
           )}
 
           {submitted && isCorrect && (
@@ -223,7 +218,7 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích" : "Xem giải thích"}
+              {showExplanation ? t('grammar:an_giai_thich_0dda30') : t('grammar:xem_giai_thich_a2622a')}
             </button>
           )}
         </div>
@@ -233,12 +228,12 @@ const ImageQuestion = ({ question, onAnswerResult }) => {
       {submitted && (showExplanation || !isCorrect) && (
         <div className={`feedback-box animate-pop ${isCorrect ? 'correct-box' : 'incorrect-box'}`} style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <strong>{isCorrect ? 'Chính xác!' : 'Chưa chính xác'}</strong>
+            <strong>{isCorrect ? t('grammar:chinh_xac_f4a09a') : t('grammar:chua_chinh_xac_be86df')}</strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px' }}>
             {!isCorrect && (
               <p>
-                <strong>Đáp án đúng:</strong> <span style={{ color: '#10b981', fontWeight: 600 }}>{question.correct_answer}</span>
+                <strong> {t('grammar:ap_an_dung_43609c')} </strong> <span style={{ color: '#10b981', fontWeight: 600 }}>{question.correct_answer}</span>
               </p>
             )}
             {question.explanation && (

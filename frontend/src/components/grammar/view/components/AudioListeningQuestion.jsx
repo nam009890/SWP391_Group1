@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 import React, { useState, useRef, useEffect } from 'react';
 
 const AudioListeningQuestion = ({ question, onAnswerResult }) => {
@@ -91,12 +92,10 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag">
-        Dạng bài: Nghe audio trả lời câu hỏi
-      </div>
+      <div className="exercise-meta-tag"> {t('grammar:dang_bai_nghe_audio_tra_loi_cau_hoi_52f965')} </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '20px', color: 'var(--text-main)', fontWeight: 600 }}>
-        {question.instruction || "Nghe đoạn ghi âm bên dưới và chọn câu trả lời chính xác:"}
+        {question.instruction || t('grammar:nghe_doan_ghi_am_ben_duoi_va_chon_cau_tr_645489')}
       </div>
 
       {/* KHUNG TRÌNH PHÁT AUDIO HIỆN ĐẠI */}
@@ -138,17 +137,15 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
 
           <div>
             <div style={{ fontSize: '16px', fontWeight: 700, color: '#f59e0b' }}>
-              {isPlaying ? "Đang phát đoạn âm thanh..." : "Bấm nút Play để nghe đoạn băng"}
+              {isPlaying ? t('grammar:ang_phat_doan_am_thanh_efc014') : t('grammar:bam_nut_play_de_nghe_doan_bang_63a50d')}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              {question.audio_url ? "Âm thanh gốc • Chuẩn bản xứ" : "Phát âm AI tiếng Anh chuẩn (Text-to-Speech)"}
+              {question.audio_url ? t('grammar:am_thanh_goc_chuan_ban_xu_f84734') : t('grammar:phat_am_ai_tieng_anh_chuan_text_to_speec_42bf9d')}
             </div>
           </div>
         </div>
 
-        <div style={{ fontSize: '13px', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '6px 12px', borderRadius: '10px' }}>
-          Đã nghe: <strong style={{ color: '#f59e0b' }}>{listenCount}</strong> lần
-        </div>
+        <div style={{ fontSize: '13px', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '6px 12px', borderRadius: '10px' }}> {t('grammar:a_nghe_32d77c')} <strong style={{ color: '#f59e0b' }}>{listenCount}</strong> {t('grammar:lan_a5b7c3')} </div>
 
         {question.audio_url && (
           <audio
@@ -266,17 +263,13 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
               onClick={handleCheck}
               disabled={!selectedOption}
               style={{ opacity: !selectedOption ? 0.6 : 1, padding: '10px 24px' }}
-            >
-              Kiểm Tra
-            </button>
+            > {t('grammar:kiem_tra_99c4b0')} </button>
           ) : (
             <button
               className="btn btn-glass"
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
-            >
-              Làm lại câu nghe
-            </button>
+            > {t('grammar:lam_lai_cau_nghe_8587be')} </button>
           )}
 
           {submitted && isCorrect && (
@@ -285,7 +278,7 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích & Lời thoại" : "Xem lời thoại & Giải thích"}
+              {showExplanation ? t('grammar:an_giai_thich_loi_thoai_aef384') : t('grammar:xem_loi_thoai_giai_thich_3eb478')}
             </button>
           )}
         </div>
@@ -295,20 +288,18 @@ const AudioListeningQuestion = ({ question, onAnswerResult }) => {
       {submitted && (showExplanation || !isCorrect) && (
         <div className={`feedback-box animate-pop ${isCorrect ? 'correct-box' : 'incorrect-box'}`} style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <strong>{isCorrect ? 'Chính xác!' : 'Chưa chính xác'}</strong>
+            <strong>{isCorrect ? t('grammar:chinh_xac_f4a09a') : t('grammar:chua_chinh_xac_be86df')}</strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px' }}>
             {!isCorrect && (
               <p>
-                <strong>Đáp án đúng:</strong> <span style={{ color: '#10b981', fontWeight: 600 }}>{question.correct_answer}</span>
+                <strong> {t('grammar:ap_an_dung_43609c')} </strong> <span style={{ color: '#10b981', fontWeight: 600 }}>{question.correct_answer}</span>
               </p>
             )}
 
             {question.transcript && (
               <div style={{ marginTop: '10px', padding: '10px 14px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                  Lời thoại gốc (Transcript):
-                </span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: '4px' }}> {t('grammar:loi_thoai_goc_transcript_180f3f')} </span>
                 <span style={{ fontStyle: 'italic', color: 'var(--text-main)' }}>"{question.transcript}"</span>
               </div>
             )}

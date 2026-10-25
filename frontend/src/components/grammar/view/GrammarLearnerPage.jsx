@@ -1,3 +1,4 @@
+import { t, locale } from '../../../i18n/index.js';
 // =========================================================================================
 // VIEW LAYER — GRAMMAR LEARNER PAGE (GIAO DIỆN HỌC VIÊN LÀM BÀI TẬP & QUẢN LÝ BÀI TẬP)
 // =========================================================================================
@@ -77,7 +78,7 @@ const GrammarLearnerPage = ({ user }) => {
     loggedInUser = null;
   }
   const userEmail = (user?.email || loggedInUser?.email || '').toLowerCase().trim();
-  const userName = (user?.name || loggedInUser?.name || 'Cộng đồng').trim();
+  const userName = (user?.name || loggedInUser?.name || t('grammar:cong_dong_a0164a')).trim();
 
   useEffect(() => {
     fetchGrammarQuestions().then(res => {
@@ -178,13 +179,13 @@ const GrammarLearnerPage = ({ user }) => {
   const handleResolveReport = (groupId, reportId) => {
     const updated = resolveQuestionReport(groupId, reportId);
     setData(updated);
-    showToast("Đã đánh dấu báo cáo đã được giải quyết!");
+    showToast(t('grammar:a_danh_dau_bao_cao_da_duoc_giai_quyet_93c0a8'));
   };
 
   // Mở tab Gmail để phản hồi trực tiếp cho học viên đã báo lỗi
   const handleReplyReportViaGmail = (rep) => {
-    const subject = `[StudyE - Phản hồi từ tác giả] Bài tập: ${rep.testTitle} - ${rep.questionTitle}`;
-    const body = `Xin chào ${rep.reporterName || 'bạn'},\n\nMình là tác giả bài tập "${rep.testTitle}" trên StudyE. Cảm ơn bạn rất nhiều vì đã báo lỗi cho câu hỏi "${rep.questionTitle}".\n\nMình đã kiểm tra lại và cập nhật câu hỏi theo góp ý của bạn.\n\nChúc bạn học tập thật tốt trên StudyE nhé!\n\nThân ái,`;
+    const subject = t('common:feedback_12', { v0: rep.testTitle, v1: rep.questionTitle });
+    const body = t('common:feedback_13', { v0: rep.reporterName || t('grammar:ban_e8f043'), v1: rep.testTitle, v2: rep.questionTitle });
     const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(rep.reporterEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -192,21 +193,21 @@ const GrammarLearnerPage = ({ user }) => {
   // Xóa nhóm bài tập
   const handleDeleteGroup = (groupId, groupTitle) => {
     if (groups.length <= 1) {
-      showToast("Không thể xóa nhóm bài tập duy nhất còn lại!");
+      showToast(t('grammar:khong_the_xoa_nhom_bai_tap_duy_nhat_con__451a87'));
       return;
     }
-    if (window.confirm(`Bạn có chắc chắn muốn xóa bài tập "${groupTitle}" cùng toàn bộ câu hỏi bên trong?`)) {
+    if (window.confirm(t('common:feedback_14', { v0: groupTitle }))) {
       const updatedGroups = groups.filter(g => g.id !== groupId);
       const updatedData = { ...data, groups: updatedGroups };
       setData(updatedData);
       saveStoredQuestions(updatedData);
-      showToast(`Đã xóa bài tập "${groupTitle}".`);
+      showToast(t('common:feedback_15', { v0: groupTitle }));
     }
   };
 
   // Xóa câu hỏi trong nhóm bài tập
   const handleDeleteQuestion = (groupId, questionId, questionTitle) => {
-    if (window.confirm(`Bạn có chắc muốn xóa câu hỏi "${questionTitle}"?`)) {
+    if (window.confirm(t('common:feedback_16', { v0: questionTitle }))) {
       const updatedGroups = groups.map(g => {
         if (g.id === groupId) {
           return {
@@ -220,7 +221,7 @@ const GrammarLearnerPage = ({ user }) => {
       setData(updatedData);
       saveStoredQuestions(updatedData);
       deleteGrammarQuestionFromBackend(questionId);
-      showToast("Đã xóa câu hỏi khỏi bài tập!");
+      showToast(t('grammar:a_xoa_cau_hoi_khoi_bai_tap_49a0d3'));
     }
   };
 
@@ -262,25 +263,17 @@ const GrammarLearnerPage = ({ user }) => {
         {/* Thanh tiêu đề trên cùng */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 6px 0' }}>
-              Bài tập ngữ pháp
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>
-              Luyện tập củng cố ngữ pháp tiếng Anh qua các bài tập tương tác:
-            </p>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-main)', margin: '0 0 6px 0' }}> {t('grammar:bai_tap_ngu_phap_acae32')} </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}> {t('grammar:luyen_tap_cung_co_ngu_phap_tieng_anh_qua_fc6a4d')} </p>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button
               className="btn btn-primary btn-sm"
               onClick={() => navigate('/grammar/create')}
-              title="Tự tạo bài tập mới và chia sẻ lên bảng tin cộng đồng"
+              title={t('grammar:tu_tao_bai_tap_moi_va_chia_se_len_bang_t_fac455')}
               style={{ fontWeight: 600 }}
-            >
-              Tạo bài tập mới
-            </button>
-            <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}>
-              Trang chủ
-            </button>
+            > {t('grammar:tao_bai_tap_moi_45b799')} </button>
+            <button className="btn btn-glass btn-sm" onClick={() => navigate('/')}> {t('grammar:trang_chu_738a4c')} </button>
           </div>
         </div>
 
@@ -290,22 +283,18 @@ const GrammarLearnerPage = ({ user }) => {
             className={`btn ${learnerTab === 'ALL_TESTS' ? 'btn-primary' : 'btn-glass'}`}
             onClick={() => setLearnerTab('ALL_TESTS')}
             style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
-          >
-            Các bài tập hiện tại
-          </button>
+          > {t('grammar:cac_bai_tap_hien_tai_0d6d2d')} </button>
           <button
             className={`btn ${learnerTab === 'MY_TESTS' ? 'btn-primary' : 'btn-glass'}`}
             onClick={() => setLearnerTab('MY_TESTS')}
             style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px' }}
-          >
-            Bài tập của tôi ({myGroups.length} bài)
-          </button>
+          > {t('grammar:bai_tap_cua_toi_b2d380')} {myGroups.length} {t('grammar:bai_de7072')} </button>
           <button
             className={`btn ${learnerTab === 'REPORTS_INBOX' ? 'btn-primary' : 'btn-glass'}`}
             onClick={() => setLearnerTab('REPORTS_INBOX')}
             style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>Hòm thư báo lỗi</span>
+            <span> {t('grammar:hom_thu_bao_loi_70b9d9')} </span>
             {openReportsCount > 0 && (
               <span style={{ padding: '2px 6px', borderRadius: '10px', background: '#ef4444', color: '#fff', fontSize: '11px', fontWeight: 700 }}>
                 {openReportsCount}
@@ -342,18 +331,16 @@ const GrammarLearnerPage = ({ user }) => {
                         {group.title}
                       </h3>
                       {score !== undefined && (
-                        <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 600 }}>
-                          Đạt: {score}/{count}
+                        <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 600 }}> {t('grammar:at_5d0190')} {score}/{count}
                         </span>
                       )}
                     </div>
 
                     <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      {count} câu hỏi
-                    </p>
+                      {count} {t('grammar:cau_hoi_d51ff7')} </p>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '18px' }}>
-                      <span>Người tạo: <strong style={{ color: 'var(--text-main)' }}>{group.author?.name || 'Cộng đồng'}</strong></span>
+                      <span> {t('grammar:nguoi_tao_dc59e4')} <strong style={{ color: 'var(--text-main)' }}>{group.author?.name || t('grammar:cong_dong_a0164a')}</strong></span>
                     </div>
                   </div>
 
@@ -364,9 +351,7 @@ const GrammarLearnerPage = ({ user }) => {
                       e.stopPropagation();
                       handleStartTest(idx);
                     }}
-                  >
-                    Bắt đầu làm bài
-                  </button>
+                  > {t('grammar:bat_dau_lam_bai_cdd91b')} </button>
                 </div>
               );
             })}
@@ -391,7 +376,7 @@ const GrammarLearnerPage = ({ user }) => {
                             {group.title}
                           </h4>
                           <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
-                            {group.description || `${groupQuestions.length} câu hỏi`}
+                            {group.description || t('common:feedback_17', { v0: groupQuestions.length })}
                           </p>
                         </div>
 
@@ -399,33 +384,25 @@ const GrammarLearnerPage = ({ user }) => {
                           <button
                             className="btn btn-primary btn-sm"
                             onClick={() => handleStartTest(originalIdx >= 0 ? originalIdx : 0)}
-                          >
-                            Làm bài này
-                          </button>
+                          > {t('grammar:lam_bai_nay_5aa110')} </button>
                           <button
                             className="btn btn-glass btn-sm"
                             onClick={() => navigate(`/grammar/create?groupId=${group.id}`)}
-                            title="Soạn thêm câu hỏi vào bài này"
-                          >
-                            Thêm câu hỏi
-                          </button>
+                            title={t('grammar:soan_them_cau_hoi_vao_bai_nay_8785d2')}
+                          > {t('grammar:them_cau_hoi_4549cb')} </button>
                           <button
                             className="btn btn-glass btn-sm"
                             onClick={() => handleDeleteGroup(group.id, group.title)}
                             style={{ color: '#ef4444' }}
-                            title="Xóa bài tập này"
-                          >
-                            Xóa bài tập
-                          </button>
+                            title={t('grammar:xoa_bai_tap_nay_ef88fe')}
+                          > {t('grammar:xoa_bai_tap_1735f9')} </button>
                         </div>
                       </div>
 
                       {/* Các dạng câu hỏi có trong nhóm */}
                       {typeBreakdown.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.03)' }}>
-                          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                            Dạng câu hỏi:
-                          </span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}> {t('grammar:dang_cau_hoi_e3adf3')} </span>
                           {typeBreakdown.map((tInfo, tIdx) => (
                             <span
                               key={tIdx}
@@ -485,18 +462,14 @@ const GrammarLearnerPage = ({ user }) => {
                                   className="btn btn-glass btn-sm"
                                   onClick={() => handleDeleteQuestion(group.id, q.id, q.title)}
                                   style={{ color: '#ef4444', fontSize: '12px', padding: '4px 8px' }}
-                                  title="Xóa câu hỏi này"
-                                >
-                                  Xóa
-                                </button>
+                                  title={t('grammar:xoa_cau_hoi_nay_07a99e')}
+                                > {t('grammar:xoa_aa1d94')} </button>
                               </div>
                             );
                           })}
                         </div>
                       ) : (
-                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                          Bài tập này chưa có câu hỏi nào.
-                        </p>
+                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}> {t('grammar:bai_tap_nay_chua_co_cau_hoi_nao_01ac08')} </p>
                       )}
                     </div>
                   );
@@ -504,12 +477,8 @@ const GrammarLearnerPage = ({ user }) => {
               </div>
             ) : (
               <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', borderRadius: '14px' }}>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
-                  Bạn chưa tạo bài tập nào. Hãy bấm "Tạo bài tập mới" để chia sẻ bài tập của bạn!
-                </p>
-                <button className="btn btn-primary btn-sm" onClick={() => navigate('/grammar/create')}>
-                  Tạo bài tập mới
-                </button>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}> {t('grammar:ban_chua_tao_bai_tap_nao_hay_bam_tao_bai_3a4879')} </p>
+                <button className="btn btn-primary btn-sm" onClick={() => navigate('/grammar/create')}> {t('grammar:tao_bai_tap_moi_45b799')} </button>
               </div>
             )}
           </div>
@@ -520,12 +489,8 @@ const GrammarLearnerPage = ({ user }) => {
           <div className="animate-fade-in">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}>
-                  Hộp Thư Báo Lỗi & Góp Ý
-                </h3>
-                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                  Các phản ánh lỗi câu hỏi được gửi trực tiếp từ người học.
-                </p>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: 'var(--text-main)', fontWeight: 700 }}> {t('grammar:hop_thu_bao_loi_gop_y_38e026')} </h3>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}> {t('grammar:cac_phan_anh_loi_cau_hoi_duoc_gui_truc_t_70f169')} </p>
               </div>
               <div style={{
                 padding: '4px 12px',
@@ -535,7 +500,7 @@ const GrammarLearnerPage = ({ user }) => {
                 fontWeight: 600,
                 fontSize: '12px'
               }}>
-                {openReportsCount > 0 ? `${openReportsCount} báo lỗi đang chờ xử lý` : 'Không có báo lỗi nào chưa xử lý'}
+                {openReportsCount > 0 ? t('common:feedback_18', { v0: openReportsCount }) : t('grammar:khong_co_bao_loi_nao_chua_xu_ly_798229')}
               </div>
             </div>
 
@@ -564,19 +529,18 @@ const GrammarLearnerPage = ({ user }) => {
                             background: isOpen ? '#ef4444' : '#10b981',
                             color: '#fff'
                           }}>
-                            {isOpen ? 'CHƯA XỬ LÝ' : 'ĐÃ SỬA'}
+                            {isOpen ? t('grammar:chua_xu_ly_4dec22') : t('grammar:a_sua_bd2904')}
                           </span>
                           <strong style={{ fontSize: '14px', color: 'var(--text-main)' }}>
                             {rep.errorType}
                           </strong>
                         </div>
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          {rep.createdAt ? new Date(rep.createdAt).toLocaleString('vi-VN') : ''}
+                          {rep.createdAt ? new Date(rep.createdAt).toLocaleString(locale()) : ''}
                         </span>
                       </div>
 
-                      <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        Bài tập: <strong style={{ color: 'var(--primary)' }}>{rep.testTitle || rep.groupTitle}</strong> • Câu: <strong style={{ color: '#38bdf8' }}>{rep.questionTitle}</strong>
+                      <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}> {t('grammar:bai_tap_d0a487')} <strong style={{ color: 'var(--primary)' }}>{rep.testTitle || rep.groupTitle}</strong> {t('grammar:cau_75f7c2')} <strong style={{ color: '#38bdf8' }}>{rep.questionTitle}</strong>
                       </div>
 
                       <div style={{
@@ -593,29 +557,24 @@ const GrammarLearnerPage = ({ user }) => {
                       </div>
 
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          Người gửi: <strong>{rep.reporterName || 'Người học'}</strong> ({rep.reporterEmail})
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}> {t('grammar:nguoi_gui_feefc2')} <strong>{rep.reporterName || t('grammar:nguoi_hoc_74895e')}</strong> ({rep.reporterEmail})
                         </div>
 
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          {rep.reporterEmail && rep.reporterEmail !== 'Học viên ẩn danh' && (
+                          {rep.reporterEmail && rep.reporterEmail !== t('grammar:hoc_vien_an_danh_908a8f') && (
                             <button
                               className="btn btn-glass btn-sm"
                               onClick={() => handleReplyReportViaGmail(rep)}
                               style={{ fontSize: '12px' }}
-                              title="Gửi email phản hồi cho học viên qua Gmail"
-                            >
-                              Mở Gmail phản hồi
-                            </button>
+                              title={t('grammar:gui_email_phan_hoi_cho_hoc_vien_qua_gmai_f53850')}
+                            > {t('grammar:mo_gmail_phan_hoi_3f3fbe')} </button>
                           )}
                           {isOpen && (
                             <button
                               className="btn btn-primary btn-sm"
                               onClick={() => handleResolveReport(rep.groupId, rep.id)}
                               style={{ fontSize: '12px' }}
-                            >
-                              Đánh dấu đã sửa
-                            </button>
+                            > {t('grammar:anh_dau_da_sua_277408')} </button>
                           )}
                         </div>
                       </div>
@@ -625,9 +584,7 @@ const GrammarLearnerPage = ({ user }) => {
               </div>
             ) : (
               <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', borderRadius: '14px' }}>
-                <p style={{ color: 'var(--text-muted)', margin: 0 }}>
-                  Chưa có báo lỗi nào cho các bài tập. Khi có phản ánh, thông tin sẽ hiển thị tại đây.
-                </p>
+                <p style={{ color: 'var(--text-muted)', margin: 0 }}> {t('grammar:chua_co_bao_loi_nao_cho_cac_bai_tap_khi__4e1657')} </p>
               </div>
             )}
           </div>
@@ -657,16 +614,13 @@ const GrammarLearnerPage = ({ user }) => {
           className="btn btn-glass btn-sm"
           onClick={handleBackToGroupsList}
           style={{ fontSize: '13px', fontWeight: 600 }}
-        >
-          Quay lại danh sách
-        </button>
+        > {t('grammar:quay_lai_danh_sach_325426')} </button>
 
         <div style={{ textAlign: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--primary)' }}>
             {currentGroup.title}
           </h3>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Người tạo: <strong>{currentGroup.author?.name || 'Cộng đồng'}</strong>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}> {t('grammar:nguoi_tao_dc59e4')} <strong>{currentGroup.author?.name || t('grammar:cong_dong_a0164a')}</strong>
           </span>
         </div>
 
@@ -674,30 +628,24 @@ const GrammarLearnerPage = ({ user }) => {
           <button
             className="btn btn-glass btn-sm"
             onClick={() => setShowPrintModal(true)}
-            title="Tải xuống đề bài tập dạng PDF hoặc file đề thi"
+            title={t('grammar:tai_xuong_de_bai_tap_dang_pdf_hoac_file__21e2e8')}
             style={{ fontSize: '13px', fontWeight: 600 }}
-          >
-            Tải xuống
-          </button>
+          > {t('grammar:tai_xuong_ca78e2')} </button>
           <button
             className="btn btn-glass btn-sm"
             onClick={() => setShowReportModal(true)}
-            title="Báo lỗi câu hỏi này cho tác giả"
+            title={t('grammar:bao_loi_cau_hoi_nay_cho_tac_gia_9bcce9')}
             style={{ color: '#ef4444', fontSize: '13px', fontWeight: 600 }}
-          >
-            Báo lỗi
-          </button>
+          > {t('grammar:bao_loi_0048ce')} </button>
         </div>
       </div>
 
       {/* Thanh tiến độ */}
       <div className="progress-container glass-panel" style={{ padding: '16px', borderRadius: '12px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-          <span>
-            Câu hỏi: <strong>{currentIndex + 1}</strong> / {questions.length}
+          <span> {t('grammar:cau_hoi_61294b')} <strong>{currentIndex + 1}</strong> / {questions.length}
           </span>
-          <span>
-            Đúng: <strong style={{ color: '#10b981' }}>{currentScore}</strong> / {questions.length}
+          <span> {t('grammar:ung_acb110')} <strong style={{ color: '#10b981' }}>{currentScore}</strong> / {questions.length}
           </span>
         </div>
         <div className="progress-bar-bg">
@@ -710,10 +658,8 @@ const GrammarLearnerPage = ({ user }) => {
         if (!currentQuestion) {
           return (
             <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
-              <p>Bài tập này hiện chưa có câu hỏi.</p>
-              <button className="btn btn-glass" onClick={handleBackToGroupsList}>
-                Quay lại danh sách bài
-              </button>
+              <p> {t('grammar:bai_tap_nay_hien_chua_co_cau_hoi_7e70f2')} </p>
+              <button className="btn btn-glass" onClick={handleBackToGroupsList}> {t('grammar:quay_lai_danh_sach_bai_f0fdae')} </button>
             </div>
           );
         }
@@ -781,9 +727,7 @@ const GrammarLearnerPage = ({ user }) => {
           onClick={handlePrev}
           disabled={currentIndex === 0}
           style={{ opacity: currentIndex === 0 ? 0.4 : 1, cursor: currentIndex === 0 ? 'not-allowed' : 'pointer' }}
-        >
-          Câu trước
-        </button>
+        > {t('grammar:cau_truoc_2cc696')} </button>
 
         <div className="step-numbers-box">
           {questions.map((_, idx) => {
@@ -794,7 +738,7 @@ const GrammarLearnerPage = ({ user }) => {
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`step-num-btn ${currentIndex === idx ? 'active' : ''} ${state === 'correct' ? 'done-correct' : state === 'incorrect' ? 'done-incorrect' : ''}`}
-                title={`Câu ${idx + 1}`}
+                title={t('common:feedback_19', { v0: idx + 1 })}
               >
                 {idx + 1}
               </button>
@@ -803,7 +747,7 @@ const GrammarLearnerPage = ({ user }) => {
         </div>
 
         <button className="btn btn-primary" onClick={handleNext}>
-          {currentIndex === questions.length - 1 ? "Hoàn thành" : "Câu tiếp"}
+          {currentIndex === questions.length - 1 ? t('grammar:hoan_thanh_58f8d6') : t('grammar:cau_tiep_34ec24')}
         </button>
       </div>
 
@@ -811,35 +755,28 @@ const GrammarLearnerPage = ({ user }) => {
       {showCompletionModal && (
         <div className="completion-modal-overlay">
           <div className="glass-panel completion-modal-card animate-pop">
-            <h2>Hoàn thành {currentGroup.title}</h2>
-            <p>Bạn đã hoàn thành tất cả câu hỏi trong bài tập này.</p>
+            <h2> {t('grammar:hoan_thanh_58f8d6')} {currentGroup.title}</h2>
+            <p> {t('grammar:ban_da_hoan_thanh_tat_ca_cau_hoi_trong_b_24e451')} </p>
 
             <div className="completion-score-badge">
               <div style={{ fontSize: '26px', fontWeight: 800, color: currentScore === questions.length ? '#10b981' : 'var(--primary)' }}>
-                {currentScore} / {questions.length} câu đúng
-              </div>
+                {currentScore} / {questions.length} {t('grammar:cau_dung_276d76')} </div>
               <div style={{ fontSize: '13px', marginTop: '6px', color: 'var(--text-muted)' }}>
                 {currentScore === questions.length
-                  ? 'Xuất sắc! Bạn đã trả lời đúng toàn bộ các câu hỏi.'
+                  ? t('grammar:xuat_sac_ban_da_tra_loi_dung_toan_bo_cac_12cbfc')
                   : currentScore > 0
-                  ? `Bạn đã hoàn thành tốt ${currentScore} câu hỏi.`
-                  : 'Hãy ôn lại kiến thức và thử lại để cải thiện kết quả nhé!'}
+                  ? t('common:feedback_20', { v0: currentScore })
+                  : t('grammar:hay_on_lai_kien_thuc_va_thu_lai_de_cai_t_9493b1')}
               </div>
             </div>
 
             <div className="completion-actions-row">
-              <button className="btn btn-glass" onClick={handleRestartGroup}>
-                Làm lại bài
-              </button>
+              <button className="btn btn-glass" onClick={handleRestartGroup}> {t('grammar:lam_lai_bai_8be05b')} </button>
               <button
                 className="btn btn-glass"
                 onClick={() => setShowReportModal(true)}
-              >
-                Báo lỗi
-              </button>
-              <button className="btn btn-primary" onClick={handleBackToGroupsList}>
-                Quay lại danh sách
-              </button>
+              > {t('grammar:bao_loi_0048ce')} </button>
+              <button className="btn btn-primary" onClick={handleBackToGroupsList}> {t('grammar:quay_lai_danh_sach_325426')} </button>
             </div>
           </div>
         </div>

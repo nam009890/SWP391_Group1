@@ -35,9 +35,12 @@ class WeakVocabularyServiceImplTest {
         flashcard = Flashcard.builder().id(2L).deck(com.example.demo.flashcard.entity.Deck.builder().id(1L).build()).build();
         when(users.findById(1L)).thenReturn(Optional.of(user));
         when(flashcards.findById(2L)).thenReturn(Optional.of(flashcard));
+        when(weakRepository.saveAndFlush(any(UserWeakVocabulary.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(weakRepository.save(any(UserWeakVocabulary.class))).thenAnswer(invocation -> invocation.getArgument(0));
         service = new WeakVocabularyServiceImpl(weakRepository, users, flashcards,
-                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)));
+                new com.example.demo.flashcard.service.DeckAccessPolicy(mock(com.example.demo.flashcard.repository.DeckRepository.class)),
+                mock(com.example.demo.study.service.LearningActivityLock.class),
+                mock(com.example.demo.study.repository.FlashcardStudyEventRepository.class));
     }
 
     @Test
@@ -65,7 +68,7 @@ class WeakVocabularyServiceImplTest {
         UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).weakDeleted(true).build();
         when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
 
-        service.recordStudyDifficulty(1L, 2L, 1);
+        service.registerStudyDetection(1L, 2L, 1, com.example.demo.weakvocabulary.entity.WeakDetectionReason.STUDY_FORGOT);
 
         assertTrue(item.isWeakDeleted());
         verify(weakRepository, never()).save(any());
@@ -75,30 +78,30 @@ class WeakVocabularyServiceImplTest {
     void qualityOneMarksAutoDetected() {
         UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).build();
         when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
-        service.recordStudyDifficulty(1L, 2L, 1);
+        service.registerStudyDetection(1L, 2L, 1, com.example.demo.weakvocabulary.entity.WeakDetectionReason.STUDY_FORGOT);
         assertTrue(item.isAutoDetected());
         assertTrue(item.getLastStudyQuality() == 1);
     }
 
     @Test
-    void qualityThreeMarksAutoDetected() {
+    void firstQualityThreeDoesNotMarkAutoDetected() {
         UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).build();
         when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
-        service.recordStudyDifficulty(1L, 2L, 3);
-        assertTrue(item.isAutoDetected());
+        service.registerStudyDetection(1L, 2L, 3, null);
+        assertFalse(item.isAutoDetected());
     }
 
     @Test
     void qualityFourDoesNotCreateWeakVocabulary() {
-        service.recordStudyDifficulty(1L, 2L, 4);
-        verify(weakRepository, never()).findByUserIdAndFlashcardId(any(), any());
+        service.registerStudyDetection(1L, 2L, 4, null);
+        verify(weakRepository, never()).saveAndFlush(any());
     }
 
     @Test
     void qualityFiveDoesNotRemoveExistingWeakVocabulary() {
         UserWeakVocabulary item = UserWeakVocabulary.builder().user(user).flashcard(flashcard).build();
         when(weakRepository.findByUserIdAndFlashcardId(1L, 2L)).thenReturn(Optional.of(item));
-        service.recordStudyDifficulty(1L, 2L, 5);
+        service.registerStudyDetection(1L, 2L, 5, null);
         assertFalse(item.isWeakDeleted());
         verify(weakRepository, never()).save(any());
     }

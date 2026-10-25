@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { t } from '../i18n/index.js';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getDeck, getDeckCards } from '../api/deckApi';
 import { setDeckVisibility } from '../api/deckApi';
@@ -7,6 +8,8 @@ import api from '../api/axiosConfig';
 import { addWeakVocabulary, getWeakVocabularies } from '../api/weakVocabularyApi';
 import './DeckDetails.css';
 import './DeckExplorer.css';
+
+const AiFlashcardGenerator = lazy(() => import('./ai/AiFlashcardGenerator'));
 
 const DeckDetails = ({ user }) => {
   const { id } = useParams();
@@ -27,9 +30,8 @@ const DeckDetails = ({ user }) => {
   
   // AI Generation State
   const [isAiMode, setIsAiMode] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [aiError, setAiError] = useState('');
+  const [aiSuccess, setAiSuccess] = useState('');
+  const [aiSaving, setAiSaving] = useState(false);
   const [weakAdded, setWeakAdded] = useState({});
   const [editing, setEditing] = useState(false);
   const [managing, setManaging] = useState(false);
@@ -40,13 +42,13 @@ const DeckDetails = ({ user }) => {
     const controller = new AbortController();
     setLoading(true); setDeck(null); setFlashcards([]); setWeakAdded({});
     setLoadError('');
-    setIsAdding(false); setIsAiMode(false);
+    setIsAdding(false); setIsAiMode(false); setAiSuccess('');
     const fetchDeckData = async () => {
       try {
         const [deckRes, cardsRes, weakRes] = await Promise.all([
-          getDeck(id, Boolean(user), controller.signal),
-          getDeckCards(id, Boolean(user), controller.signal),
-          user ? getWeakVocabularies({ deckId: id, page: 0, size: 100 })
+          getDeck(id, Boolean(user?.id), controller.signal),
+          getDeckCards(id, Boolean(user?.id), controller.signal),
+          user?.id ? getWeakVocabularies({ deckId: id, page: 0, size: 100 }, controller.signal)
             .catch(() => ({ data: { items: [] } })) : Promise.resolve({ data: { items: [] } })
         ]);
         if (controller.signal.aborted) return;
@@ -56,7 +58,7 @@ const DeckDetails = ({ user }) => {
           weakRes.data.items.map((item) => [item.flashcardId, true])
         ));
       } catch (error) {
-        if (!controller.signal.aborted) setLoadError(error.response?.status === 404 ? 'Deck not found or unavailable.' : 'Could not load this deck. Please try again.');
+        if (!controller.signal.aborted) setLoadError(error.response?.status === 404 ? t('decks:deck_not_found_or_unavailable_d4f4fe') : t('decks:could_not_load_this_deck_please_try_agai_f705f0'));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -64,12 +66,12 @@ const DeckDetails = ({ user }) => {
     
     fetchDeckData();
     return () => controller.abort();
-  }, [id, user, revision]);
+  }, [id, user?.id, user?.role, revision]);
 
   const handleAddCard = async (e) => {
     e.preventDefault();
     if (!term.trim() || !definition.trim()) {
-      setFormError('Term and Definition are required.');
+      setFormError(t('decks:term_and_definition_are_required_3d2436'));
       return;
     }
     
@@ -94,43 +96,16 @@ const DeckDetails = ({ user }) => {
       setIsAdding(false);
     } catch (err) {
       console.error('Failed to add card:', err);
-      setFormError('Failed to save the card. Please try again.');
+      setFormError(err.response?.data?.message || t('decks:failed_to_save_the_card_please_try_again_8d5a9b'));
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleGenerateAi = async (e) => {
-    e.preventDefault();
-    if (!aiPrompt.trim()) {
-      setAiError('Please enter a topic to generate flashcards.');
-      return;
-    }
-
-    setIsAiGenerating(true);
-    setAiError('');
-
-    try {
-      const response = await api.post(`/decks/${id}/generate-ai`, {
-        prompt: aiPrompt
-      });
-      
-      // AI returns an array of newly created cards
-      setFlashcards([...flashcards, ...response.data]);
-      setAiPrompt('');
-      setIsAiMode(false);
-    } catch (err) {
-      console.error('Failed to generate cards with AI:', err);
-      setAiError('Could not generate flashcards. Please try again.');
-    } finally {
-      setIsAiGenerating(false);
     }
   };
 
   if (loading) {
     return (
       <div className="details-container animate-fade-in" style={{ justifyContent: 'center' }}>
-        <h2>Loading deck...</h2>
+        <h2> {t('decks:loading_deck_4da96d')} </h2>
       </div>
     );
   }
@@ -138,11 +113,9 @@ const DeckDetails = ({ user }) => {
   if (!deck) {
     return (
       <div className="details-container animate-fade-in" style={{ justifyContent: 'center' }}>
-        <h2>{loadError || 'Deck not found'}</h2>
-        <button className="btn btn-glass" onClick={() => setRevision(r => r + 1)}>Retry</button>
-        <button className="btn btn-primary" onClick={() => navigate('/')} style={{ marginTop: '20px' }}>
-          Back to Dashboard
-        </button>
+        <h2>{loadError || t('decks:deck_not_found_0a62b5')}</h2>
+        <button className="btn btn-glass" onClick={() => setRevision(r => r + 1)}> {t('decks:retry_9f5cd8')} </button>
+        <button className="btn btn-primary" onClick={() => navigate('/')} style={{ marginTop: '20px' }}> {t('decks:back_to_dashboard_8fb719')} </button>
       </div>
     );
   }
@@ -150,146 +123,120 @@ const DeckDetails = ({ user }) => {
   return (
     <div className="details-container animate-fade-in">
       <div className="details-header">
-        <button className="btn btn-glass back-btn" onClick={() => navigate('/')}>
-          ← Back
-        </button>
+        <button className="btn btn-glass back-btn" onClick={() => navigate('/')}> {t('decks:back_c32ae9')} </button>
         <div className="deck-info">
           <h1>{deck.name}</h1>
           {deck.description && <p className="deck-desc">{deck.description}</p>}
-          <span className="card-count-badge">{flashcards.length} terms</span>
-          <p className="deck-desc">{deck.visibility} · By {deck.ownerName || 'Community'}</p>
+          <span className="card-count-badge">{flashcards.length} {t('decks:terms_ce620d')} </span>
+          <p className="deck-desc">{deck.visibility} {t('decks:by_dd4394')} {deck.ownerName || 'Community'}</p>
         </div>
         <button 
           className="btn btn-primary study-btn-large" 
           onClick={() => navigate(`/study/${id}`)}
           disabled={flashcards.length === 0}
-        >
-          Study Now
-        </button>
+        > {t('decks:study_now_ba15d1')} </button>
       </div>
 
-      {!user && <p className="deck-guest-note"><Link to="/login" state={{ from: `/deck/${id}` }}>Log in</Link> to save your learning progress and create your own flashcards.</p>}
-      {deck.isOwner && <div className="explorer-manage"><button disabled={managing} onClick={() => setEditing(true)}>Edit Deck</button><button disabled={managing} onClick={async () => {
+      {!user && <p className="deck-guest-note"><Link to="/login" state={{ from: `/deck/${id}` }}> {t('decks:log_in_f7c400')} </Link> {t('decks:to_save_your_learning_progress_and_creat_8f70b4')} </p>}
+      {deck.isOwner && <div className="explorer-manage"><button disabled={managing} onClick={() => setEditing(true)}> {t('decks:edit_deck_e7bb8d')} </button><button disabled={managing} onClick={async () => {
         const visibility = deck.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
         if (!window.confirm(visibility === 'PRIVATE' ? 'Unpublish this deck? Other learners will lose access.' : 'Publish this deck for everyone to learn?')) return;
         setManaging(true);
         try { const response = await setDeckVisibility(id, visibility); setDeck(response.data); setFormError(''); }
         catch { setFormError('Could not update visibility. Please try again.'); }
         finally { setManaging(false); }
-      }}>{deck.visibility === 'PUBLIC' ? 'Unpublish Deck' : 'Publish Deck'}</button></div>}
+      }}>{deck.visibility === 'PUBLIC' ? t('decks:unpublish_deck_b31308') : t('decks:publish_deck_85d6b1')}</button></div>}
       {editing && <CreateDeckModal isOpen deck={deck} onClose={() => setEditing(false)} onDeckCreated={setDeck} />}
       {formError && <p className="form-error" role="alert">{formError}</p>}
       <div className="cards-section">
         <div className="section-header">
-          <h2>Terms in this set</h2>
+          <h2> {t('decks:terms_in_this_set_5dfe86')} </h2>
           {deck.isOwner && <div className="header-actions">
             <button 
               className={`btn ${isAiMode ? 'btn-glass' : 'btn-ai'}`} 
+              disabled={aiSaving}
               onClick={() => {
                 setIsAiMode(!isAiMode);
                 setIsAdding(false);
               }}
             >
-              {isAiMode ? 'Cancel' : 'Generate with AI'}
+              {isAiMode ? t('common:cancel') : t('decks:generate_with_ai_d517b5')}
             </button>
             <button 
               className="btn btn-glass" 
+              disabled={aiSaving}
               onClick={() => {
                 setIsAdding(!isAdding);
                 setIsAiMode(false);
               }}
             >
-              {isAdding ? 'Cancel' : '+ Add Card'}
+              {isAdding ? t('common:cancel') : t('decks:add_card_af7e5b')}
             </button>
           </div>}
         </div>
         
-        {deck.isOwner && isAiMode && (
-          <form onSubmit={handleGenerateAi} className="add-card-form ai-form glass-panel animate-fade-in">
-            <h3 style={{ background: 'linear-gradient(90deg, #a855f7, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Generate flashcards with AI
-            </h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
-              Choose a topic, such as travel vocabulary or 10 useful words for work.
-            </p>
-            {aiError && <div className="form-error">{aiError}</div>}
-            
-            <div className="form-row">
-              <div className="form-group flex-1">
-                <input 
-                  type="text" 
-                  value={aiPrompt} 
-                  onChange={(e) => setAiPrompt(e.target.value)} 
-                  className="glass-input" 
-                  placeholder="What would you like to learn?"
-                  autoFocus
-                  disabled={isAiGenerating}
-                />
-              </div>
-              <button type="submit" className="btn btn-ai" disabled={isAiGenerating}>
-                {isAiGenerating ? (
-                  <span className="loading-dots">Generating...</span>
-                ) : 'Generate Cards'}
-              </button>
-            </div>
-          </form>
-        )}
+        {aiSuccess && <p className="account-success" role="status">{aiSuccess}</p>}
+        {deck.isOwner && isAiMode && <Suspense fallback={<p role="status">{t('decks:loading_deck_4da96d')}</p>}><AiFlashcardGenerator key={id} deckId={id} onClose={() => setIsAiMode(false)} onSavingChange={setAiSaving} onSaved={result => {
+          setFlashcards(current => Array.from(new Map([...current, ...result.cards].map(card => [card.id, card])).values()));
+          setAiSuccess('Đã thêm ' + result.savedCount + ' thẻ vào Deck.');
+          setIsAiMode(false);
+        }} /></Suspense>}
 
         {deck.isOwner && isAdding && (
           <form onSubmit={handleAddCard} className="add-card-form glass-panel animate-fade-in">
-            <h3>Add a New Card</h3>
+            <h3> {t('decks:add_a_new_card_b67041')} </h3>
             {formError && <div className="form-error">{formError}</div>}
             
             <div className="form-row">
               <div className="form-group flex-1">
-                <label>Term (Vocabulary) *</label>
+                <label> {t('decks:term_vocabulary_851fcf')} </label>
                 <input 
                   type="text" 
                   value={term} 
                   onChange={(e) => setTerm(e.target.value)} 
                   className="glass-input" 
-                  placeholder="e.g. Obfuscate"
+                  placeholder={t('decks:e_g_obfuscate_3cb3a0')}
                   autoFocus
                 />
               </div>
               <div className="form-group flex-1">
-                <label>Definition (Meaning) *</label>
+                <label> {t('decks:definition_meaning_6d2ad9')} </label>
                 <input 
                   type="text" 
                   value={definition} 
                   onChange={(e) => setDefinition(e.target.value)} 
                   className="glass-input" 
-                  placeholder="e.g. Make obscure, unclear, or unintelligible"
+                  placeholder={t('decks:e_g_make_obscure_unclear_or_unintelligib_322f3a')}
                 />
               </div>
             </div>
             
             <div className="form-row">
               <div className="form-group flex-1">
-                <label>Phonetic (Optional)</label>
+                <label> {t('decks:phonetic_optional_c93df1')} </label>
                 <input 
                   type="text" 
                   value={phonetic} 
                   onChange={(e) => setPhonetic(e.target.value)} 
                   className="glass-input" 
-                  placeholder="e.g. /əbˈfʌs.keɪt/"
+                  placeholder={t('decks:e_g_b_f_s_ke_t_e4855b')}
                 />
               </div>
               <div className="form-group flex-2">
-                <label>Example Sentence (Optional)</label>
+                <label> {t('decks:example_sentence_optional_8a350a')} </label>
                 <input 
                   type="text" 
                   value={example} 
                   onChange={(e) => setExample(e.target.value)} 
                   className="glass-input" 
-                  placeholder="e.g. The spelling changes will obfuscate the original intent."
+                  placeholder={t('decks:e_g_the_spelling_changes_will_obfuscate__a1856a')}
                 />
               </div>
             </div>
             
             <div className="form-actions">
               <button type="submit" className="btn btn-primary" disabled={submitting}>
-                {submitting ? 'Saving...' : 'Save Card'}
+                {submitting ? t('common:saving') : t('decks:save_card_5ea0d5')}
               </button>
             </div>
           </form>
@@ -298,8 +245,8 @@ const DeckDetails = ({ user }) => {
         <div className="cards-list">
           {flashcards.length === 0 && !isAdding ? (
             <div className="empty-state glass-panel">
-              <p>This deck has no cards yet.</p>
-              {deck.isOwner && <button className="btn btn-primary" onClick={() => setIsAdding(true)}>Add your first card</button>}
+              <p> {t('decks:this_deck_has_no_cards_yet_106832')} </p>
+              {deck.isOwner && <button className="btn btn-primary" disabled={aiSaving} onClick={() => setIsAdding(true)}> {t('decks:add_your_first_card_5f1a5e')} </button>}
             </div>
           ) : (
             flashcards.map((card, index) => (
@@ -321,9 +268,7 @@ const DeckDetails = ({ user }) => {
                       setWeakAdded((current) => ({ ...current, [card.id]: true }));
                       setFormError('');
                     } catch { setFormError('Could not add weak vocabulary. Please try again.'); }
-                  }}>
-                    Add to weak vocabulary
-                  </button>
+                  }}> {t('decks:add_to_weak_vocabulary_cfba94')} </button>
                 )}
               </div>
             ))

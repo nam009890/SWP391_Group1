@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 // ============================================================
 // VIEW / COMPONENT — Fill in the Blank Question
 // Supports three display modes: text input, inline dropdown,
@@ -101,7 +102,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
                     {selectedVal || `[ ___#${blankKey}___ ]`}
                   </span>
                   {submitted && result && !result.isCorrect && (
-                    <span className="blank-correct-contrast">Đúng: {result.expected}</span>
+                    <span className="blank-correct-contrast"> {t('grammar:ung_acb110')} {result.expected}</span>
                   )}
                 </span>
               );
@@ -119,13 +120,13 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
                     onChange={(e) => handleInputChange(blankKey, e.target.value)}
                     disabled={submitted && result?.isCorrect}
                   >
-                    <option value="">-- Chọn đáp án ▼ --</option>
+                    <option value=""> {t('grammar:chon_dap_an_e3620c')} </option>
                     {options.map((opt, optIdx) => (
                       <option key={optIdx} value={opt}>{opt}</option>
                     ))}
                   </select>
                   {submitted && result && !result.isCorrect && (
-                    <span className="blank-correct-contrast">Đúng: {result.expected}</span>
+                    <span className="blank-correct-contrast"> {t('grammar:ung_acb110')} {result.expected}</span>
                   )}
                 </span>
               );
@@ -152,7 +153,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
                   spellCheck="false"
                 />
                 {submitted && result && !result.isCorrect && (
-                  <span className="blank-correct-contrast">Đúng: {result.expected}</span>
+                  <span className="blank-correct-contrast"> {t('grammar:ung_acb110')} {result.expected}</span>
                 )}
               </span>
             );
@@ -173,9 +174,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
 
     return (
       <div style={{ marginTop: '10px', marginBottom: '24px' }}>
-        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-          Chọn 1 thẻ dưới đây để điền vào câu:
-        </p>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '12px' }}> {t('grammar:chon_1_the_duoi_day_de_dien_vao_cau_3e16a5')} </p>
         <div className="option-cards-grid">
           {options.map((opt, idx) => {
             const letter = letters[idx % letters.length];
@@ -218,13 +217,13 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
   return (
     <div className="exercise-card glass-panel">
       <div className="exercise-meta-tag">
-        {isText && "Dạng bài: Điền từ vào ô trống"}
-        {isDropdown && "Dạng bài: Chọn đáp án thả xuống"}
-        {isCards && "Dạng bài: Trắc nghiệm thẻ đáp án"}
+        {isText && t('grammar:dang_bai_ien_tu_vao_o_trong_b54c7d')}
+        {isDropdown && t('grammar:dang_bai_chon_dap_an_tha_xuong_0c1370')}
+        {isCards && t('grammar:dang_bai_trac_nghiem_the_dap_an_40c4c9')}
       </div>
 
       <div className="exercise-instruction">
-        {question.instruction || "Điền nội dung đúng vào các ô trống:"}
+        {question.instruction || t('grammar:ien_noi_dung_dung_vao_cac_o_trong_9fd0d0')}
       </div>
 
       {renderSentence()}
@@ -238,31 +237,27 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
               onClick={handleCheckAnswer}
               disabled={!isAllAnswered}
               style={{ opacity: !isAllAnswered ? 0.6 : 1 }}
-            >
-              Nộp Bài (Kiểm Tra)
-            </button>
+            > {t('grammar:nop_bai_kiem_tra_241e3e')} </button>
           ) : (
             <button
               className="btn btn-glass"
               onClick={() => setShowExplanation(!showExplanation)}
             >
-              {showExplanation ? 'Ẩn Phân Tích' : 'Phân Tích Đáp Án'}
+              {showExplanation ? t('grammar:an_phan_tich_e9b984') : t('grammar:phan_tich_ap_an_e0429a')}
             </button>
           )}
 
           {submitted && (
-            <button className="btn btn-glass" onClick={handleReset}>
-              Làm Lại
-            </button>
+            <button className="btn btn-glass" onClick={handleReset}> {t('grammar:lam_lai_d3a72f')} </button>
           )}
         </div>
 
         {submitted && (
           <div style={{ fontSize: '15px', fontWeight: '600' }}>
             {isEntirelyCorrect ? (
-              <span style={{ color: '#34d399' }}>Xuất sắc! Tất cả các vị trí đều chính xác.</span>
+              <span style={{ color: '#34d399' }}> {t('grammar:xuat_sac_tat_ca_cac_vi_tri_deu_chinh_xac_242cab')} </span>
             ) : (
-              <span style={{ color: '#fb7185' }}>Có vị trí chưa chính xác. Vui lòng kiểm tra lại.</span>
+              <span style={{ color: '#fb7185' }}> {t('grammar:co_vi_tri_chua_chinh_xac_vui_long_kiem_t_a49ba1')} </span>
             )}
           </div>
         )}
@@ -271,7 +266,7 @@ const FillBlankQuestion = ({ question, onAnswerResult }) => {
       {showExplanation && question.explanation && (
         <div className="feedback-box success-box">
           <div className="feedback-title">
-            <span>Phân tích ngữ pháp chi tiết:</span>
+            <span> {t('grammar:phan_tich_ngu_phap_chi_tiet_94056b')} </span>
           </div>
           <div className="feedback-content">
             <p>{question.explanation}</p>

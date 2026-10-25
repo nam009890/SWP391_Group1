@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class WeakVocabularyRepositoryIntegrationTest {
     @Autowired private UserWeakVocabularyRepository weakRepo;
     @Autowired private UserRepository users;
+    @Autowired private com.example.demo.study.repository.FlashcardStudyEventRepository events;
     @Autowired private FlashcardRepository flashcards;
     private WeakVocabularyServiceImpl service;
     private User user;
@@ -33,7 +34,8 @@ class WeakVocabularyRepositoryIntegrationTest {
     @BeforeEach
     void setUp() {
         service = new WeakVocabularyServiceImpl(weakRepo, users, flashcards,
-                new com.example.demo.flashcard.service.DeckAccessPolicy(org.mockito.Mockito.mock(com.example.demo.flashcard.repository.DeckRepository.class)));
+                new com.example.demo.flashcard.service.DeckAccessPolicy(org.mockito.Mockito.mock(com.example.demo.flashcard.repository.DeckRepository.class)),
+                new com.example.demo.study.service.LearningActivityLock(users, em), events);
         user = users.save(User.builder().email("u" + System.nanoTime() + "@test").build());
         deckA = Deck.builder().name("A").build(); deckB = Deck.builder().name("B").build();
         // Cascading is intentionally not assumed in production mappings.

@@ -36,10 +36,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String email = tokenProvider.getEmailFromToken(jwt);
+            if (StringUtils.hasText(jwt)) {
+                var identity = tokenProvider.verifyIdentity(jwt);
+                String email = identity.email();
 
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+                UserPrincipal userDetails = (UserPrincipal) customUserDetailsService.loadUserByUsername(email);
+                if (!userDetails.isAccountNonLocked()) {
+                    reject(response, "ACCOUNT_LOCKED", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+                    return;
+                }
+                if (identity.version() != userDetails.getTokenVersion()
+                        || !java.util.Objects.equals(identity.authIdentity(), userDetails.getAuthIdentity())) {
+                    reject(response, "SESSION_REVOKED", "Phiên đăng nhập đã bị thu hồi. Vui lòng đăng nhập lại.");
+                    return;
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -51,6 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void reject(HttpServletResponse response, String code, String message) throws IOException {
+        SecurityContextHolder.clearContext();
+        SecurityErrorWriter.write(response, 401, code, message);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

@@ -12,6 +12,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ReviewResponse {
+    public enum DetectionStatus {
+        NOT_DETECTED, AUTO_ADDED, ALREADY_WEAK, SUPPRESSED
+    }
+
+    public record WeakDetection(DetectionStatus status,
+            com.example.demo.weakvocabulary.entity.WeakDetectionReason reason, Long weakVocabularyId) {
+    }
+
+    private String requestId;
+    private long studyReviewCount;
+    private Double studyAccuracy;
+    private WeakDetection weakDetection;
     private Long id;
     private Long userId;
     private Long flashcardId;

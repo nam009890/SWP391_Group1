@@ -36,7 +36,8 @@ public class StudyController {
         ReviewResponse updatedReview = studyService.processReview(
                 userPrincipal.getId(), 
                 flashcardId, 
-                reviewDto.getQuality()
+                reviewDto.getQuality(),
+                reviewDto.getRequestId()
         );
         return ResponseEntity.ok(updatedReview);
     }

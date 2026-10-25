@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "weak_practice_attempts")
+@Table(name = "weak_practice_attempts", uniqueConstraints = @UniqueConstraint(
+        name = "UQ_practice_attempt_item", columnNames = "item_id"))
 public class WeakPracticeAttempt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

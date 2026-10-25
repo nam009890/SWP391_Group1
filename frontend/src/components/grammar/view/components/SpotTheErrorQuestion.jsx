@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 // ============================================================
 // VIEW / COMPONENT — Spot the Error Question
 // Renders an interactive sentence tokenizer for learners.
@@ -41,12 +42,10 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel">
-      <div className="exercise-meta-tag">
-        Dạng bài: Tìm lỗi sai trong câu
-      </div>
+      <div className="exercise-meta-tag"> {t('grammar:dang_bai_tim_loi_sai_trong_cau_bf747b')} </div>
 
       <div className="exercise-instruction">
-        {question.instruction || "Chỉ ra lỗi sai trong câu sau bằng cách click vào từ/cụm từ bị sai:"}
+        {question.instruction || t('grammar:chi_ra_loi_sai_trong_cau_sau_bang_cach_c_2a92da')}
       </div>
 
       {/* Interactive Sentence Tokens */}
@@ -69,7 +68,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
               key={token.id}
               className={`token-chip ${statusClass} ${isLocked ? 'locked' : ''}`}
               onClick={() => handleSelectToken(token.id)}
-              title="Click để chọn vị trí này"
+              title={t('grammar:click_de_chon_vi_tri_nay_626f1e')}
             >
               {submitted && isCorrect && isTargetErrorToken ? (
                 <>
@@ -93,31 +92,27 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
               onClick={handleCheckAnswer}
               disabled={!selectedTokenId}
               style={{ opacity: !selectedTokenId ? 0.6 : 1 }}
-            >
-              Kiểm Tra
-            </button>
+            > {t('grammar:kiem_tra_99c4b0')} </button>
           ) : (
             <button
               className="btn btn-glass"
               onClick={() => setShowExplanation(!showExplanation)}
             >
-              {showExplanation ? 'Ẩn Giải Thích' : 'Xem Giải Thích Chi Tiết'}
+              {showExplanation ? t('grammar:an_giai_thich_9a2cfa') : t('grammar:xem_giai_thich_chi_tiet_d45cfb')}
             </button>
           )}
 
           {submitted && (
-            <button className="btn btn-glass" onClick={handleReset}>
-              Thử Lại
-            </button>
+            <button className="btn btn-glass" onClick={handleReset}> {t('grammar:thu_lai_761e13')} </button>
           )}
         </div>
 
         {submitted && (
           <div style={{ fontSize: '15px', fontWeight: '600' }}>
             {isCorrect ? (
-              <span style={{ color: '#34d399' }}>Chính xác! Bạn đã tìm đúng lỗi sai.</span>
+              <span style={{ color: '#34d399' }}> {t('grammar:chinh_xac_ban_da_tim_dung_loi_sai_8ae525')} </span>
             ) : (
-              <span style={{ color: '#fb7185' }}>Chưa chính xác. Vui lòng chọn lại.</span>
+              <span style={{ color: '#fb7185' }}> {t('grammar:chua_chinh_xac_vui_long_chon_lai_42c786')} </span>
             )}
           </div>
         )}
@@ -127,7 +122,7 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
       {showExplanation && (
         <div className="feedback-box success-box">
           <div className="feedback-title">
-            <span>Phân tích ngữ pháp chi tiết:</span>
+            <span> {t('grammar:phan_tich_ngu_phap_chi_tiet_94056b')} </span>
             {question.error_type && (
               <span style={{ fontSize: '12px', background: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '4px' }}>
                 {question.error_type}
@@ -136,8 +131,8 @@ const SpotTheErrorQuestion = ({ question, onAnswerResult }) => {
           </div>
           <div className="feedback-content" style={{ marginTop: '8px' }}>
             <p>
-              <strong>Lỗi sai:</strong> "{question.tokens?.find(t => t.id === question.correct_token_id)?.text}" ➔{' '}
-              <strong>Sửa thành:</strong> "{question.correction}"
+              <strong> {t('grammar:loi_sai_76d948')} </strong> "{question.tokens?.find(t => t.id === question.correct_token_id)?.text}" ➔{' '}
+              <strong> {t('grammar:sua_thanh_b15e0f')} </strong> "{question.correction}"
             </p>
             <p style={{ marginTop: '6px' }}>{question.explanation}</p>
           </div>

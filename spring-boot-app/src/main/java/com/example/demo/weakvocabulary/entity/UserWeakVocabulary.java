@@ -38,6 +38,11 @@ public class UserWeakVocabulary {
     private int wrongCount = 0;
     @Builder.Default
     private int consecutiveWrong = 0;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 40)
+    private WeakDetectionReason detectionReason;
+    private LocalDateTime firstDetectedAt;
+    private LocalDateTime lastDetectedAt;
     private Integer lastStudyQuality;
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String weakNote;

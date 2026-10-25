@@ -393,3 +393,13 @@
     width: 100%;
   }
 }
+
+.weak-detection-help { padding: 14px 18px; margin-bottom: 18px; }
+.weak-detection-help summary { cursor: pointer; font-weight: 700; }
+.weak-detection-help p { margin-top: 10px; color: var(--text-muted); }
+.weak-learning-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.weak-learning-metrics section { display: flex; flex-direction: column; gap: 6px; }
+.weak-learning-metrics span { font-size: 13px; }
+@media (max-width: 480px) {
+  .weak-learning-metrics { grid-template-columns: 1fr; }
+}

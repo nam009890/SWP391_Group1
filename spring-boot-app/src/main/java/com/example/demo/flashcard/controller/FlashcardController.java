@@ -1,6 +1,5 @@
 package com.example.demo.flashcard.controller;
 
-import com.example.demo.flashcard.dto.AiRequestDto;
 import com.example.demo.flashcard.dto.DeckDto;
 import com.example.demo.flashcard.dto.DeckPage;
 import com.example.demo.flashcard.dto.DeckRequest;
@@ -95,11 +94,11 @@ public class FlashcardController {
         return ResponseEntity.ok(flashcardService.addFlashcardToDeck(deckId, request));
     }
 
+    @Deprecated
     @PostMapping("/{deckId}/generate-ai")
-    public ResponseEntity<List<FlashcardResponse>> generateAiFlashcards(
-            @PathVariable Long deckId,
-            @RequestBody AiRequestDto request
-    ) {
-        return ResponseEntity.ok(flashcardService.generateAiFlashcards(deckId, request.getPrompt()));
+    public void legacyGeneration(@PathVariable Long deckId) {
+        access.requireOwner(deckId);
+        throw new com.example.demo.common.exception.BusinessException(410,"AI_PREVIEW_REQUIRED",
+                "Luồng cũ đã ngừng. Dùng /ai/preview rồi /ai/commit để xác nhận thẻ trước khi lưu.");
     }
 }

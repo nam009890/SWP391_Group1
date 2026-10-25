@@ -11,6 +11,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
+    @Query("select f.vocabulary from Flashcard f where f.deck.id = :deckId")
+    List<String> vocabularyInDeck(@Param("deckId") Long deckId);
+    long countByDeckDeletedFalse();
     List<Flashcard> findByDeckId(Long deckId);
     long countByDeckId(Long deckId);
 

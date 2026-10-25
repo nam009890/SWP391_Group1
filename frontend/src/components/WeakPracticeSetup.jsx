@@ -1,3 +1,4 @@
+import { t , localizeMessage } from '../i18n/index.js';
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,12 +9,12 @@ import WeakVocabularyFilters, {
   defaultWeakFilters,
 } from "./WeakVocabularyFilters";
 import "./WeakVocabulary.css";
-const methods = [
-  ["FILL_BLANK", "✎", "Điền từ theo ngữ cảnh", "Tự nhớ và hoàn thành câu"],
-  ["MULTIPLE_CHOICE", "A", "Chọn từ đúng", "Chọn đáp án phù hợp nhất"],
-  ["WORD_TO_MEANING", "→", "Từ → Nghĩa", "Nhìn từ và chọn nghĩa"],
-  ["MEANING_TO_WORD", "←", "Nghĩa → Từ", "Nhìn nghĩa và chọn từ"],
-];
+const methods = () => ([
+  ["FILL_BLANK", "✎", t('practice:ien_tu_theo_ngu_canh_ea2ceb'), t('practice:tu_nho_va_hoan_thanh_cau_1775c2')],
+  ["MULTIPLE_CHOICE", "A", t('practice:chon_tu_dung_23003c'), t('practice:chon_dap_an_phu_hop_nhat_be06d8')],
+  ["WORD_TO_MEANING", "→", t('practice:tu_nghia_ce0ace'), t('practice:nhin_tu_va_chon_nghia_68914f')],
+  ["MEANING_TO_WORD", "←", t('practice:nghia_tu_e8c6fc'), t('practice:nhin_nghia_va_chon_tu_160175')],
+]);
 
 export default function WeakPracticeSetup() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function WeakPracticeSetup() {
       setPage(nextPage);
       setError("");
     } catch {
-      setError("Không thể tải danh sách từ yếu để ôn luyện.");
+      setError(t('practice:khong_the_tai_danh_sach_tu_yeu_de_on_luy_eec7c2'));
     }
   };
   useEffect(() => {
@@ -77,7 +78,7 @@ export default function WeakPracticeSetup() {
       navigate(`/weak-vocabulary/practice/${response.data.sessionId}`);
     } catch {
       setError(
-        "Không thể tạo phiên ôn luyện. Vui lòng kiểm tra lại các từ đã chọn.",
+        t('practice:khong_the_tao_phien_on_luyen_vui_long_ki_384fc9'),
       );
       setStarting(false);
     }
@@ -86,13 +87,13 @@ export default function WeakPracticeSetup() {
     <main className="weak-page animate-fade-in">
       <section className="weak-head">
         <div>
-          <h1>Ôn luyện từ yếu</h1>
-          <p>Chọn phương thức và các từ muốn luyện.</p>
+          <h1> {t('practice:on_luyen_tu_yeu_055a6c')} </h1>
+          <p> {t('practice:chon_phuong_thuc_va_cac_tu_muon_luyen_126023')} </p>
         </div>
-        <span className="selected-count">Đã chọn {selectedIds.size} từ</span>
+        <span className="selected-count"> {t('practice:a_chon_40b56a')} {selectedIds.size} {t('practice:tu_c826c3')} </span>
       </section>
       <section className="weak-grid setup">
-        {methods.map(([value, icon, label, description]) => (
+        {methods().map(([value, icon, label, description]) => (
           <button
             key={value}
             className={`glass-panel method ${questionType === value ? "selected" : ""}`}
@@ -115,27 +116,25 @@ export default function WeakPracticeSetup() {
         }}
         onReset={reset}
       />
-      {error && <div className="weak-error">{error}</div>}
+      {error && <div className="weak-error">{localizeMessage(error)}</div>}
       <section className="glass-panel choices">
         <div className="choice-head">
-          <h2>Chọn từ yếu</h2>
+          <h2> {t('practice:chon_tu_yeu_e45cb6')} </h2>
           <div>
             <button className="btn btn-glass" onClick={toggleCurrentPage} disabled={!currentIds.length}>
               {allCurrentSelected
-                ? "Bỏ chọn trang này"
-                : "Chọn tất cả trang này"}
+                ? t('practice:bo_chon_trang_nay_49c611')
+                : t('practice:chon_tat_ca_trang_nay_a179f4')}
             </button>
             <button
               className="btn btn-glass"
               onClick={() => setSelectedIds(new Set())}
               disabled={!selectedIds.size}
-            >
-              Bỏ chọn tất cả
-            </button>
+            > {t('practice:bo_chon_tat_ca_c1aecf')} </button>
           </div>
         </div>
         {!data ? (
-          <p>Đang tải...</p>
+          <p> {t('practice:ang_tai_3d8a48')} </p>
         ) : (
           data.items.map((word) => (
             <label className={`choice-row ${selectedIds.has(word.weakVocabularyId) ? "is-selected" : ""}`} key={word.weakVocabularyId}>
@@ -151,19 +150,15 @@ export default function WeakPracticeSetup() {
             </label>
           ))
         )}
-        {data && !data.items.length && <p>Không tìm thấy từ phù hợp.</p>}
+        {data && !data.items.length && <p> {t('practice:khong_tim_thay_tu_phu_hop_ee7dbd')} </p>}
         <div className="pager">
-          <button disabled={!data || data.first} onClick={() => load(page - 1)}>
-            ← Trước
-          </button>
+          <button disabled={!data || data.first} onClick={() => load(page - 1)}> {t('practice:truoc_f6b296')} </button>
           <span>
             {data
-              ? `Trang ${data.page + 1} / ${Math.max(data.totalPages, 1)}`
+              ? t('common:page_of', { page: data.page + 1, total: Math.max(data.totalPages, 1) })
               : ""}
           </span>
-          <button disabled={!data || data.last} onClick={() => load(page + 1)}>
-            Sau →
-          </button>
+          <button disabled={!data || data.last} onClick={() => load(page + 1)}> {t('practice:sau_e76068')} </button>
         </div>
       </section>
       <button
@@ -171,7 +166,7 @@ export default function WeakPracticeSetup() {
         disabled={!questionType || !selectedIds.size || starting}
         onClick={start}
       >
-        {starting ? "Đang tạo phiên..." : "Bắt đầu luyện tập"}
+        {starting ? t('practice:ang_tao_phien_df0094') : t('practice:bat_dau_luyen_tap_34fe28')}
       </button>
     </main>
   );

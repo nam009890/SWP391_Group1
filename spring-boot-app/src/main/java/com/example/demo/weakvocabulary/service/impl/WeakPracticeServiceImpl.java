@@ -10,6 +10,8 @@ import com.example.demo.weakvocabulary.repository.*;
 import com.example.demo.weakvocabulary.service.WeakPracticeService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.demo.study.service.LearningActivityLock;
+import com.example.demo.weakvocabulary.service.WeaknessRules;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -25,21 +27,24 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
     private final WeakPracticeAttemptRepository attempts;
     private final FlashcardRepository flashcards;
     private final DeckAccessPolicy access;
+    private final LearningActivityLock activityLock;
     private final ObjectMapper json = new ObjectMapper();
 
     public WeakPracticeServiceImpl(UserWeakVocabularyRepository weakRepo, WeakPracticeSessionRepository sessions,
             WeakPracticeItemRepository items, WeakPracticeAttemptRepository attempts, FlashcardRepository flashcards,
-            DeckAccessPolicy access) {
+            DeckAccessPolicy access, LearningActivityLock activityLock) {
         this.weakRepo = weakRepo;
         this.sessions = sessions;
         this.items = items;
         this.attempts = attempts;
         this.flashcards = flashcards;
         this.access = access;
+        this.activityLock = activityLock;
     }
 
     @Transactional
     public SessionResponse start(Long uid, PracticeStartRequest r) {
+        activityLock.acquire(uid);
         if (r.getQuestionType() == null || r.getWeakVocabularyIds() == null || r.getWeakVocabularyIds().isEmpty())
             throw new InvalidWeakPracticeException("Choose a method and at least one word");
         if (new HashSet<>(r.getWeakVocabularyIds()).size() != r.getWeakVocabularyIds().size())
@@ -93,8 +98,12 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
 
     @Transactional
     public AnswerResponse answer(Long uid, Long sid, Long iid, AnswerRequest r) {
+        activityLock.acquire(uid);
         WeakPracticeSession s = owned(uid, sid);
         WeakPracticeItem i = items.findByIdAndSessionId(iid, sid).orElseThrow(() -> new ResourceNotFoundException("Practice item not found"));
+        if (i.getUserWeakVocabulary().isWeakDeleted()) {
+            throw new ResourceNotFoundException("Từ yếu đã được xóa khỏi danh sách");
+        }
         if (i.isAnswered()) throw new InvalidWeakPracticeException("This question has already been answered");
         String given = r.getAnswer() == null ? "" : r.getAnswer().trim();
         if (i.getOptionsJson() != null && !read(i.getOptionsJson()).contains(given))
@@ -109,14 +118,16 @@ public class WeakPracticeServiceImpl implements WeakPracticeService {
         if (ok) {
             w.setCorrectCount(w.getCorrectCount() + 1);
             w.setConsecutiveWrong(0);
-            w.setMasteryScore(Math.min(100, w.getMasteryScore() + 20));
+            w.setMasteryScore(Math.min(100, w.getMasteryScore() + WeaknessRules.MASTERY_STEP));
             s.setCorrectAnswers(s.getCorrectAnswers() + 1);
         } else {
             w.setWrongCount(w.getWrongCount() + 1);
             w.setConsecutiveWrong(w.getConsecutiveWrong() + 1);
-            w.setMasteryScore(Math.max(0, w.getMasteryScore() - 20));
+            w.setMasteryScore(Math.max(0, w.getMasteryScore() - WeaknessRules.MASTERY_STEP));
             s.setWrongAnswers(s.getWrongAnswers() + 1);
         }
+        // Mastery chỉ thay đổi từ câu trả lời Practice; không phụ thuộc Study Accuracy.
+        WeaknessRules.detected(w, WeaknessRules.practice(w));
         weakRepo.save(w);
         attempts.save(WeakPracticeAttempt.builder().session(s).item(i).userWeakVocabulary(w).questionType(i.getQuestionType()).questionContent(i.getQuestionContent()).userAnswer(given).correctAnswer(i.getCorrectAnswer()).correct(ok).build());
         if (s.getCorrectAnswers() + s.getWrongAnswers() == s.getTotalQuestions()) {

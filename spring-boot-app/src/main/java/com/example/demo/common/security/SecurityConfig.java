@@ -75,34 +75,34 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.GET, "/api/decks/public", "/api/decks/public/**").permitAll()
-                .requestMatchers("/api/auth/**", "/api/grammar/**", "/", "/login**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/grammar/**").permitAll()
+                .requestMatchers("/api/auth/me").authenticated()
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/", "/login**", "/oauth2/**", "/error", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(errors -> errors
-                .authenticationEntryPoint((request, response, error) -> response.sendError(401))
-                .accessDeniedHandler((request, response, error) -> response.sendError(403)))
-            .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .logoutSuccessUrl("http://localhost:5173/login")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-            );
+                .authenticationEntryPoint((request, response, error) -> SecurityErrorWriter.write(response, 401, "UNAUTHENTICATED", "Vui lòng đăng nhập lại"))
+                .accessDeniedHandler((request, response, error) -> SecurityErrorWriter.write(response, 403, "ACCESS_DENIED", "Bạn không có quyền thực hiện thao tác này")))
+            .logout(logout -> logout.disable());
 
-        // Chỉ bật OAuth2 khi application có client registration hợp lệ trong cấu hình.
+        // Session chỉ phục vụ state của OAuth handshake, không xác thực API bằng cookie.
         if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
             http.oauth2Login(oauth2 -> oauth2
-                    .authorizationEndpoint(authorization -> authorization
-                            .baseUri("/oauth2/authorization")
-                            .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
-                    )
-                    .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                    .successHandler(oAuth2AuthenticationSuccessHandler)
-            );
+                .authorizationEndpoint(authorization -> authorization.baseUri("/oauth2/authorization")
+                    .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository))
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .failureHandler((request, response, error) -> {
+                    httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request,response);
+                    String code="OAUTH_FAILED";
+                    if(error instanceof org.springframework.security.oauth2.core.OAuth2AuthenticationException oauth
+                        && java.util.Set.of("ACCOUNT_LOCKED","OAUTH_LINK_REQUIRED").contains(oauth.getError().getErrorCode()))
+                        code=oauth.getError().getErrorCode();
+                    response.sendRedirect(oAuth2AuthenticationSuccessHandler.frontendUrl()+"/login?error="+code);
+                }));
         }
-            
-        // Add JWT filter
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+        http.addFilterBefore(jwtAuthenticationFilter,UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class ReviewDto {
     private int quality;
+    private String requestId;
 }

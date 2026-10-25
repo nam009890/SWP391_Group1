@@ -1,0 +1,486 @@
+{
+  "travel": [
+    {
+      "vocabulary": "passport",
+      "meaning": "hộ chiếu",
+      "phonetic": "/ˈpɑːspɔːt/",
+      "exampleSentence": "Please keep your passport in a safe place."
+    },
+    {
+      "vocabulary": "luggage",
+      "meaning": "hành lý",
+      "phonetic": "/ˈlʌɡɪdʒ/",
+      "exampleSentence": "My luggage is too heavy to carry."
+    },
+    {
+      "vocabulary": "itinerary",
+      "meaning": "lịch trình",
+      "phonetic": null,
+      "exampleSentence": "Our itinerary includes a visit to the museum."
+    },
+    {
+      "vocabulary": "destination",
+      "meaning": "điểm đến",
+      "phonetic": null,
+      "exampleSentence": "Da Nang is our next destination."
+    },
+    {
+      "vocabulary": "reservation",
+      "meaning": "sự đặt chỗ",
+      "phonetic": null,
+      "exampleSentence": "I have a reservation for two nights."
+    },
+    {
+      "vocabulary": "departure",
+      "meaning": "sự khởi hành",
+      "phonetic": null,
+      "exampleSentence": "The departure time is on your ticket."
+    },
+    {
+      "vocabulary": "arrival",
+      "meaning": "sự đến nơi",
+      "phonetic": null,
+      "exampleSentence": "Please call me after your arrival."
+    },
+    {
+      "vocabulary": "journey",
+      "meaning": "chuyến hành trình",
+      "phonetic": null,
+      "exampleSentence": "The train journey takes three hours."
+    },
+    {
+      "vocabulary": "ticket",
+      "meaning": "vé",
+      "phonetic": "/ˈtɪkɪt/",
+      "exampleSentence": "Keep your ticket until the journey ends."
+    },
+    {
+      "vocabulary": "airport",
+      "meaning": "sân bay",
+      "phonetic": null,
+      "exampleSentence": "We arrived at the airport early."
+    },
+    {
+      "vocabulary": "platform",
+      "meaning": "sân ga",
+      "phonetic": null,
+      "exampleSentence": "The train leaves from platform four."
+    },
+    {
+      "vocabulary": "terminal",
+      "meaning": "nhà ga hành khách",
+      "phonetic": null,
+      "exampleSentence": "Meet me outside the main terminal."
+    },
+    {
+      "vocabulary": "accommodation",
+      "meaning": "chỗ ở",
+      "phonetic": null,
+      "exampleSentence": "We need affordable accommodation near the beach."
+    },
+    {
+      "vocabulary": "souvenir",
+      "meaning": "quà lưu niệm",
+      "phonetic": null,
+      "exampleSentence": "I bought a small souvenir for my sister."
+    },
+    {
+      "vocabulary": "tourist",
+      "meaning": "khách du lịch",
+      "phonetic": null,
+      "exampleSentence": "Every tourist needs a map of the city."
+    },
+    {
+      "vocabulary": "guide",
+      "meaning": "người hướng dẫn",
+      "phonetic": null,
+      "exampleSentence": "Our guide explained the history of the temple."
+    },
+    {
+      "vocabulary": "map",
+      "meaning": "bản đồ",
+      "phonetic": null,
+      "exampleSentence": "This map shows all the bus stops."
+    },
+    {
+      "vocabulary": "currency",
+      "meaning": "tiền tệ",
+      "phonetic": null,
+      "exampleSentence": "What currency do people use here?"
+    },
+    {
+      "vocabulary": "delay",
+      "meaning": "sự chậm trễ",
+      "phonetic": null,
+      "exampleSentence": "There is a short delay at the station."
+    },
+    {
+      "vocabulary": "insurance",
+      "meaning": "bảo hiểm",
+      "phonetic": null,
+      "exampleSentence": "Check that your insurance covers this journey."
+    },
+    {
+      "vocabulary": "boarding pass",
+      "meaning": "thẻ lên máy bay",
+      "phonetic": null,
+      "exampleSentence": "Please show your boarding pass at the gate."
+    },
+    {
+      "vocabulary": "return ticket",
+      "meaning": "vé khứ hồi",
+      "phonetic": null,
+      "exampleSentence": "A return ticket is cheaper than two single tickets."
+    },
+    {
+      "vocabulary": "travel insurance",
+      "meaning": "bảo hiểm du lịch",
+      "phonetic": null,
+      "exampleSentence": "We bought travel insurance before our trip."
+    },
+    {
+      "vocabulary": "carry-on bag",
+      "meaning": "túi hành lý xách tay",
+      "phonetic": null,
+      "exampleSentence": "Put your medicine in your carry-on bag."
+    },
+    {
+      "vocabulary": "hotel room",
+      "meaning": "phòng khách sạn",
+      "phonetic": null,
+      "exampleSentence": "Our hotel room has a view of the river."
+    },
+    {
+      "vocabulary": "book a room",
+      "meaning": "đặt một phòng",
+      "phonetic": null,
+      "exampleSentence": "I would like to book a room for Friday."
+    },
+    {
+      "vocabulary": "catch a train",
+      "meaning": "đón kịp một chuyến tàu",
+      "phonetic": null,
+      "exampleSentence": "We need to leave now to catch a train."
+    },
+    {
+      "vocabulary": "go sightseeing",
+      "meaning": "đi tham quan",
+      "phonetic": null,
+      "exampleSentence": "We can go sightseeing after breakfast."
+    },
+    {
+      "vocabulary": "public transport",
+      "meaning": "phương tiện giao thông công cộng",
+      "phonetic": null,
+      "exampleSentence": "Public transport is convenient in this city."
+    },
+    {
+      "vocabulary": "baggage claim",
+      "meaning": "khu nhận hành lý",
+      "phonetic": null,
+      "exampleSentence": "Follow the signs to baggage claim."
+    },
+    {
+      "vocabulary": "departure gate",
+      "meaning": "cổng khởi hành",
+      "phonetic": null,
+      "exampleSentence": "Our departure gate is near the cafe."
+    },
+    {
+      "vocabulary": "exchange money",
+      "meaning": "đổi tiền",
+      "phonetic": null,
+      "exampleSentence": "You can exchange money at the bank."
+    },
+    {
+      "vocabulary": "local food",
+      "meaning": "ẩm thực địa phương",
+      "phonetic": null,
+      "exampleSentence": "We enjoy trying local food when we travel."
+    },
+    {
+      "vocabulary": "tour guide",
+      "meaning": "hướng dẫn viên du lịch",
+      "phonetic": null,
+      "exampleSentence": "The tour guide showed us the old town."
+    },
+    {
+      "vocabulary": "city centre",
+      "meaning": "trung tâm thành phố",
+      "phonetic": null,
+      "exampleSentence": "Our hotel is close to the city centre."
+    },
+    {
+      "vocabulary": "train station",
+      "meaning": "nhà ga xe lửa",
+      "phonetic": null,
+      "exampleSentence": "The train station is across the road."
+    },
+    {
+      "vocabulary": "miss a flight",
+      "meaning": "lỡ chuyến bay",
+      "phonetic": null,
+      "exampleSentence": "Leave early so you do not miss a flight."
+    },
+    {
+      "vocabulary": "rent a car",
+      "meaning": "thuê một chiếc xe hơi",
+      "phonetic": null,
+      "exampleSentence": "We plan to rent a car at the airport."
+    },
+    {
+      "vocabulary": "pack a suitcase",
+      "meaning": "xếp đồ vào va li",
+      "phonetic": null,
+      "exampleSentence": "I need to pack a suitcase tonight."
+    },
+    {
+      "vocabulary": "check in",
+      "meaning": "làm thủ tục nhận phòng hoặc lên máy bay",
+      "phonetic": null,
+      "exampleSentence": "We can check in at the hotel after two."
+    }
+  ],
+  "business": [
+    {
+      "vocabulary": "meeting",
+      "meaning": "cuộc họp",
+      "phonetic": "/ˈmiːtɪŋ/",
+      "exampleSentence": "The meeting starts at nine tomorrow."
+    },
+    {
+      "vocabulary": "deadline",
+      "meaning": "hạn chót",
+      "phonetic": "/ˈdedlaɪn/",
+      "exampleSentence": "The deadline for this report is Friday."
+    },
+    {
+      "vocabulary": "invoice",
+      "meaning": "hóa đơn",
+      "phonetic": null,
+      "exampleSentence": "Please send the invoice to our office."
+    },
+    {
+      "vocabulary": "contract",
+      "meaning": "hợp đồng",
+      "phonetic": null,
+      "exampleSentence": "Read the contract before you sign it."
+    },
+    {
+      "vocabulary": "budget",
+      "meaning": "ngân sách",
+      "phonetic": null,
+      "exampleSentence": "Our budget for this project is limited."
+    },
+    {
+      "vocabulary": "profit",
+      "meaning": "lợi nhuận",
+      "phonetic": null,
+      "exampleSentence": "The shop made a small profit last month."
+    },
+    {
+      "vocabulary": "revenue",
+      "meaning": "doanh thu",
+      "phonetic": null,
+      "exampleSentence": "Online sales increased our revenue."
+    },
+    {
+      "vocabulary": "supplier",
+      "meaning": "nhà cung cấp",
+      "phonetic": null,
+      "exampleSentence": "Our supplier delivers fresh products every day."
+    },
+    {
+      "vocabulary": "customer",
+      "meaning": "khách hàng",
+      "phonetic": null,
+      "exampleSentence": "The customer asked for a refund."
+    },
+    {
+      "vocabulary": "colleague",
+      "meaning": "đồng nghiệp",
+      "phonetic": null,
+      "exampleSentence": "My colleague helped me finish the report."
+    },
+    {
+      "vocabulary": "manager",
+      "meaning": "người quản lý",
+      "phonetic": null,
+      "exampleSentence": "Ask your manager about the new schedule."
+    },
+    {
+      "vocabulary": "proposal",
+      "meaning": "bản đề xuất",
+      "phonetic": null,
+      "exampleSentence": "We discussed the proposal at the meeting."
+    },
+    {
+      "vocabulary": "negotiation",
+      "meaning": "cuộc đàm phán",
+      "phonetic": null,
+      "exampleSentence": "The negotiation took longer than expected."
+    },
+    {
+      "vocabulary": "investment",
+      "meaning": "khoản đầu tư",
+      "phonetic": null,
+      "exampleSentence": "This investment will help the company grow."
+    },
+    {
+      "vocabulary": "delivery",
+      "meaning": "việc giao hàng",
+      "phonetic": null,
+      "exampleSentence": "The delivery will arrive on Monday."
+    },
+    {
+      "vocabulary": "feedback",
+      "meaning": "ý kiến phản hồi",
+      "phonetic": null,
+      "exampleSentence": "Thank you for your helpful feedback."
+    },
+    {
+      "vocabulary": "schedule",
+      "meaning": "lịch làm việc",
+      "phonetic": null,
+      "exampleSentence": "Please check the schedule before booking a meeting."
+    },
+    {
+      "vocabulary": "discount",
+      "meaning": "khoản giảm giá",
+      "phonetic": null,
+      "exampleSentence": "The supplier offered us a discount."
+    },
+    {
+      "vocabulary": "employee",
+      "meaning": "nhân viên",
+      "phonetic": null,
+      "exampleSentence": "Each employee receives regular training."
+    },
+    {
+      "vocabulary": "partnership",
+      "meaning": "quan hệ hợp tác",
+      "phonetic": null,
+      "exampleSentence": "The partnership benefits both companies."
+    },
+    {
+      "vocabulary": "business trip",
+      "meaning": "chuyến công tác",
+      "phonetic": null,
+      "exampleSentence": "She is on a business trip this week."
+    },
+    {
+      "vocabulary": "customer service",
+      "meaning": "dịch vụ khách hàng",
+      "phonetic": null,
+      "exampleSentence": "Good customer service builds trust."
+    },
+    {
+      "vocabulary": "meet a deadline",
+      "meaning": "hoàn thành đúng hạn",
+      "phonetic": null,
+      "exampleSentence": "We worked together to meet a deadline."
+    },
+    {
+      "vocabulary": "attend a meeting",
+      "meaning": "tham dự một cuộc họp",
+      "phonetic": null,
+      "exampleSentence": "I need to attend a meeting at ten."
+    },
+    {
+      "vocabulary": "sign a contract",
+      "meaning": "ký một hợp đồng",
+      "phonetic": null,
+      "exampleSentence": "They will sign a contract next week."
+    },
+    {
+      "vocabulary": "place an order",
+      "meaning": "đặt một đơn hàng",
+      "phonetic": null,
+      "exampleSentence": "You can place an order on our website."
+    },
+    {
+      "vocabulary": "make a profit",
+      "meaning": "tạo ra lợi nhuận",
+      "phonetic": null,
+      "exampleSentence": "The business hopes to make a profit this year."
+    },
+    {
+      "vocabulary": "send an invoice",
+      "meaning": "gửi hóa đơn",
+      "phonetic": null,
+      "exampleSentence": "Please send an invoice after the delivery."
+    },
+    {
+      "vocabulary": "annual report",
+      "meaning": "báo cáo thường niên",
+      "phonetic": null,
+      "exampleSentence": "The annual report describes our progress."
+    },
+    {
+      "vocabulary": "market research",
+      "meaning": "nghiên cứu thị trường",
+      "phonetic": null,
+      "exampleSentence": "We need market research before launching the product."
+    },
+    {
+      "vocabulary": "sales target",
+      "meaning": "mục tiêu doanh số",
+      "phonetic": null,
+      "exampleSentence": "Our team reached its sales target."
+    },
+    {
+      "vocabulary": "work experience",
+      "meaning": "kinh nghiệm làm việc",
+      "phonetic": null,
+      "exampleSentence": "This job requires some work experience."
+    },
+    {
+      "vocabulary": "job interview",
+      "meaning": "buổi phỏng vấn xin việc",
+      "phonetic": null,
+      "exampleSentence": "Her job interview went well."
+    },
+    {
+      "vocabulary": "team leader",
+      "meaning": "trưởng nhóm",
+      "phonetic": null,
+      "exampleSentence": "The team leader assigned the tasks."
+    },
+    {
+      "vocabulary": "office hours",
+      "meaning": "giờ làm việc của văn phòng",
+      "phonetic": null,
+      "exampleSentence": "Please call during office hours."
+    },
+    {
+      "vocabulary": "project plan",
+      "meaning": "kế hoạch dự án",
+      "phonetic": null,
+      "exampleSentence": "The project plan includes a clear schedule."
+    },
+    {
+      "vocabulary": "payment terms",
+      "meaning": "điều khoản thanh toán",
+      "phonetic": null,
+      "exampleSentence": "We agreed on the payment terms."
+    },
+    {
+      "vocabulary": "training session",
+      "meaning": "buổi đào tạo",
+      "phonetic": null,
+      "exampleSentence": "The training session begins after lunch."
+    },
+    {
+      "vocabulary": "quality control",
+      "meaning": "kiểm soát chất lượng",
+      "phonetic": null,
+      "exampleSentence": "Quality control is important in our factory."
+    },
+    {
+      "vocabulary": "long-term goal",
+      "meaning": "mục tiêu dài hạn",
+      "phonetic": null,
+      "exampleSentence": "Our long-term goal is to improve customer service."
+    }
+  ]
+}

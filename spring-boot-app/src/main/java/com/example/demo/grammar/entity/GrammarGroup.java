@@ -26,7 +26,7 @@ public class GrammarGroup {
     @Column(name = "title", nullable = false, length = 255)
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(name = "icon", length = 50)
@@ -39,10 +39,12 @@ public class GrammarGroup {
     private String authorEmail;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 32)
     @Builder.Default
     private List<GrammarQuestion> questions = new ArrayList<>();
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 32)
     @Builder.Default
     private List<GrammarQuestionReport> reports = new ArrayList<>();
 

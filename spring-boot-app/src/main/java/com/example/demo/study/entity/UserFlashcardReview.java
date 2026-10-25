@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user_flashcard_reviews")
+@Table(name = "user_flashcard_reviews", uniqueConstraints = @UniqueConstraint(
+        name = "UQ_review_user_card", columnNames = {"user_id", "flashcard_id"}))
 public class UserFlashcardReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

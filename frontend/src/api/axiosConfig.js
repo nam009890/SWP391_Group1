@@ -1,3 +1,4 @@
+import { apiError } from '../i18n/index.js';
 import axios from 'axios';
 
 const api = axios.create({
@@ -19,9 +20,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use((response) => {
     return response;
 }, (error) => {
-    const isAuthRequest = error.config?.url?.includes('/auth/');
+    if (error.response?.data && typeof error.response.data === 'object') {
+        error.response.data.message = apiError(error.response.data.code);
+    }
+    const isAuthRequest = ['/auth/login', '/auth/register'].includes(error.config?.url);
     if (!isAuthRequest && error.response?.status === 401 && localStorage.getItem('token')) {
         // Token hết hạn hoặc không hợp lệ -> Xóa token và chuyển hướng về /login
+        sessionStorage.setItem('authNotice', error.response.data?.code === 'ACCOUNT_LOCKED'
+            ? 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.'
+            : 'Phiên đăng nhập đã hết hạn hoặc bị thu hồi. Vui lòng đăng nhập lại.');
         localStorage.removeItem('token');
         window.dispatchEvent(new Event('auth-expired'));
     }

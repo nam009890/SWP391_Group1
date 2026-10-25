@@ -20,14 +20,17 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
-    private final GeminiService geminiService;
+    private final com.example.demo.study.service.LearningActivityLock accounts;
+    private final com.example.demo.flashcard.ai.validation.AiFlashcardValidator vocabulary;
     private final DeckAccessPolicy access;
 
     public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository,
-            GeminiService geminiService, DeckAccessPolicy access) {
+            DeckAccessPolicy access, com.example.demo.study.service.LearningActivityLock accounts,
+            com.example.demo.flashcard.ai.validation.AiFlashcardValidator vocabulary) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
-        this.geminiService = geminiService;
+        this.accounts = accounts;
+        this.vocabulary = vocabulary;
         this.access = access;
     }
 
@@ -40,13 +43,24 @@ public class FlashcardServiceImpl implements FlashcardService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public FlashcardResponse addFlashcardToDeck(Long deckId, FlashcardRequest request) {
-        Deck deck = access.requireOwner(deckId);
+        Long uid = access.requireUserId();
+        accounts.acquire(uid);
+        Deck deck = deckRepository.findForUpdate(deckId).orElseThrow(() -> new ResourceNotFoundException("Deck not found"));
+        if (!access.canManageDeck(deck,uid)) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Only the deck owner can add cards");
 
         if (request.getVocabulary() == null || request.getVocabulary().isBlank() || request.getVocabulary().length() > 255
                 || request.getMeaning() == null || request.getMeaning().isBlank() || request.getMeaning().length() > 255)
             throw new IllegalArgumentException("Vocabulary and meaning must contain 1 to 255 characters");
 
+        if ((request.getPhonetic() != null && request.getPhonetic().length() > 255)
+                || (request.getExampleSentence() != null && request.getExampleSentence().length() > 2000)) {
+            throw new IllegalArgumentException("Phonetic tối đa 255 và ví dụ tối đa 2000 ký tự");
+        }
+        if (flashcardRepository.vocabularyInDeck(deckId).stream().anyMatch(word -> vocabulary.normalize(word).equals(vocabulary.normalize(request.getVocabulary())))) {
+            throw new com.example.demo.flashcard.ai.exception.AiException(409,"DUPLICATE_FLASHCARD");
+        }
         Flashcard flashcard = Flashcard.builder()
                 .vocabulary(request.getVocabulary())
                 .meaning(request.getMeaning())
@@ -57,22 +71,6 @@ public class FlashcardServiceImpl implements FlashcardService {
 
         Flashcard savedFlashcard = flashcardRepository.save(flashcard);
         return mapToResponse(savedFlashcard);
-    }
-
-    @Override
-    public List<FlashcardResponse> generateAiFlashcards(Long deckId, String prompt) {
-        Deck deck = access.requireOwner(deckId);
-        if (prompt == null || prompt.isBlank() || prompt.length() > 2000)
-            throw new IllegalArgumentException("AI prompt must contain 1 to 2000 characters");
-
-        List<Flashcard> generatedCards = geminiService.generateFlashcards(prompt);
-
-        List<Flashcard> savedCards = generatedCards.stream().map(card -> {
-            card.setDeck(deck);
-            return flashcardRepository.save(card);
-        }).collect(Collectors.toList());
-
-        return savedCards.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
     private FlashcardResponse mapToResponse(Flashcard flashcard) {

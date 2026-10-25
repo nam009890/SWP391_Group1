@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 import React, { useState } from 'react';
 
 const PassageClozeQuestion = ({ question, onAnswerResult }) => {
@@ -101,8 +102,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
                   }}
                 >
                   <option value="" style={{ background: '#1e293b', color: '#94a3b8' }}>
-                    ({blankKey}) -- Chọn từ ▼ --
-                  </option>
+                    ({blankKey} {t('grammar:chon_tu_1e57bb')} </option>
                   {options.map((opt, optIdx) => (
                     <option key={optIdx} value={opt} style={{ background: '#0f172a', color: '#fff' }}>
                       ({blankKey}) {opt}
@@ -120,8 +120,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
                     padding: '2px 8px',
                     borderRadius: '6px',
                     border: '1px solid rgba(16, 185, 129, 0.3)'
-                  }}>
-                    Đúng: {result.expected}
+                  }}> {t('grammar:ung_acb110')} {result.expected}
                   </span>
                 )}
               </span>
@@ -138,12 +137,10 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag">
-        Dạng bài: Điền từ vào đoạn văn
-      </div>
+      <div className="exercise-meta-tag"> {t('grammar:dang_bai_ien_tu_vao_doan_van_dc35b2')} </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '18px', color: 'var(--text-main)', fontWeight: 600 }}>
-        {question.instruction || "Đọc đoạn văn sau và chọn từ thích hợp để điền vào mỗi chỗ trống:"}
+        {question.instruction || t('grammar:oc_doan_van_sau_va_chon_tu_thich_hop_de__de4954')}
       </div>
 
       {/* TIÊU ĐỀ BÀI ĐỌC */}
@@ -166,9 +163,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
 
       {/* BẢNG TỔNG KẾT TIẾN ĐỘ ĐIỀN */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          Đã điền: <strong style={{ color: 'var(--primary, #3b82f6)' }}>{answeredCount}</strong> / {totalBlanks} chỗ trống
-        </span>
+        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}> {t('grammar:a_dien_2dbb7a')} <strong style={{ color: 'var(--primary, #3b82f6)' }}>{answeredCount}</strong> / {totalBlanks} {t('grammar:cho_trong_e09add')} </span>
         {submitted && (
           <span style={{
             fontSize: '13px',
@@ -177,9 +172,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
             borderRadius: '12px',
             background: Object.values(results).every(r => r.isCorrect) ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
             color: Object.values(results).every(r => r.isCorrect) ? '#10b981' : '#ef4444'
-          }}>
-            Kết quả: {Object.values(results).filter(r => r.isCorrect).length}/{totalBlanks} đúng
-          </span>
+          }}> {t('grammar:ket_qua_caa91b')} {Object.values(results).filter(r => r.isCorrect).length}/{totalBlanks} {t('grammar:dung_dc0008')} </span>
         )}
       </div>
 
@@ -191,18 +184,14 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
             onClick={handleCheck}
             disabled={answeredCount === 0}
             style={{ opacity: answeredCount === 0 ? 0.6 : 1, padding: '10px 24px' }}
-          >
-            Kiểm Tra Đáp Án
-          </button>
+          > {t('grammar:kiem_tra_ap_an_4f2392')} </button>
 
           {submitted && (
             <button
               className="btn btn-glass"
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
-            >
-              Làm lại đoạn văn
-            </button>
+            > {t('grammar:lam_lai_doan_van_d65281')} </button>
           )}
 
           {submitted && (
@@ -211,7 +200,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích" : "Xem giải thích"}
+              {showExplanation ? t('grammar:an_giai_thich_0dda30') : t('grammar:xem_giai_thich_a2622a')}
             </button>
           )}
         </div>
@@ -221,7 +210,7 @@ const PassageClozeQuestion = ({ question, onAnswerResult }) => {
       {submitted && showExplanation && question.explanation && (
         <div className="feedback-box correct-box animate-pop" style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <strong>Giải thích chi tiết các chỗ trống:</strong>
+            <strong> {t('grammar:giai_thich_chi_tiet_cac_cho_trong_a0ea07')} </strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px', lineHeight: '1.7' }}>
             <p>{question.explanation}</p>

@@ -1737,3 +1737,5 @@
 }
 
 
+
+.grammar-page-titlebar h1.grammar-lesson-badge {font-size:clamp(22px,4vw,30px);margin:0;line-height:1.3;}

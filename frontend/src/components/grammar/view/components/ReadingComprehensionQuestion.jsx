@@ -1,3 +1,4 @@
+import { t } from '../../../../i18n/index.js';
 import React, { useState } from 'react';
 
 const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
@@ -55,12 +56,10 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
 
   return (
     <div className="exercise-card glass-panel animate-fade-in" style={{ padding: '28px' }}>
-      <div className="exercise-meta-tag">
-        Dạng bài: Đọc hiểu và trả lời câu hỏi
-      </div>
+      <div className="exercise-meta-tag"> {t('grammar:dang_bai_oc_hieu_va_tra_loi_cau_hoi_ddbdc7')} </div>
 
       <div className="exercise-instruction" style={{ fontSize: '16px', marginBottom: '20px', color: 'var(--text-main)', fontWeight: 600 }}>
-        {question.instruction || "Đọc kỹ đoạn văn sau và trả lời các câu hỏi bên dưới:"}
+        {question.instruction || t('grammar:oc_ky_doan_van_sau_va_tra_loi_cac_cau_ho_d01271')}
       </div>
 
       {/* BỐ CỤC CHIA 2 CỘT (SPLIT VIEW CHO DESKTOP) */}
@@ -126,7 +125,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
                   marginBottom: '12px',
                   lineHeight: '1.5'
                 }}>
-                  <span style={{ color: 'var(--primary, #3b82f6)', marginRight: '6px' }}>Q{sIdx + 1}:</span>
+                  <span style={{ color: 'var(--primary, #3b82f6)', marginRight: '6px' }}>{t('common:question_short')}{sIdx + 1}:</span>
                   {sub.question}
                 </div>
 
@@ -193,8 +192,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
                 </div>
 
                 {submitted && subRes && !subRes.isCorrect && (
-                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
-                    Đáp án đúng: {sub.correct_answer}
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981', fontWeight: 600 }}> {t('grammar:ap_an_dung_43609c')} {sub.correct_answer}
                   </div>
                 )}
               </div>
@@ -205,9 +203,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
 
       {/* TỔNG KẾT & TIẾN ĐỘ */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          Đã chọn: <strong style={{ color: 'var(--primary, #3b82f6)' }}>{answeredCount}</strong> / {subQuestions.length} câu hỏi
-        </span>
+        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}> {t('grammar:a_chon_1f0182')} <strong style={{ color: 'var(--primary, #3b82f6)' }}>{answeredCount}</strong> / {subQuestions.length} {t('grammar:cau_hoi_d51ff7')} </span>
         {submitted && (
           <span style={{
             fontSize: '13px',
@@ -216,9 +212,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
             borderRadius: '12px',
             background: correctCount === subQuestions.length ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
             color: correctCount === subQuestions.length ? '#10b981' : '#ef4444'
-          }}>
-            Điểm: {correctCount}/{subQuestions.length} câu đúng
-          </span>
+          }}> {t('grammar:iem_f959b4')} {correctCount}/{subQuestions.length} {t('grammar:cau_dung_276d76')} </span>
         )}
       </div>
 
@@ -230,18 +224,14 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
             onClick={handleCheck}
             disabled={answeredCount === 0}
             style={{ opacity: answeredCount === 0 ? 0.6 : 1, padding: '10px 24px' }}
-          >
-            Kiểm Tra Bài Đọc
-          </button>
+          > {t('grammar:kiem_tra_bai_oc_6fe26d')} </button>
 
           {submitted && (
             <button
               className="btn btn-glass"
               onClick={handleReset}
               style={{ padding: '10px 20px' }}
-            >
-              Làm lại bài đọc
-            </button>
+            > {t('grammar:lam_lai_bai_doc_ea357b')} </button>
           )}
 
           {submitted && (
@@ -250,7 +240,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
               onClick={() => setShowExplanation(!showExplanation)}
               style={{ padding: '10px 20px' }}
             >
-              {showExplanation ? "Ẩn giải thích" : "Xem giải thích"}
+              {showExplanation ? t('grammar:an_giai_thich_0dda30') : t('grammar:xem_giai_thich_a2622a')}
             </button>
           )}
         </div>
@@ -260,7 +250,7 @@ const ReadingComprehensionQuestion = ({ question, onAnswerResult }) => {
       {submitted && showExplanation && question.explanation && (
         <div className="feedback-box correct-box animate-pop" style={{ marginTop: '20px' }}>
           <div className="feedback-header">
-            <strong>Giải thích chi tiết bài đọc hiểu:</strong>
+            <strong> {t('grammar:giai_thich_chi_tiet_bai_doc_hieu_e8aeee')} </strong>
           </div>
           <div className="feedback-content" style={{ marginTop: '8px', lineHeight: '1.7' }}>
             <p>{question.explanation}</p>

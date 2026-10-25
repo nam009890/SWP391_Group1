@@ -39,7 +39,7 @@ public class GrammarQuestion {
     private String questionType;
 
     // Instruction prompt
-    @Column(name = "instruction", columnDefinition = "TEXT")
+    @Column(name = "instruction", columnDefinition = "NVARCHAR(MAX)")
     private String instruction;
 
     // Full JSON content (tokens, template, blanks, options, sub_questions, audio_url, etc.)

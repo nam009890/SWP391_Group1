@@ -7,5 +7,9 @@ import java.util.List;
 
 public interface StudyService {
     List<FlashcardResponse> getFlashcardsToStudy(Long deckId, Long userId);
-    ReviewResponse processReview(Long userId, Long flashcardId, int quality);
+    default ReviewResponse processReview(Long userId, Long flashcardId, int quality) {
+        return processReview(userId, flashcardId, quality, null);
+    }
+
+    ReviewResponse processReview(Long userId, Long flashcardId, int quality, String requestId);
 }

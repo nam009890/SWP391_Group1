@@ -131,3 +131,12 @@ input::placeholder, textarea::placeholder { color: #b5a096; }
 .toast-notification,.admin-toast { color:#fff!important; background:#7d4f35!important; border-color:#d5ab8c!important; box-shadow:0 12px 25px rgba(83,51,34,.2)!important; }
 
 @media(max-width:700px){.details-container,.study-container,.weak-page,.grammar-container{width:calc(100% - 24px);padding-top:calc(var(--nav-height) + 24px)}.details-header,.study-header,.weak-head,.grammar-page-titlebar{padding:20px}.grammar-header-banner,.active-group-banner{border-width:6px}}
+
+/* Shared accessible warm controls. Component-specific layout stays scoped. */
+:root { --surface: #fffdf9; --surface-elevated: #fffaf4; --input-bg: #fffefb; --input-text: #4b3428; --placeholder: #786457; --border-default: #cbb4a3; --border-focus: #7d4f35; --focus-ring: rgba(125,79,53,.2); --error: #a12d38; --success: #32623d; --warning: #835713; --disabled-bg: #ede4db; --text-muted: #766050; --radius: 12px; --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px; }
+.glass-input::placeholder, input::placeholder, textarea::placeholder {color:var(--placeholder);}
+button:focus-visible, a:focus-visible, summary:focus-visible {outline:3px solid var(--border-focus);outline-offset:3px;}
+button:disabled {cursor:not-allowed;background:var(--disabled-bg);color:#6a5b50;box-shadow:none;}
+input:disabled, textarea:disabled, select:disabled {background:var(--disabled-bg);color:#6a5b50;}
+.account-table-wrap {max-width:100%;overflow-x:auto;}
+@media(max-width:375px){.account-page,.details-container,.study-container,.weak-page,.grammar-container{width:calc(100% - 24px);}.account-toolbar,.details-actions,.weak-actions{flex-wrap:wrap;} }
